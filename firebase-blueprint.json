@@ -1,0 +1,122 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user profile in the application.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The user's unique ID." },
+        "name": { "type": "string", "description": "The user's display name." },
+        "handle": { "type": "string", "description": "The user's unique handle." },
+        "avatar": { "type": "string", "description": "URL to the user's avatar." },
+        "bio": { "type": "string", "description": "The user's bio." },
+        "followers": { "type": "array", "items": { "type": "string" }, "description": "List of user IDs following this user." },
+        "following": { "type": "array", "items": { "type": "string" }, "description": "List of user IDs this user is following." }
+      },
+      "required": ["uid", "name", "handle", "avatar"]
+    },
+    "Idea": {
+      "title": "Idea",
+      "description": "A main post or idea shared by a user.",
+      "type": "object",
+      "properties": {
+        "authorId": { "type": "string", "description": "ID of the user who created the idea." },
+        "content": { "type": "string", "description": "The content of the idea." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp." },
+        "likes": { "type": "number", "description": "Number of likes." },
+        "tags": { "type": "array", "items": { "type": "string" }, "description": "Tags associated with the idea." }
+      },
+      "required": ["authorId", "content", "createdAt", "likes"]
+    },
+    "Branch": {
+      "title": "Branch",
+      "description": "A branch or fork of an idea.",
+      "type": "object",
+      "properties": {
+        "ideaId": { "type": "string", "description": "ID of the parent idea." },
+        "authorId": { "type": "string", "description": "ID of the user who created the branch." },
+        "content": { "type": "string", "description": "The content of the branch." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp." },
+        "likes": { "type": "number", "description": "Number of likes." }
+      },
+      "required": ["ideaId", "authorId", "content", "createdAt", "likes"]
+    },
+    "Feedback": {
+      "title": "Feedback",
+      "description": "Feedback on a branch.",
+      "type": "object",
+      "properties": {
+        "branchId": { "type": "string", "description": "ID of the parent branch." },
+        "authorId": { "type": "string", "description": "ID of the user who created the feedback." },
+        "content": { "type": "string", "description": "The content of the feedback." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp." }
+      },
+      "required": ["branchId", "authorId", "content", "createdAt"]
+    },
+    "Like": {
+      "title": "Like",
+      "description": "A record of a user liking an idea or branch.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "targetId": { "type": "string" },
+        "type": { "type": "string", "enum": ["idea", "branch"] }
+      },
+      "required": ["userId", "targetId", "type"]
+    },
+    "Bookmark": {
+      "title": "Bookmark",
+      "description": "A record of a user bookmarking an idea.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "ideaId": { "type": "string" }
+      },
+      "required": ["userId", "ideaId"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "A notification for a user.",
+      "type": "object",
+      "properties": {
+        "recipientId": { "type": "string" },
+        "actorId": { "type": "string" },
+        "type": { "type": "string", "enum": ["like", "branch", "feedback", "follow"] },
+        "targetId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "read": { "type": "boolean" }
+      },
+      "required": ["recipientId", "actorId", "type", "createdAt", "read"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Stores user profiles."
+    },
+    "/ideas/{ideaId}": {
+      "schema": { "$ref": "#/entities/Idea" },
+      "description": "Stores ideas."
+    },
+    "/branches/{branchId}": {
+      "schema": { "$ref": "#/entities/Branch" },
+      "description": "Stores branches."
+    },
+    "/feedbacks/{feedbackId}": {
+      "schema": { "$ref": "#/entities/Feedback" },
+      "description": "Stores feedbacks."
+    },
+    "/likes/{likeId}": {
+      "schema": { "$ref": "#/entities/Like" },
+      "description": "Stores likes to enforce 1 like per user per target."
+    },
+    "/bookmarks/{bookmarkId}": {
+      "schema": { "$ref": "#/entities/Bookmark" },
+      "description": "Stores bookmarks."
+    },
+    "/notifications/{notificationId}": {
+      "schema": { "$ref": "#/entities/Notification" },
+      "description": "Stores notifications."
+    }
+  }
+}
