@@ -8,10 +8,12 @@ import { motion, AnimatePresence } from 'motion/react';
 interface FeedProps {
   onSelectIdea: (ideaId: string) => void;
   onUserClick?: (userId: string) => void;
+  onNotificationsClick?: () => void;
 }
 
-export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick }) => {
-  const { ideas, currentUser, users } = useAppContext();
+export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotificationsClick }) => {
+  const { ideas, currentUser, users, notifications } = useAppContext();
+  const unreadCount = notifications.filter(n => !n.read).length;
   const [activeTab, setActiveTab] = useState<'foryou' | 'trending'>('foryou');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -45,8 +47,14 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick }) => {
         <h1 className="text-xl font-bold text-primary tracking-tight flex items-center">
           ideo<span className="text-primary text-2xl leading-none">.</span>
         </h1>
-        <button className="p-2 -mr-2 hover:bg-gray-50 rounded-full transition-colors">
+        <button 
+          className="p-2 -mr-2 hover:bg-gray-50 rounded-full transition-colors relative"
+          onClick={onNotificationsClick}
+        >
           <Bell className="w-5 h-5 text-gray-700" />
+          {unreadCount > 0 && (
+            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full" />
+          )}
         </button>
       </div>
 

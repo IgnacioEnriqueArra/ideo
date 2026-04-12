@@ -30,6 +30,7 @@ type AppContextType = {
   updateProfile: (name: string, handle: string, bio: string, avatar: string) => void;
   markNotificationsRead: () => void;
   toggleFollow: (userId: string) => void;
+  deleteIdea: (ideaId: string) => void;
   logout: () => void;
   login: () => void;
   loginRedirect: () => void;
@@ -218,6 +219,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
+  const deleteIdea = async (ideaId: string) => {
+    if (!currentUser) return;
+    const targetIdea = rawIdeas.find(i => i.id === ideaId);
+    if (targetIdea && targetIdea.authorId === currentUser.id) {
+      await deleteDoc(doc(db, 'ideas', ideaId));
+    }
+  };
+
   const addIdea = async (content: string, tags: string[]) => {
     if (!currentUser) return;
     const newIdeaRef = doc(collection(db, 'ideas'));
@@ -378,6 +387,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       updateProfile,
       markNotificationsRead,
       toggleFollow,
+      deleteIdea,
       logout,
       login,
       loginRedirect,

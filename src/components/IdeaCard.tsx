@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { MessageSquare, GitFork, Heart, Share, Bookmark, MoreHorizontal } from 'lucide-react';
 import { Idea } from '../types';
@@ -13,9 +13,10 @@ interface IdeaCardProps {
 }
 
 export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = false, onUserClick }) => {
-  const { likeIdea, toggleBookmark, bookmarks, userLikes } = useAppContext();
+  const { likeIdea, toggleBookmark, bookmarks, userLikes, currentUser, deleteIdea } = useAppContext();
   const isBookmarked = bookmarks.includes(idea.id);
   const isLiked = userLikes.includes(idea.id);
+  const [showMenu, setShowMenu] = useState(false);
 
   return (
     <div 
@@ -35,26 +36,57 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = fa
         </Avatar>
         
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-[15px]">
-              <span 
-                className="font-bold text-gray-900 truncate cursor-pointer hover:underline"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (onUserClick) onUserClick(idea.author.id);
-                }}
-              >
-                {idea.author.name}
-              </span>
-              <span className="text-gray-500 truncate">@{idea.author.handle}</span>
-              <span className="text-gray-500">·</span>
-              <span className="text-gray-500 whitespace-nowrap">
+          <div className="flex items-start justify-between">
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1.5 text-[15px]">
+                <span 
+                  className="font-bold text-gray-900 truncate cursor-pointer hover:underline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onUserClick) onUserClick(idea.author.id);
+                  }}
+                >
+                  {idea.author.name}
+                </span>
+                <span className="text-gray-500 truncate">@{idea.author.handle}</span>
+              </div>
+              <span className="text-gray-500 text-[13px] mt-0.5">
                 {formatDistanceToNow(new Date(idea.createdAt), { addSuffix: true }).replace('about ', '')}
               </span>
             </div>
-            <button className="text-gray-400 hover:text-primary transition-colors">
-              <MoreHorizontal className="w-4 h-4" />
-            </button>
+            <div className="relative">
+              <button 
+                onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
+                className="text-gray-400 hover:text-primary transition-colors p-1"
+              >
+                <MoreHorizontal className="w-4 h-4" />
+              </button>
+              {showMenu && (
+                <div className="absolute right-0 mt-1 w-36 bg-white rounded-md shadow-lg border border-gray-100 z-10 py-1">
+                  {currentUser?.id === idea.author.id && (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowMenu(false);
+                        deleteIdea(idea.id);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm font-semibold text-red-600 hover:bg-gray-50 transition-colors"
+                    >
+                      Delete
+                    </button>
+                  )}
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowMenu(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           <p className={`mt-1 text-gray-900 leading-snug whitespace-pre-wrap ${isDetail ? 'text-lg' : 'text-[15px]'}`}>
@@ -104,7 +136,14 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = fa
               </div>
             </button>
 
-            <button className="flex items-center gap-1.5 hover:text-primary transition-colors group">
+            <button 
+              className="flex items-center gap-1.5 hover:text-primary transition-colors group"
+              onClick={(e) => {
+                e.stopPropagation();
+                const text = `Check out this idea by ${idea.author.name}:\n\n"${idea.content}"\n\n${window.location.origin}/`;
+                navigator.clipboard.writeText(text).then(() => alert("Link y descripción copiados al portapapeles."));
+              }}
+            >
               <div className="p-1.5 rounded-full group-hover:bg-primary/10">
                 <Share className="w-[18px] h-[18px]" />
               </div>

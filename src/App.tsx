@@ -84,7 +84,7 @@ function AppContent() {
         return <Bookmarks key="bookmarks" onBack={() => setActiveTab('home')} onUserClick={setSelectedUserId} />;
       case 'home':
       default:
-        return <Feed key="feed" onSelectIdea={setSelectedIdeaId} onUserClick={setSelectedUserId} />;
+        return <Feed key="feed" onSelectIdea={setSelectedIdeaId} onUserClick={setSelectedUserId} onNotificationsClick={() => setActiveTab('notifications')} />;
     }
   };
 
