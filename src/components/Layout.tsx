@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Home, FileText, PlaySquare, User, Plus, X, Settings, Bookmark, LogOut, Moon, Bell } from 'lucide-react';
+import { Home, FileText, PlaySquare, User, Plus, X, Settings, Bookmark, LogOut, Smartphone, Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAppContext } from '../AppContext';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -22,10 +22,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
     return () => window.removeEventListener('open-menu', handleOpenMenu);
   }, []);
 
-  const toggleDarkMode = () => {
-    document.documentElement.classList.toggle('dark');
-    setIsMenuOpen(false);
-  };
+  // removed toggleDarkMode
 
   return (
     <div className="h-[100dvh] w-full bg-white dark:bg-gray-950 max-w-md mx-auto border-x border-gray-100 dark:border-gray-800 relative flex flex-col overflow-hidden transition-colors">
@@ -98,8 +95,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 <div className="font-bold text-gray-900 dark:text-white text-lg">{currentUser.name}</div>
                 <div className="text-gray-500 text-[15px]">@{currentUser.handle}</div>
                 <div className="flex gap-4 mt-3 text-[15px]">
-                  <div className="flex gap-1"><span className="font-bold text-gray-900 dark:text-white">124</span> <span className="text-gray-500">Following</span></div>
-                  <div className="flex gap-1"><span className="font-bold text-gray-900 dark:text-white">892</span> <span className="text-gray-500">Followers</span></div>
+                  <div className="flex gap-1"><span className="font-bold text-gray-900 dark:text-white">{currentUser.following?.length || 0}</span> <span className="text-gray-500">Following</span></div>
+                  <div className="flex gap-1"><span className="font-bold text-gray-900 dark:text-white">{currentUser.followers?.length || 0}</span> <span className="text-gray-500">Followers</span></div>
                 </div>
               </div>
 
@@ -124,10 +121,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 </button>
                 <button 
                   className="w-full flex items-center gap-4 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                  onClick={toggleDarkMode}
+                  onClick={() => {
+                    alert("Para instalar Ideo en tu dispositivo:\n\niOS: Toca el botón de Compartir y elige 'Agregar a inicio'.\n\nAndroid: En el menú del navegador, selecciona 'Instalar aplicación'.");
+                    setIsMenuOpen(false);
+                  }}
                 >
-                  <Moon className="w-6 h-6" />
-                  <span className="font-bold text-[17px]">Dark Mode</span>
+                  <Smartphone className="w-6 h-6" />
+                  <span className="font-bold text-[17px]">Instalar App (iOS/Android)</span>
                 </button>
               </div>
 

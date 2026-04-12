@@ -13,12 +13,13 @@ interface IdeaDetailProps {
 }
 
 export const IdeaDetail: React.FC<IdeaDetailProps> = ({ ideaId, onBack, onUserClick }) => {
-  const { ideas, currentUser, addBranch, addFeedback, likeIdea, bookmarks, toggleBookmark } = useAppContext();
+  const { ideas, currentUser, addBranch, addFeedback, likeIdea, bookmarks, toggleBookmark, deleteIdea } = useAppContext();
   const idea = ideas.find(i => i.id === ideaId);
   
   const [newBranch, setNewBranch] = useState('');
   const [activeBranchId, setActiveBranchId] = useState<string | null>(null);
   const [newFeedback, setNewFeedback] = useState('');
+  const [showMenu, setShowMenu] = useState(false);
 
   if (!idea) return <div>Idea not found</div>;
 
@@ -70,9 +71,40 @@ export const IdeaDetail: React.FC<IdeaDetailProps> = ({ ideaId, onBack, onUserCl
               <div className="text-gray-500 text-[15px]">@{idea.author.handle}</div>
             </div>
           </div>
-          <button className="text-gray-400 hover:text-primary transition-colors">
-            <MoreHorizontal className="w-5 h-5" />
-          </button>
+          <div className="relative">
+            <button 
+              onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
+              className="text-gray-400 hover:text-primary transition-colors p-1"
+            >
+              <MoreHorizontal className="w-5 h-5" />
+            </button>
+            {showMenu && (
+              <div className="absolute right-0 mt-1 w-36 bg-white rounded-md shadow-lg border border-gray-100 z-10 py-1">
+                {currentUser?.id === idea.author.id && (
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowMenu(false);
+                      deleteIdea(idea.id);
+                      onBack();
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm font-semibold text-red-600 hover:bg-gray-50 transition-colors"
+                  >
+                    Delete
+                  </button>
+                )}
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMenu(false);
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         <p className="text-gray-900 text-[17px] leading-relaxed whitespace-pre-wrap mb-4">

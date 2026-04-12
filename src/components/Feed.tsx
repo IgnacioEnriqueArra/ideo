@@ -96,22 +96,21 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
             </button>
           </div>
 
-          {/* Inline Composer (Visual only, could open modal) */}
-          <div 
-            className="p-4 border-b border-gray-100 flex gap-3 items-center cursor-text hover:bg-gray-50 transition-colors"
-            onClick={() => {
-              // Find the compose button and click it to open the modal
-              const composeBtn = document.querySelector('button[aria-label="Compose"]') || document.querySelector('.fixed.bottom-20');
-              if (composeBtn) (composeBtn as HTMLButtonElement).click();
-            }}
-          >
-            <Avatar className="w-10 h-10 rounded-lg">
-              <AvatarImage src={currentUser.avatar} />
-              <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div className="flex-1 text-gray-400 text-[15px]">
-              What's your idea?
-            </div>
+          {/* CTA post */}
+          <div className="p-6 border-b border-gray-100 flex flex-col items-center justify-center bg-gradient-to-br from-primary/5 to-transparent">
+            <h2 className="text-lg font-bold text-gray-900 mb-2">Comparte tu próxima idea</h2>
+            <p className="text-gray-500 text-[15px] mb-4 text-center max-w-sm">
+              Únete a la comunidad de Ideo. Comparte proyectos, haz branches y colabora.
+            </p>
+            <button 
+              className="bg-primary text-white font-bold py-2.5 px-6 rounded-full hover:bg-blue-600 transition-all shadow-sm active:scale-95"
+              onClick={() => {
+                const composeBtn = document.querySelector('svg.lucide-plus')?.closest('button');
+                if (composeBtn) composeBtn.click();
+              }}
+            >
+              Postear Idea
+            </button>
           </div>
         </>
       )}
