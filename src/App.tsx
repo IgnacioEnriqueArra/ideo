@@ -8,6 +8,7 @@ import { Notifications } from './components/Notifications';
 import { Bookmarks } from './components/Bookmarks';
 import { Layout } from './components/Layout';
 import { ComposeModal } from './components/ComposeModal';
+import { Settings } from './components/Settings';
 import { AnimatePresence } from 'motion/react';
 
 function AppContent() {
@@ -82,6 +83,8 @@ function AppContent() {
         return <Notifications key="notifications" onUserClick={setSelectedUserId} />;
       case 'bookmarks':
         return <Bookmarks key="bookmarks" onBack={() => setActiveTab('home')} onUserClick={setSelectedUserId} />;
+      case 'settings':
+        return <Settings key="settings" onBack={() => setActiveTab('home')} />;
       case 'home':
       default:
         return <Feed key="feed" onSelectIdea={setSelectedIdeaId} onUserClick={setSelectedUserId} onNotificationsClick={() => setActiveTab('notifications')} />;

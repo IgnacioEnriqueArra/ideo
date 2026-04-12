@@ -115,9 +115,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                   <Bookmark className="w-6 h-6" />
                   <span className="font-bold text-[17px]">Bookmarks</span>
                 </button>
-                <button className="w-full flex items-center gap-4 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                <button 
+                  className="w-full flex items-center gap-4 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  onClick={() => { setActiveTab('settings'); setIsMenuOpen(false); }}
+                >
                   <Settings className="w-6 h-6" />
-                  <span className="font-bold text-[17px]">Settings</span>
+                  <span className="font-bold text-[17px]">Configuración</span>
                 </button>
                 <button 
                   className="w-full flex items-center gap-4 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
@@ -127,7 +130,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                   }}
                 >
                   <Smartphone className="w-6 h-6" />
-                  <span className="font-bold text-[17px]">Instalar App (iOS/Android)</span>
+                  <span className="font-bold text-[17px]">Instalar App</span>
                 </button>
               </div>
 

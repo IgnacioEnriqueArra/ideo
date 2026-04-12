@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Idea, User, Branch, Feedback } from './types';
 import { auth, db, signInWithGoogle, signInWithGoogleRedirect, logOut } from './firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, deleteUser } from 'firebase/auth';
 import { collection, doc, onSnapshot, setDoc, updateDoc, deleteDoc, getDoc, query, orderBy, getDocs, writeBatch, arrayUnion, arrayRemove, where } from 'firebase/firestore';
 
 export interface Notification {
@@ -31,6 +31,7 @@ type AppContextType = {
   markNotificationsRead: () => void;
   toggleFollow: (userId: string) => void;
   deleteIdea: (ideaId: string) => void;
+  deleteAccount: () => Promise<void>;
   logout: () => void;
   login: () => void;
   loginRedirect: () => void;
@@ -370,6 +371,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await signInWithGoogleRedirect();
   };
 
+  const deleteAccount = async () => {
+    if (!currentUser || !auth.currentUser) return;
+    try {
+      await deleteDoc(doc(db, 'users', currentUser.id));
+      await deleteUser(auth.currentUser);
+    } catch (error) {
+      console.error("Error deleting user account:", error);
+      throw error;
+    }
+  };
+
   return (
     <AppContext.Provider value={{ 
       currentUser, 
@@ -388,6 +400,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       markNotificationsRead,
       toggleFollow,
       deleteIdea,
+      deleteAccount,
       logout,
       login,
       loginRedirect,
