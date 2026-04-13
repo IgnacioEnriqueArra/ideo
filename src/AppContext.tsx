@@ -50,12 +50,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [rawNotifications, setRawNotifications] = useState<Notification[]>([]);
   const [isAuthReady, setIsAuthReady] = useState(false);
 
-  // Initial Auth & Data Fetching
   useEffect(() => {
     let authSubscription: any;
     
     const initializeData = async () => {
-      // Fetch public data
       const [uRes, iRes, bRes, fRes] = await Promise.all([
         supabase.from('users').select('*'),
         supabase.from('ideas').select('*').order('createdAt', { ascending: false }),
@@ -67,7 +65,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (bRes.data) setRawBranches(bRes.data);
       if (fRes.data) setRawFeedbacks(fRes.data);
       
-      // Auth
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         await fetchCurrentUser(session.user.id);
@@ -87,19 +84,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     initializeData();
 
-    // Supabase Realtime for public tables
+    // Tiempo Real SIN Fetch Completos (Instantáneo)
     const channel = supabase.channel('public-db')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, payload => {
-        supabase.from('users').select('*').then(res => res.data && setUsers(res.data));
+        if (payload.eventType === 'INSERT') setUsers(p => { const x = p.find(u => u.id === payload.new.id); return x ? p : [...p, payload.new as User] });
+        if (payload.eventType === 'UPDATE') setUsers(p => p.map(u => u.id === payload.new.id ? payload.new as User : u));
+        if (payload.eventType === 'DELETE') setUsers(p => p.filter(u => u.id !== payload.old.id));
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'ideas' }, () => {
-        supabase.from('ideas').select('*').order('createdAt', { ascending: false }).then(res => res.data && setRawIdeas(res.data));
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ideas' }, payload => {
+        if (payload.eventType === 'INSERT') setRawIdeas(p => { const x = p.find(i => i.id === payload.new.id); return x ? p : [payload.new, ...p] });
+        if (payload.eventType === 'UPDATE') setRawIdeas(p => p.map(i => i.id === payload.new.id ? payload.new : i));
+        if (payload.eventType === 'DELETE') setRawIdeas(p => p.filter(i => i.id !== payload.old.id));
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'branches' }, () => {
-        supabase.from('branches').select('*').order('createdAt', { ascending: true }).then(res => res.data && setRawBranches(res.data));
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'branches' }, payload => {
+        if (payload.eventType === 'INSERT') setRawBranches(p => { const x = p.find(i => i.id === payload.new.id); return x ? p : [...p, payload.new] });
+        if (payload.eventType === 'UPDATE') setRawBranches(p => p.map(b => b.id === payload.new.id ? payload.new : b));
+        if (payload.eventType === 'DELETE') setRawBranches(p => p.filter(b => b.id !== payload.old.id));
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'feedbacks' }, () => {
-        supabase.from('feedbacks').select('*').order('createdAt', { ascending: true }).then(res => res.data && setRawFeedbacks(res.data));
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'feedbacks' }, payload => {
+        if (payload.eventType === 'INSERT') setRawFeedbacks(p => { const x = p.find(i => i.id === payload.new.id); return x ? p : [...p, payload.new] });
+        if (payload.eventType === 'UPDATE') setRawFeedbacks(p => p.map(f => f.id === payload.new.id ? payload.new : f));
+        if (payload.eventType === 'DELETE') setRawFeedbacks(p => p.filter(f => f.id !== payload.old.id));
       })
       .subscribe();
 
@@ -115,7 +120,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsAuthReady(true);
   };
 
-  // User specific fetching
   useEffect(() => {
     if (!currentUser) {
       setBookmarks([]);
@@ -136,26 +140,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     fetchUserSpecific();
 
-    // Realtime for private tables
     const channel = supabase.channel(`user-${currentUser.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookmarks', filter: `userId=eq.${currentUser.id}` }, fetchUserSpecific)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'likes', filter: `userId=eq.${currentUser.id}` }, fetchUserSpecific)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `recipientId=eq.${currentUser.id}` }, fetchUserSpecific)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookmarks', filter: `userId=eq.${currentUser.id}` }, payload => {
+         if (payload.eventType === 'INSERT') setBookmarks(prev => { const x = prev.includes((payload.new as any).ideaId); return x ? prev : [...prev, (payload.new as any).ideaId] });
+         if (payload.eventType === 'DELETE') fetchUserSpecific(); // IDs missing in old
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'likes', filter: `userId=eq.${currentUser.id}` }, payload => {
+         if (payload.eventType === 'INSERT') setUserLikes(prev => { const x = prev.includes((payload.new as any).targetId); return x ? prev : [...prev, (payload.new as any).targetId] });
+         if (payload.eventType === 'DELETE') fetchUserSpecific();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `recipientId=eq.${currentUser.id}` }, payload => {
+         if (payload.eventType === 'INSERT') setRawNotifications(prev => { const x = prev.find(n => n.id === payload.new.id); return x ? prev : [payload.new as Notification, ...prev] });
+         if (payload.eventType === 'UPDATE') setRawNotifications(prev => prev.map(n => n.id === payload.new.id ? payload.new as Notification : n));
+         if (payload.eventType === 'DELETE') setRawNotifications(prev => prev.filter(n => n.id !== payload.old.id));
+      })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
   }, [currentUser?.id]);
 
   const ideas: Idea[] = rawIdeas.map(rawIdea => {
-    const author = users.find(u => u.id === rawIdea.authorId) || { id: rawIdea.authorId, name: 'Unknown', handle: 'unknown', avatar: '', followers: [], following: [] };
+    const author = users.find(u => u.id === rawIdea.authorId) || { id: rawIdea.authorId, name: 'Cargando...', handle: 'cargando', avatar: '', followers: [], following: [] };
     const ideaBranches: Branch[] = rawBranches
       .filter(b => b.ideaId === rawIdea.id)
       .map(rawBranch => {
-        const branchAuthor = users.find(u => u.id === rawBranch.authorId) || { id: rawBranch.authorId, name: 'Unknown', handle: 'unknown', avatar: '', followers: [], following: [] };
+        const branchAuthor = users.find(u => u.id === rawBranch.authorId) || { id: rawBranch.authorId, name: 'Cargando...', handle: 'cargando', avatar: '', followers: [], following: [] };
         const branchFeedbacks: Feedback[] = rawFeedbacks
           .filter(f => f.branchId === rawBranch.id)
           .map(rawFeedback => {
-            const feedbackAuthor = users.find(u => u.id === rawFeedback.authorId) || { id: rawFeedback.authorId, name: 'Unknown', handle: 'unknown', avatar: '', followers: [], following: [] };
+            const feedbackAuthor = users.find(u => u.id === rawFeedback.authorId) || { id: rawFeedback.authorId, name: 'Cargando...', handle: 'cargando', avatar: '', followers: [], following: [] };
             return { id: rawFeedback.id, branchId: rawFeedback.branchId, author: feedbackAuthor, content: rawFeedback.content, createdAt: rawFeedback.createdAt };
           });
         return { id: rawBranch.id, ideaId: rawBranch.ideaId, author: branchAuthor, content: rawBranch.content, createdAt: rawBranch.createdAt, likes: rawBranch.likes || 0, feedbacks: branchFeedbacks };
@@ -164,7 +177,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const notifications = rawNotifications.map(n => {
-    const actor = users.find(u => u.id === n.actorId) || { id: n.actorId, name: 'Unknown', handle: 'unknown', avatar: '', followers: [], following: [] };
+    const actor = users.find(u => u.id === n.actorId) || { id: n.actorId, name: 'Usuario', handle: 'usuario', avatar: '', followers: [], following: [] };
     return { ...n, actor };
   });
 
@@ -175,40 +188,60 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const addIdea = async (content: string, tags: string[]) => {
     if (!currentUser) return;
-    await supabase.from('ideas').insert({ authorId: currentUser.id, content, createdAt: new Date().toISOString(), likes: 0, tags });
+    const tempId = crypto.randomUUID();
+    const newIdea = { id: tempId, authorId: currentUser.id, content, createdAt: new Date().toISOString(), likes: 0, tags };
+    setRawIdeas(prev => [newIdea, ...prev]);
+    await supabase.from('ideas').insert(newIdea);
   };
 
   const deleteIdea = async (ideaId: string) => {
     if (!currentUser) return;
-    const targetIdea = rawIdeas.find(i => i.id === ideaId);
-    if (targetIdea && targetIdea.authorId === currentUser.id) {
-      await supabase.from('ideas').delete().eq('id', ideaId);
-    }
+    setRawIdeas(prev => prev.filter(i => i.id !== ideaId));
+    await supabase.from('ideas').delete().eq('id', ideaId);
   };
 
   const addBranch = async (ideaId: string, content: string) => {
     if (!currentUser) return;
-    await supabase.from('branches').insert({ ideaId, authorId: currentUser.id, content, createdAt: new Date().toISOString(), likes: 0 });
+    const tempId = crypto.randomUUID();
+    const newBranch = { id: tempId, ideaId, authorId: currentUser.id, content, createdAt: new Date().toISOString(), likes: 0 };
+    setRawBranches(prev => [...prev, newBranch]);
+    await supabase.from('branches').insert(newBranch);
+    
     const idea = rawIdeas.find(i => i.id === ideaId);
     if (idea) createNotification(idea.authorId, 'branch', ideaId);
   };
 
   const addFeedback = async (ideaId: string, branchId: string, content: string) => {
     if (!currentUser) return;
-    await supabase.from('feedbacks').insert({ branchId, authorId: currentUser.id, content, createdAt: new Date().toISOString() });
+    const tempId = crypto.randomUUID();
+    const newFeedback = { id: tempId, branchId, authorId: currentUser.id, content, createdAt: new Date().toISOString() };
+    setRawFeedbacks(prev => [...prev, newFeedback]);
+    await supabase.from('feedbacks').insert(newFeedback);
+    
     const branch = rawBranches.find(b => b.id === branchId);
     if (branch) createNotification(branch.authorId, 'feedback', branchId);
   };
 
   const likeIdea = async (ideaId: string) => {
     if (!currentUser) return;
-    const { data: likeSnap } = await supabase.from('likes').select('*').eq('userId', currentUser.id).eq('targetId', ideaId).single();
+    const isLiked = userLikes.includes(ideaId);
     const idea = rawIdeas.find(i => i.id === ideaId);
 
-    if (likeSnap) {
+    // Actualización Optimizada para no esperar la red de regreso
+    if (isLiked) {
+      setUserLikes(prev => prev.filter(id => id !== ideaId));
+      setRawIdeas(prev => prev.map(i => i.id === ideaId ? { ...i, likes: Math.max(0, (i.likes || 0) - 1) } : i));
+    } else {
+      setUserLikes(prev => [...prev, ideaId]);
+      setRawIdeas(prev => prev.map(i => i.id === ideaId ? { ...i, likes: (i.likes || 0) + 1 } : i));
+    }
+
+    const { data: likeSnap } = await supabase.from('likes').select('*').eq('userId', currentUser.id).eq('targetId', ideaId).single();
+
+    if (likeSnap && isLiked) {
       await supabase.from('likes').delete().eq('id', likeSnap.id);
       if (idea) await supabase.from('ideas').update({ likes: Math.max(0, (idea.likes || 0) - 1) }).eq('id', ideaId);
-    } else {
+    } else if (!likeSnap && !isLiked) {
       await supabase.from('likes').insert({ userId: currentUser.id, targetId: ideaId, type: 'idea' });
       if (idea) {
         await supabase.from('ideas').update({ likes: (idea.likes || 0) + 1 }).eq('id', ideaId);
@@ -219,13 +252,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const likeBranch = async (ideaId: string, branchId: string) => {
     if (!currentUser) return;
-    const { data: likeSnap } = await supabase.from('likes').select('*').eq('userId', currentUser.id).eq('targetId', branchId).single();
+    const isLiked = userLikes.includes(branchId);
     const branch = rawBranches.find(b => b.id === branchId);
 
-    if (likeSnap) {
+    if (isLiked) {
+      setUserLikes(prev => prev.filter(id => id !== branchId));
+      setRawBranches(prev => prev.map(b => b.id === branchId ? { ...b, likes: Math.max(0, (b.likes || 0) - 1) } : b));
+    } else {
+      setUserLikes(prev => [...prev, branchId]);
+      setRawBranches(prev => prev.map(b => b.id === branchId ? { ...b, likes: (b.likes || 0) + 1 } : b));
+    }
+
+    const { data: likeSnap } = await supabase.from('likes').select('*').eq('userId', currentUser.id).eq('targetId', branchId).single();
+
+    if (likeSnap && isLiked) {
       await supabase.from('likes').delete().eq('id', likeSnap.id);
       if (branch) await supabase.from('branches').update({ likes: Math.max(0, (branch.likes || 0) - 1) }).eq('id', branchId);
-    } else {
+    } else if (!likeSnap && !isLiked) {
       await supabase.from('likes').insert({ userId: currentUser.id, targetId: branchId, type: 'branch' });
       if (branch) {
         await supabase.from('branches').update({ likes: (branch.likes || 0) + 1 }).eq('id', branchId);
@@ -236,22 +279,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const toggleBookmark = async (ideaId: string) => {
     if (!currentUser) return;
-    const { data: bookmarkSnap } = await supabase.from('bookmarks').select('*').eq('userId', currentUser.id).eq('ideaId', ideaId).single();
+    const isBookmarked = bookmarks.includes(ideaId);
 
-    if (bookmarkSnap) {
-      await supabase.from('bookmarks').delete().eq('id', bookmarkSnap.id);
+    if (isBookmarked) {
+      setBookmarks(prev => prev.filter(id => id !== ideaId));
+      const { data: bookmarkSnap } = await supabase.from('bookmarks').select('*').eq('userId', currentUser.id).eq('ideaId', ideaId).single();
+      if (bookmarkSnap) await supabase.from('bookmarks').delete().eq('id', bookmarkSnap.id);
     } else {
-      await supabase.from('bookmarks').insert({ userId: currentUser.id, ideaId });
+      setBookmarks(prev => [...prev, ideaId]);
+      const { data: bookmarkSnap } = await supabase.from('bookmarks').select('*').eq('userId', currentUser.id).eq('ideaId', ideaId).single();
+      if (!bookmarkSnap) await supabase.from('bookmarks').insert({ userId: currentUser.id, ideaId });
     }
   };
 
   const updateProfile = async (name: string, handle: string, bio: string, avatar: string) => {
     if (!currentUser) return;
+    setCurrentUser(prev => prev ? { ...prev, name, handle, bio, avatar } : null);
+    setUsers(prev => prev.map(u => u.id === currentUser.id ? { ...u, name, handle, bio, avatar } : u));
     await supabase.from('users').update({ name, handle, bio, avatar }).eq('id', currentUser.id);
   };
 
   const markNotificationsRead = async () => {
     if (!currentUser) return;
+    setRawNotifications(prev => prev.map(n => ({ ...n, read: true })));
     const unreadNotifs = rawNotifications.filter(n => !n.read);
     const updates = unreadNotifs.map(n => supabase.from('notifications').update({ read: true }).eq('id', n.id));
     await Promise.all(updates);
@@ -262,13 +312,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const isFollowing = currentUser.following?.includes(userId);
     const targetUser = users.find(u => u.id === userId);
     
+    // Optimizacion en Cliente Primero
     if (isFollowing) {
-      await supabase.from('users').update({ following: (currentUser.following || []).filter(id => id !== userId) }).eq('id', currentUser.id);
-      if (targetUser) await supabase.from('users').update({ followers: (targetUser.followers || []).filter(id => id !== currentUser.id) }).eq('id', userId);
+       setCurrentUser(p => p ? { ...p, following: (p.following || []).filter(id => id !== userId) } : null);
+       setUsers(p => p.map(u => {
+         if (u.id === currentUser.id) return { ...u, following: (u.following || []).filter(id => id !== userId) };
+         if (u.id === userId) return { ...u, followers: (u.followers || []).filter(id => id !== currentUser.id) };
+         return u;
+       }));
+       await supabase.from('users').update({ following: (currentUser.following || []).filter(id => id !== userId) }).eq('id', currentUser.id);
+       if (targetUser) await supabase.from('users').update({ followers: (targetUser.followers || []).filter(id => id !== currentUser.id) }).eq('id', userId);
     } else {
-      await supabase.from('users').update({ following: [...(currentUser.following || []), userId] }).eq('id', currentUser.id);
-      if (targetUser) await supabase.from('users').update({ followers: [...(targetUser.followers || []), currentUser.id] }).eq('id', userId);
-      createNotification(userId, 'follow', currentUser.id);
+       setCurrentUser(p => p ? { ...p, following: [...(p.following || []), userId] } : null);
+       setUsers(p => p.map(u => {
+         if (u.id === currentUser.id) return { ...u, following: [...(u.following || []), userId] };
+         if (u.id === userId) return { ...u, followers: [...(u.followers || []), currentUser.id] };
+         return u;
+       }));
+       await supabase.from('users').update({ following: [...(currentUser.following || []), userId] }).eq('id', currentUser.id);
+       if (targetUser) await supabase.from('users').update({ followers: [...(targetUser.followers || []), currentUser.id] }).eq('id', userId);
+       createNotification(userId, 'follow', currentUser.id);
     }
   };
 
@@ -330,3 +393,4 @@ export const useAppContext = () => {
   if (!context) throw new Error('useAppContext must be used within AppProvider');
   return context;
 };
+

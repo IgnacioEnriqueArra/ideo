@@ -39,6 +39,7 @@ export const Notifications: React.FC<NotificationsProps> = ({ onUserClick }) => 
                 {notification.type === 'like' && <Heart className="w-6 h-6 text-red-500 fill-red-500" />}
                 {notification.type === 'branch' && <GitFork className="w-6 h-6 text-primary" />}
                 {notification.type === 'feedback' && <MessageSquare className="w-6 h-6 text-green-500" />}
+                {notification.type === 'follow' && <svg className="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6z" /></svg>}
               </div>
               <div className="flex-1">
                 <Avatar 
@@ -55,9 +56,10 @@ export const Notifications: React.FC<NotificationsProps> = ({ onUserClick }) => 
                   >
                     {notification.actor.name}
                   </span>
-                  {notification.type === 'like' && ' liked your post'}
-                  {notification.type === 'branch' && ' branched from your idea'}
-                  {notification.type === 'feedback' && ' left feedback on your branch'}
+                  {notification.type === 'like' && ' le dio me gusta a tu post.'}
+                  {notification.type === 'branch' && ' hizo un branch desde tu idea.'}
+                  {notification.type === 'feedback' && ' comentó en tu branch.'}
+                  {notification.type === 'follow' && ' comenzó a seguirte.'}
                 </div>
                 <div className="text-sm text-gray-500 mt-1">
                   {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true }).replace('about ', '')}
