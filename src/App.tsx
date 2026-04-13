@@ -12,7 +12,7 @@ import { Settings } from './components/Settings';
 import { AnimatePresence } from 'motion/react';
 
 function AppContent() {
-  const { currentUser, login, loginRedirect, isAuthReady } = useAppContext();
+  const { currentUser, isAuthReady } = useAppContext();
   const [selectedIdeaId, setSelectedIdeaId] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('home');
@@ -29,27 +29,7 @@ function AppContent() {
   }
 
   if (!currentUser) {
-    return (
-      <div className="h-[100dvh] w-full bg-white dark:bg-gray-950 max-w-md mx-auto border-x border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center p-6 transition-colors">
-        <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-6">
-          <span className="text-white font-bold text-3xl">i.</span>
-        </div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center">Welcome to ideo.</h1>
-        <p className="text-gray-500 text-center mb-8">The place where developers share, branch, and build ideas together.</p>
-        <button 
-          onClick={login}
-          className="w-full bg-primary text-white font-bold py-3.5 rounded-full hover:bg-blue-600 transition-colors"
-        >
-          Sign in with Google
-        </button>
-        <button 
-          onClick={loginRedirect}
-          className="w-full mt-4 text-gray-500 text-sm hover:underline"
-        >
-          ¿Problemas con la ventana emergente? Usa el redireccionamiento
-        </button>
-      </div>
-    );
+    return <AuthScreen />;
   }
 
   const renderContent = () => {
@@ -106,6 +86,53 @@ export default function App() {
     <AppProvider>
       <AppContent />
     </AppProvider>
+  );
+}
+
+function AuthScreen() {
+  const { login, signup } = useAppContext();
+  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [handle, setHandle] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isLogin) {
+      if (login) login(email, password);
+    } else {
+      if (signup) signup(email, password, name, handle);
+    }
+  };
+
+  return (
+      <div className="h-[100dvh] w-full bg-white dark:bg-gray-950 max-w-md mx-auto border-x border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center p-6 transition-colors">
+        <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-6">
+          <span className="text-white font-bold text-3xl">i.</span>
+        </div>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center">Welcome to Ideo.</h1>
+        <p className="text-gray-500 text-center mb-8">Escribe, comparte y construye ideas.</p>
+        
+        <form onSubmit={handleSubmit} className="w-full space-y-4">
+          {!isLogin && (
+            <>
+              <input type="text" placeholder="Nombre completo" value={name} onChange={e=>setName(e.target.value)} required className="w-full p-3 rounded-lg border border-gray-200" />
+              <input type="text" placeholder="Nombre de usuario (sin espacios)" value={handle} onChange={e=>setHandle(e.target.value)} required className="w-full p-3 rounded-lg border border-gray-200" />
+            </>
+          )}
+          <input type="email" placeholder="Correo electrónico" value={email} onChange={e=>setEmail(e.target.value)} required className="w-full p-3 rounded-lg border border-gray-200" />
+          <input type="password" placeholder="Contraseña (mínimo 6 caracteres)" value={password} onChange={e=>setPassword(e.target.value)} required minLength={6} className="w-full p-3 rounded-lg border border-gray-200 dark:bg-gray-900 dark:text-white" />
+          
+          <button type="submit" className="w-full bg-primary text-white font-bold py-3.5 rounded-full hover:bg-blue-600 transition-colors">
+            {isLogin ? 'Iniciar Sesión' : 'Registrarse'}
+          </button>
+        </form>
+
+        <button onClick={() => setIsLogin(!isLogin)} className="w-full mt-4 text-gray-500 text-sm hover:underline">
+          {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
+        </button>
+      </div>
   );
 }
 

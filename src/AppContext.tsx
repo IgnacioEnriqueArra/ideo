@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Idea, User, Branch, Feedback } from './types';
-import { auth, db, signInWithGoogle, signInWithGoogleRedirect, logOut } from './firebase';
-import { onAuthStateChanged, deleteUser } from 'firebase/auth';
-import { collection, doc, onSnapshot, setDoc, updateDoc, deleteDoc, getDoc, query, orderBy, getDocs, writeBatch, arrayUnion, arrayRemove, where } from 'firebase/firestore';
+import { supabase } from './supabase';
 
 export interface Notification {
   id: string;
@@ -33,7 +31,8 @@ type AppContextType = {
   deleteIdea: (ideaId: string) => void;
   deleteAccount: () => Promise<void>;
   logout: () => void;
-  login: () => void;
+  login: (email?: string, password?: string) => Promise<void>;
+  signup?: (email: string, password: string, name: string, handle: string) => Promise<void>;
   loginRedirect: () => void;
   isAuthReady: boolean;
 };
@@ -51,65 +50,72 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [rawNotifications, setRawNotifications] = useState<Notification[]>([]);
   const [isAuthReady, setIsAuthReady] = useState(false);
 
-  // Auth Listener
+  // Initial Auth & Data Fetching
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        const userRef = doc(db, 'users', firebaseUser.uid);
-        const userSnap = await getDoc(userRef);
-        
-        if (!userSnap.exists()) {
-          const newUser: User = {
-            id: firebaseUser.uid,
-            name: firebaseUser.displayName || 'Anonymous',
-            handle: firebaseUser.email?.split('@')[0] || `user${firebaseUser.uid.substring(0,5)}`,
-            avatar: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.uid}`,
-            bio: 'Hello world!',
-            followers: [],
-            following: []
-          };
-          await setDoc(userRef, newUser);
-          setCurrentUser(newUser);
-        } else {
-          setCurrentUser(userSnap.data() as User);
-        }
+    let authSubscription: any;
+    
+    const initializeData = async () => {
+      // Fetch public data
+      const [uRes, iRes, bRes, fRes] = await Promise.all([
+        supabase.from('users').select('*'),
+        supabase.from('ideas').select('*').order('createdAt', { ascending: false }),
+        supabase.from('branches').select('*').order('createdAt', { ascending: true }),
+        supabase.from('feedbacks').select('*').order('createdAt', { ascending: true })
+      ]);
+      if (uRes.data) setUsers(uRes.data);
+      if (iRes.data) setRawIdeas(iRes.data);
+      if (bRes.data) setRawBranches(bRes.data);
+      if (fRes.data) setRawFeedbacks(fRes.data);
+      
+      // Auth
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        await fetchCurrentUser(session.user.id);
       } else {
-        setCurrentUser(null);
+        setIsAuthReady(true);
       }
-      setIsAuthReady(true);
-    });
-    return () => unsubscribe();
-  }, []);
 
-  // Data Listeners
-  useEffect(() => {
-    if (!isAuthReady) return;
+      const { data } = supabase.auth.onAuthStateChange(async (_event, session) => {
+        if (session?.user) {
+          await fetchCurrentUser(session.user.id);
+        } else {
+          setCurrentUser(null);
+        }
+      });
+      authSubscription = data.subscription;
+    };
 
-    const unsubUsers = onSnapshot(collection(db, 'users'), (snapshot) => {
-      setUsers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User)));
-    }, (error) => console.error("Error fetching users:", error));
+    initializeData();
 
-    const unsubIdeas = onSnapshot(query(collection(db, 'ideas'), orderBy('createdAt', 'desc')), (snapshot) => {
-      setRawIdeas(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    }, (error) => console.error("Error fetching ideas:", error));
-
-    const unsubBranches = onSnapshot(query(collection(db, 'branches'), orderBy('createdAt', 'asc')), (snapshot) => {
-      setRawBranches(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    }, (error) => console.error("Error fetching branches:", error));
-
-    const unsubFeedbacks = onSnapshot(query(collection(db, 'feedbacks'), orderBy('createdAt', 'asc')), (snapshot) => {
-      setRawFeedbacks(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    }, (error) => console.error("Error fetching feedbacks:", error));
+    // Supabase Realtime for public tables
+    const channel = supabase.channel('public-db')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, payload => {
+        supabase.from('users').select('*').then(res => res.data && setUsers(res.data));
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ideas' }, () => {
+        supabase.from('ideas').select('*').order('createdAt', { ascending: false }).then(res => res.data && setRawIdeas(res.data));
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'branches' }, () => {
+        supabase.from('branches').select('*').order('createdAt', { ascending: true }).then(res => res.data && setRawBranches(res.data));
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'feedbacks' }, () => {
+        supabase.from('feedbacks').select('*').order('createdAt', { ascending: true }).then(res => res.data && setRawFeedbacks(res.data));
+      })
+      .subscribe();
 
     return () => {
-      unsubUsers();
-      unsubIdeas();
-      unsubBranches();
-      unsubFeedbacks();
+      authSubscription?.unsubscribe();
+      supabase.removeChannel(channel);
     };
-  }, [isAuthReady]);
+  }, []);
 
-  // User specific listeners (bookmarks, notifications)
+  const fetchCurrentUser = async (id: string) => {
+    const { data } = await supabase.from('users').select('*').eq('id', id).single();
+    if (data) setCurrentUser(data as User);
+    setIsAuthReady(true);
+  };
+
+  // User specific fetching
   useEffect(() => {
     if (!currentUser) {
       setBookmarks([]);
@@ -118,88 +124,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
 
-    const unsubBookmarks = onSnapshot(collection(db, 'bookmarks'), (snapshot) => {
-      const userBookmarks = snapshot.docs
-        .map(doc => doc.data())
-        .filter(b => b.userId === currentUser.id)
-        .map(b => b.ideaId);
-      setBookmarks(userBookmarks);
-    }, (error) => console.error("Error fetching bookmarks:", error));
-
-    const unsubLikes = onSnapshot(collection(db, 'likes'), (snapshot) => {
-      const likes = snapshot.docs
-        .map(doc => doc.data())
-        .filter(l => l.userId === currentUser.id)
-        .map(l => l.targetId);
-      setUserLikes(likes);
-    }, (error) => console.error("Error fetching likes:", error));
-
-    const unsubNotifications = onSnapshot(query(collection(db, 'notifications'), where('recipientId', '==', currentUser.id)), (snapshot) => {
-      const userNotifs = snapshot.docs
-        .map(doc => ({ id: doc.id, ...doc.data() } as Notification))
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      setRawNotifications(userNotifs);
-    }, (error) => {
-      console.error("Error fetching notifications:", error);
-    });
-
-    // Also update currentUser state if their user doc changes
-    const unsubCurrentUser = onSnapshot(doc(db, 'users', currentUser.id), (doc) => {
-      if (doc.exists()) {
-        setCurrentUser({ id: doc.id, ...doc.data() } as User);
-      }
-    }, (error) => console.error("Error fetching current user doc:", error));
-
-    return () => {
-      unsubBookmarks();
-      unsubLikes();
-      unsubNotifications();
-      unsubCurrentUser();
+    const fetchUserSpecific = async () => {
+      const [bRes, lRes, nRes] = await Promise.all([
+        supabase.from('bookmarks').select('*').eq('userId', currentUser.id),
+        supabase.from('likes').select('*').eq('userId', currentUser.id),
+        supabase.from('notifications').select('*').eq('recipientId', currentUser.id).order('createdAt', { ascending: false })
+      ]);
+      if (bRes.data) setBookmarks(bRes.data.map((b: any) => b.ideaId));
+      if (lRes.data) setUserLikes(lRes.data.map((l: any) => l.targetId));
+      if (nRes.data) setRawNotifications(nRes.data);
     };
+    fetchUserSpecific();
+
+    // Realtime for private tables
+    const channel = supabase.channel(`user-${currentUser.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookmarks', filter: `userId=eq.${currentUser.id}` }, fetchUserSpecific)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'likes', filter: `userId=eq.${currentUser.id}` }, fetchUserSpecific)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `recipientId=eq.${currentUser.id}` }, fetchUserSpecific)
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [currentUser?.id]);
 
-  // Assemble Ideas
   const ideas: Idea[] = rawIdeas.map(rawIdea => {
     const author = users.find(u => u.id === rawIdea.authorId) || { id: rawIdea.authorId, name: 'Unknown', handle: 'unknown', avatar: '', followers: [], following: [] };
-    
     const ideaBranches: Branch[] = rawBranches
       .filter(b => b.ideaId === rawIdea.id)
       .map(rawBranch => {
         const branchAuthor = users.find(u => u.id === rawBranch.authorId) || { id: rawBranch.authorId, name: 'Unknown', handle: 'unknown', avatar: '', followers: [], following: [] };
-        
         const branchFeedbacks: Feedback[] = rawFeedbacks
           .filter(f => f.branchId === rawBranch.id)
           .map(rawFeedback => {
             const feedbackAuthor = users.find(u => u.id === rawFeedback.authorId) || { id: rawFeedback.authorId, name: 'Unknown', handle: 'unknown', avatar: '', followers: [], following: [] };
-            return {
-              id: rawFeedback.id,
-              branchId: rawFeedback.branchId,
-              author: feedbackAuthor,
-              content: rawFeedback.content,
-              createdAt: rawFeedback.createdAt
-            };
+            return { id: rawFeedback.id, branchId: rawFeedback.branchId, author: feedbackAuthor, content: rawFeedback.content, createdAt: rawFeedback.createdAt };
           });
-
-        return {
-          id: rawBranch.id,
-          ideaId: rawBranch.ideaId,
-          author: branchAuthor,
-          content: rawBranch.content,
-          createdAt: rawBranch.createdAt,
-          likes: rawBranch.likes || 0,
-          feedbacks: branchFeedbacks
-        };
+        return { id: rawBranch.id, ideaId: rawBranch.ideaId, author: branchAuthor, content: rawBranch.content, createdAt: rawBranch.createdAt, likes: rawBranch.likes || 0, feedbacks: branchFeedbacks };
       });
-
-    return {
-      id: rawIdea.id,
-      author,
-      content: rawIdea.content,
-      createdAt: rawIdea.createdAt,
-      likes: rawIdea.likes || 0,
-      tags: rawIdea.tags || [],
-      branches: ideaBranches
-    };
+    return { id: rawIdea.id, author, content: rawIdea.content, createdAt: rawIdea.createdAt, likes: rawIdea.likes || 0, tags: rawIdea.tags || [], branches: ideaBranches };
   });
 
   const notifications = rawNotifications.map(n => {
@@ -209,85 +170,48 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const createNotification = async (recipientId: string, type: Notification['type'], targetId: string) => {
     if (!currentUser || currentUser.id === recipientId) return;
-    const notifRef = doc(collection(db, 'notifications'));
-    await setDoc(notifRef, {
-      recipientId,
-      actorId: currentUser.id,
-      type,
-      targetId,
-      createdAt: new Date().toISOString(),
-      read: false
-    });
+    await supabase.from('notifications').insert({ recipientId, actorId: currentUser.id, type, targetId, createdAt: new Date().toISOString(), read: false });
+  };
+
+  const addIdea = async (content: string, tags: string[]) => {
+    if (!currentUser) return;
+    await supabase.from('ideas').insert({ authorId: currentUser.id, content, createdAt: new Date().toISOString(), likes: 0, tags });
   };
 
   const deleteIdea = async (ideaId: string) => {
     if (!currentUser) return;
     const targetIdea = rawIdeas.find(i => i.id === ideaId);
     if (targetIdea && targetIdea.authorId === currentUser.id) {
-      await deleteDoc(doc(db, 'ideas', ideaId));
+      await supabase.from('ideas').delete().eq('id', ideaId);
     }
-  };
-
-  const addIdea = async (content: string, tags: string[]) => {
-    if (!currentUser) return;
-    const newIdeaRef = doc(collection(db, 'ideas'));
-    await setDoc(newIdeaRef, {
-      authorId: currentUser.id,
-      content,
-      createdAt: new Date().toISOString(),
-      likes: 0,
-      tags
-    });
   };
 
   const addBranch = async (ideaId: string, content: string) => {
     if (!currentUser) return;
-    const newBranchRef = doc(collection(db, 'branches'));
-    await setDoc(newBranchRef, {
-      ideaId,
-      authorId: currentUser.id,
-      content,
-      createdAt: new Date().toISOString(),
-      likes: 0
-    });
-    
+    await supabase.from('branches').insert({ ideaId, authorId: currentUser.id, content, createdAt: new Date().toISOString(), likes: 0 });
     const idea = rawIdeas.find(i => i.id === ideaId);
-    if (idea) {
-      createNotification(idea.authorId, 'branch', ideaId);
-    }
+    if (idea) createNotification(idea.authorId, 'branch', ideaId);
   };
 
   const addFeedback = async (ideaId: string, branchId: string, content: string) => {
     if (!currentUser) return;
-    const newFeedbackRef = doc(collection(db, 'feedbacks'));
-    await setDoc(newFeedbackRef, {
-      branchId,
-      authorId: currentUser.id,
-      content,
-      createdAt: new Date().toISOString()
-    });
-
+    await supabase.from('feedbacks').insert({ branchId, authorId: currentUser.id, content, createdAt: new Date().toISOString() });
     const branch = rawBranches.find(b => b.id === branchId);
-    if (branch) {
-      createNotification(branch.authorId, 'feedback', branchId);
-    }
+    if (branch) createNotification(branch.authorId, 'feedback', branchId);
   };
 
   const likeIdea = async (ideaId: string) => {
     if (!currentUser) return;
-    const likeId = `${currentUser.id}_${ideaId}`;
-    const likeRef = doc(db, 'likes', likeId);
-    const likeSnap = await getDoc(likeRef);
-    const ideaRef = doc(db, 'ideas', ideaId);
+    const { data: likeSnap } = await supabase.from('likes').select('*').eq('userId', currentUser.id).eq('targetId', ideaId).single();
     const idea = rawIdeas.find(i => i.id === ideaId);
 
-    if (likeSnap.exists()) {
-      await deleteDoc(likeRef);
-      if (idea) await updateDoc(ideaRef, { likes: Math.max(0, (idea.likes || 0) - 1) });
+    if (likeSnap) {
+      await supabase.from('likes').delete().eq('id', likeSnap.id);
+      if (idea) await supabase.from('ideas').update({ likes: Math.max(0, (idea.likes || 0) - 1) }).eq('id', ideaId);
     } else {
-      await setDoc(likeRef, { userId: currentUser.id, targetId: ideaId, type: 'idea' });
+      await supabase.from('likes').insert({ userId: currentUser.id, targetId: ideaId, type: 'idea' });
       if (idea) {
-        await updateDoc(ideaRef, { likes: (idea.likes || 0) + 1 });
+        await supabase.from('ideas').update({ likes: (idea.likes || 0) + 1 }).eq('id', ideaId);
         createNotification(idea.authorId, 'like', ideaId);
       }
     }
@@ -295,19 +219,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const likeBranch = async (ideaId: string, branchId: string) => {
     if (!currentUser) return;
-    const likeId = `${currentUser.id}_${branchId}`;
-    const likeRef = doc(db, 'likes', likeId);
-    const likeSnap = await getDoc(likeRef);
-    const branchRef = doc(db, 'branches', branchId);
+    const { data: likeSnap } = await supabase.from('likes').select('*').eq('userId', currentUser.id).eq('targetId', branchId).single();
     const branch = rawBranches.find(b => b.id === branchId);
 
-    if (likeSnap.exists()) {
-      await deleteDoc(likeRef);
-      if (branch) await updateDoc(branchRef, { likes: Math.max(0, (branch.likes || 0) - 1) });
+    if (likeSnap) {
+      await supabase.from('likes').delete().eq('id', likeSnap.id);
+      if (branch) await supabase.from('branches').update({ likes: Math.max(0, (branch.likes || 0) - 1) }).eq('id', branchId);
     } else {
-      await setDoc(likeRef, { userId: currentUser.id, targetId: branchId, type: 'branch' });
+      await supabase.from('likes').insert({ userId: currentUser.id, targetId: branchId, type: 'branch' });
       if (branch) {
-        await updateDoc(branchRef, { likes: (branch.likes || 0) + 1 });
+        await supabase.from('branches').update({ likes: (branch.likes || 0) + 1 }).eq('id', branchId);
         createNotification(branch.authorId, 'like', branchId);
       }
     }
@@ -315,67 +236,82 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const toggleBookmark = async (ideaId: string) => {
     if (!currentUser) return;
-    const bookmarkId = `${currentUser.id}_${ideaId}`;
-    const bookmarkRef = doc(db, 'bookmarks', bookmarkId);
-    const bookmarkSnap = await getDoc(bookmarkRef);
+    const { data: bookmarkSnap } = await supabase.from('bookmarks').select('*').eq('userId', currentUser.id).eq('ideaId', ideaId).single();
 
-    if (bookmarkSnap.exists()) {
-      await deleteDoc(bookmarkRef);
+    if (bookmarkSnap) {
+      await supabase.from('bookmarks').delete().eq('id', bookmarkSnap.id);
     } else {
-      await setDoc(bookmarkRef, { userId: currentUser.id, ideaId });
+      await supabase.from('bookmarks').insert({ userId: currentUser.id, ideaId });
     }
   };
 
   const updateProfile = async (name: string, handle: string, bio: string, avatar: string) => {
     if (!currentUser) return;
-    const userRef = doc(db, 'users', currentUser.id);
-    await updateDoc(userRef, { name, handle, bio, avatar });
+    await supabase.from('users').update({ name, handle, bio, avatar }).eq('id', currentUser.id);
   };
 
   const markNotificationsRead = async () => {
     if (!currentUser) return;
     const unreadNotifs = rawNotifications.filter(n => !n.read);
-    const batch = writeBatch(db);
-    unreadNotifs.forEach(n => {
-      const ref = doc(db, 'notifications', n.id);
-      batch.update(ref, { read: true });
-    });
-    await batch.commit();
+    const updates = unreadNotifs.map(n => supabase.from('notifications').update({ read: true }).eq('id', n.id));
+    await Promise.all(updates);
   };
 
   const toggleFollow = async (userId: string) => {
     if (!currentUser) return;
     const isFollowing = currentUser.following?.includes(userId);
-    const currentUserRef = doc(db, 'users', currentUser.id);
-    const targetUserRef = doc(db, 'users', userId);
-
+    const targetUser = users.find(u => u.id === userId);
+    
     if (isFollowing) {
-      await updateDoc(currentUserRef, { following: arrayRemove(userId) });
-      await updateDoc(targetUserRef, { followers: arrayRemove(currentUser.id) });
+      await supabase.from('users').update({ following: (currentUser.following || []).filter(id => id !== userId) }).eq('id', currentUser.id);
+      if (targetUser) await supabase.from('users').update({ followers: (targetUser.followers || []).filter(id => id !== currentUser.id) }).eq('id', userId);
     } else {
-      await updateDoc(currentUserRef, { following: arrayUnion(userId) });
-      await updateDoc(targetUserRef, { followers: arrayUnion(currentUser.id) });
+      await supabase.from('users').update({ following: [...(currentUser.following || []), userId] }).eq('id', currentUser.id);
+      if (targetUser) await supabase.from('users').update({ followers: [...(targetUser.followers || []), currentUser.id] }).eq('id', userId);
       createNotification(userId, 'follow', currentUser.id);
     }
   };
 
   const logout = async () => {
-    await logOut();
+    await supabase.auth.signOut();
   };
 
-  const login = async () => {
-    await signInWithGoogle();
+  const login = async (email?: string, password?: string) => {
+    if (email && password) {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) alert(error.message);
+    }
+  };
+
+  const signup = async (email: string, password: string, name: string, handle: string) => {
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (error) {
+      alert(error.message);
+      return;
+    }
+    if (data.user) {
+      const newUser: User = {
+        id: data.user.id,
+        name,
+        handle,
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.user.id}`,
+        bio: '¡Hola a todos!',
+        followers: [],
+        following: []
+      };
+      await supabase.from('users').insert(newUser);
+    }
   };
 
   const loginRedirect = async () => {
-    await signInWithGoogleRedirect();
+    // Deprecated
   };
 
   const deleteAccount = async () => {
-    if (!currentUser || !auth.currentUser) return;
+    if (!currentUser) return;
     try {
-      await deleteDoc(doc(db, 'users', currentUser.id));
-      await deleteUser(auth.currentUser);
+      await supabase.from('users').delete().eq('id', currentUser.id);
+      await supabase.auth.signOut();
     } catch (error) {
       console.error("Error deleting user account:", error);
       throw error;
@@ -383,29 +319,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   return (
-    <AppContext.Provider value={{ 
-      currentUser, 
-      users,
-      ideas, 
-      bookmarks,
-      userLikes,
-      notifications,
-      addIdea, 
-      addBranch, 
-      addFeedback, 
-      likeIdea, 
-      likeBranch,
-      toggleBookmark,
-      updateProfile,
-      markNotificationsRead,
-      toggleFollow,
-      deleteIdea,
-      deleteAccount,
-      logout,
-      login,
-      loginRedirect,
-      isAuthReady
-    }}>
+    <AppContext.Provider value={{ currentUser, users, ideas, bookmarks, userLikes, notifications, addIdea, addBranch, addFeedback, likeIdea, likeBranch, toggleBookmark, updateProfile, markNotificationsRead, toggleFollow, deleteIdea, deleteAccount, logout, login, signup, loginRedirect, isAuthReady }}>
       {children}
     </AppContext.Provider>
   );
