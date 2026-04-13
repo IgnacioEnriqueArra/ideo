@@ -19,7 +19,7 @@ type AppContextType = {
   bookmarks: string[];
   userLikes: string[];
   notifications: (Notification & { actor: User })[];
-  addIdea: (content: string, tags: string[]) => void;
+  addIdea: (content: string, tags: string[], mediaFile?: File) => void;
   addBranch: (ideaId: string, content: string) => void;
   addFeedback: (ideaId: string, branchId: string, content: string) => void;
   likeIdea: (ideaId: string) => void;
@@ -173,7 +173,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           });
         return { id: rawBranch.id, ideaId: rawBranch.ideaId, author: branchAuthor, content: rawBranch.content, createdAt: rawBranch.createdAt, likes: rawBranch.likes || 0, feedbacks: branchFeedbacks };
       });
-    return { id: rawIdea.id, author, content: rawIdea.content, createdAt: rawIdea.createdAt, likes: rawIdea.likes || 0, tags: rawIdea.tags || [], branches: ideaBranches };
+    return { id: rawIdea.id, author, content: rawIdea.content, createdAt: rawIdea.createdAt, likes: rawIdea.likes || 0, tags: rawIdea.tags || [], branches: ideaBranches, mediaUrl: rawIdea.mediaUrl };
   });
 
   const notifications = rawNotifications.map(n => {
@@ -186,10 +186,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await supabase.from('notifications').insert({ recipientId, actorId: currentUser.id, type, targetId, createdAt: new Date().toISOString(), read: false });
   };
 
-  const addIdea = async (content: string, tags: string[]) => {
+  const addIdea = async (content: string, tags: string[], mediaFile?: File) => {
     if (!currentUser) return;
     const tempId = crypto.randomUUID();
-    const newIdea = { id: tempId, authorId: currentUser.id, content, createdAt: new Date().toISOString(), likes: 0, tags };
+    let mediaUrl = undefined;
+    
+    if (mediaFile) {
+      const fileExt = mediaFile.name.split('.').pop();
+      const fileName = `${tempId}-${Math.random()}.${fileExt}`;
+      const { data, error } = await supabase.storage.from('media').upload(`public/${fileName}`, mediaFile);
+      if (!error && data) {
+         mediaUrl = supabase.storage.from('media').getPublicUrl(data.path).data.publicUrl;
+      }
+    }
+
+    const newIdea = { id: tempId, authorId: currentUser.id, content, createdAt: new Date().toISOString(), likes: 0, tags, mediaUrl };
     setRawIdeas(prev => [newIdea, ...prev]);
     await supabase.from('ideas').insert(newIdea);
   };

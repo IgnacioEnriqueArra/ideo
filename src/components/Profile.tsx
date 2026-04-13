@@ -13,7 +13,7 @@ interface ProfileProps {
 }
 
 export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
-  const { currentUser, users, ideas, toggleFollow } = useAppContext();
+  const { currentUser, users, ideas, toggleFollow, userLikes } = useAppContext();
   const [activeTab, setActiveTab] = React.useState<'ideas' | 'branches' | 'likes'>('ideas');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -25,6 +25,7 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
 
   const userIdeas = ideas.filter(i => i.author.id === profileUser.id);
   const userBranches = ideas.flatMap(i => i.branches).filter(b => b.author.id === profileUser.id);
+  const likedIdeas = isOwnProfile ? ideas.filter(i => userLikes.includes(i.id)) : [];
 
   return (
     <motion.div 
@@ -135,9 +136,15 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
             <BranchCard key={branch.id} branch={branch} />
           ))}
           {activeTab === 'likes' && (
-            <div className="p-8 text-center text-gray-500 text-[15px]">
-              No liked posts yet.
-            </div>
+            likedIdeas.length > 0 ? (
+              likedIdeas.map(idea => (
+                <IdeaCard key={idea.id} idea={idea} />
+              ))
+            ) : (
+              <div className="p-8 text-center text-gray-500 text-[15px]">
+                {isOwnProfile ? "No has dado me gusta a nada aún." : "Los me gusta de este usuario son privados."}
+              </div>
+            )
           )}
         </div>
       </div>

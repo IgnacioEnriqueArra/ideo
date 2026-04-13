@@ -15,7 +15,9 @@ export const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose }) =
   const { currentUser, addIdea } = useAppContext();
   const [content, setContent] = useState('');
   const [tags, setTags] = useState('');
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen && textareaRef.current) {
@@ -23,12 +25,19 @@ export const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose }) =
     }
   }, [isOpen]);
 
+  const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setMediaFile(e.target.files[0]);
+    }
+  };
+
   const handleSubmit = () => {
     if (!content.trim() || content.length > MAX_CHARS) return;
     const tagsList = tags.split(',').map(t => t.trim()).filter(t => t);
-    addIdea(content, tagsList);
+    addIdea(content, tagsList, mediaFile || undefined);
     setContent('');
     setTags('');
+    setMediaFile(null);
     onClose();
   };
 
@@ -99,6 +108,22 @@ export const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose }) =
                     }}
                   />
                   
+                  {mediaFile && (
+                    <div className="relative mt-2 rounded-xl overflow-hidden bg-gray-100 max-h-48 border border-gray-100 flex items-center justify-center">
+                      {mediaFile.type.startsWith('video/') ? (
+                         <video src={URL.createObjectURL(mediaFile)} className="w-full max-h-48 object-contain" controls />
+                      ) : (
+                         <img src={URL.createObjectURL(mediaFile)} className="w-full max-h-48 object-contain" />
+                      )}
+                      <button 
+                        onClick={() => setMediaFile(null)} 
+                        className="absolute top-2 right-2 p-1.5 bg-black/60 text-white rounded-full hover:bg-black/80 transition-colors"
+                      >
+                        <X className="w-4 h-4"/>
+                      </button>
+                    </div>
+                  )}
+
                   {/* Tags input inline */}
                   <div className="mt-4 border-t border-gray-100 pt-3">
                     <input 
@@ -115,7 +140,8 @@ export const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose }) =
               {/* Footer / Actions */}
               <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
                 <div className="flex items-center gap-1 text-primary">
-                  <button className="p-2 hover:bg-primary/10 rounded-full transition-colors">
+                  <input type="file" accept="image/*,video/*" className="hidden" ref={fileInputRef} onChange={handleMediaChange} />
+                  <button onClick={() => fileInputRef.current?.click()} className="p-2 hover:bg-primary/10 rounded-full transition-colors">
                     <ImageIcon className="w-5 h-5" />
                   </button>
                   <button className="p-2 hover:bg-primary/10 rounded-full transition-colors">

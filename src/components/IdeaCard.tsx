@@ -93,6 +93,16 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = fa
             {idea.content}
           </p>
 
+          {idea.mediaUrl && (
+            <div className="mt-3 rounded-2xl overflow-hidden bg-gray-100 border border-gray-100 max-h-[400px] flex items-center justify-center">
+              {idea.mediaUrl.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+                 <video src={idea.mediaUrl} className="w-full max-h-[400px] object-cover" controls onClick={e => e.stopPropagation()} />
+              ) : (
+                 <img src={idea.mediaUrl} className="w-full max-h-[400px] object-cover" onClick={e => e.stopPropagation()} />
+              )}
+            </div>
+          )}
+
           {idea.tags && idea.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-3">
               {idea.tags.map(tag => (

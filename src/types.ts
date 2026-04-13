@@ -34,4 +34,5 @@ export type Idea = {
   likes: number;
   tags: string[];
   branches: Branch[];
+  mediaUrl?: string;
 };

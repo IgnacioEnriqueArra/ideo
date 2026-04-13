@@ -72,7 +72,15 @@ function AppContent() {
   };
 
   return (
-    <Layout activeTab={activeTab} setActiveTab={setActiveTab} onCompose={() => setIsComposeOpen(true)}>
+    <Layout 
+      activeTab={activeTab} 
+      setActiveTab={(tab) => {
+        setSelectedIdeaId(null);
+        setSelectedUserId(null);
+        setActiveTab(tab);
+      }} 
+      onCompose={() => setIsComposeOpen(true)}
+    >
       <AnimatePresence mode="wait">
         {renderContent()}
       </AnimatePresence>
