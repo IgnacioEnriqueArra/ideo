@@ -29,8 +29,11 @@ function AppContent() {
     return (
       <div className="h-[100dvh] w-full bg-white flex flex-col items-center justify-center p-6 text-center">
         <div className="max-w-sm">
-          <div className="w-24 h-24 bg-primary rounded-[2rem] flex items-center justify-center mb-8 mx-auto shadow-2xl shadow-primary/30 transform transition-transform hover:scale-105 duration-500 text-white font-black text-6xl pb-2 pl-1" style={{ fontFamily: 'system-ui' }}>
-            i
+          <div className="w-24 h-24 bg-primary rounded-[2rem] flex items-center justify-center mb-8 mx-auto shadow-2xl shadow-primary/30 transform transition-transform hover:scale-105 duration-500">
+            <svg width="36" height="52" viewBox="0 0 36 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="18" cy="6" r="6" fill="white"/>
+              <rect x="10" y="18" width="16" height="34" rx="8" fill="white"/>
+            </svg>
           </div>
           <h1 className="text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">Ideo está en camino.</h1>
           <p className="text-gray-500 text-lg leading-relaxed mb-10">
@@ -60,8 +63,11 @@ function AppContent() {
   if (!isAuthReady) {
     return (
       <div className="h-[100dvh] w-full bg-white dark:bg-gray-950 max-w-md mx-auto border-x border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center p-6 transition-colors">
-        <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-6 animate-pulse text-white font-black text-4xl pb-1" style={{ fontFamily: 'system-ui' }}>
-          i
+        <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-6 animate-pulse">
+          <svg width="22" height="32" viewBox="0 0 36 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="18" cy="6" r="6" fill="white"/>
+            <rect x="10" y="18" width="16" height="34" rx="8" fill="white"/>
+          </svg>
         </div>
       </div>
     );
@@ -155,8 +161,11 @@ function AuthScreen() {
 
   return (
       <div className="h-[100dvh] w-full bg-white dark:bg-gray-950 max-w-md mx-auto border-x border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center p-6 transition-colors">
-        <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-primary/20 text-white font-black text-4xl pb-1" style={{ fontFamily: 'system-ui' }}>
-          i
+        <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-primary/20">
+          <svg width="22" height="32" viewBox="0 0 36 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="18" cy="6" r="6" fill="white"/>
+            <rect x="10" y="18" width="16" height="34" rx="8" fill="white"/>
+          </svg>
         </div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center">Bienvenido a Ideo.</h1>
         <p className="text-gray-500 text-center mb-8">Escribe, comparte y construye ideas.</p>
