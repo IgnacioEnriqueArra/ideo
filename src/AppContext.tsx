@@ -367,22 +367,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const signup = async (email: string, password: string, name: string, handle: string) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) {
-      alert(error.message);
-      return;
-    }
-    if (data.user) {
-      const newUser: User = {
-        id: data.user.id,
-        name,
-        handle,
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.user.id}`,
-        bio: '¡Hola a todos!',
-        followers: [],
-        following: []
-      };
-      await supabase.from('users').insert(newUser);
+    try {
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) throw error;
+
+      if (data.user) {
+        const newUser: User = {
+          id: data.user.id,
+          name,
+          handle,
+          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.user.id}`,
+          bio: '¡Hola a todos!',
+          followers: [],
+          following: []
+        };
+        const { error: insertError } = await supabase.from('users').insert(newUser);
+        if (insertError) throw insertError;
+        
+        // Si Supabase tiene desactivado "Confirm email", data.session tendrá valor
+        // y onAuthStateChange se activará solo. Pero para asegurar mayor velocidad:
+        if (data.session) {
+           await fetchCurrentUser(data.user.id);
+        } else {
+           alert("Registro exitoso. Si no se inicia sesión automáticamente, por favor confirma tu correo electrónico.");
+        }
+      }
+    } catch (error: any) {
+      alert(error.message || "Ocurrió un error en el registro");
     }
   };
 

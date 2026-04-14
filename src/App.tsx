@@ -143,40 +143,56 @@ function AuthScreen() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [handle, setHandle] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLogin) {
-      if (login) login(email, password);
-    } else {
-      if (signup) signup(email, password, name, handle);
+    setIsLoading(true);
+    try {
+      if (isLogin) {
+        if (login) await login(email, password);
+      } else {
+        if (signup) await signup(email, password, name, handle);
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
       <div className="h-[100dvh] w-full bg-white dark:bg-gray-950 max-w-md mx-auto border-x border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center p-6 transition-colors">
         <div className="mb-6">
-          <span className="text-5xl font-black text-primary tracking-tighter">ideo.</span>
+          <span className="text-5xl font-black text-primary tracking-tighter text-center">ideo.</span>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center">Bienvenido a Ideo.</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center">
+          {isLogin ? 'Bienvenido de nuevo' : 'Crea tu cuenta'}
+        </h1>
         <p className="text-gray-500 text-center mb-8">Escribe, comparte y construye ideas.</p>
         
         <form onSubmit={handleSubmit} className="w-full space-y-4">
           {!isLogin && (
             <>
-              <input type="text" placeholder="Nombre completo" value={name} onChange={e=>setName(e.target.value)} required className="w-full p-3 rounded-lg border border-gray-200" />
-              <input type="text" placeholder="Nombre de usuario (sin espacios)" value={handle} onChange={e=>setHandle(e.target.value)} required className="w-full p-3 rounded-lg border border-gray-200" />
+              <input type="text" placeholder="Nombre completo" value={name} onChange={e=>setName(e.target.value)} required className="w-full p-3.5 rounded-2xl border border-gray-200 outline-none focus:border-primary transition-colors" />
+              <input type="text" placeholder="Nombre de usuario" value={handle} onChange={e=>setHandle(e.target.value.toLowerCase().trim())} required className="w-full p-3.5 rounded-2xl border border-gray-200 outline-none focus:border-primary transition-colors" />
             </>
           )}
-          <input type="email" placeholder="Correo electrónico" value={email} onChange={e=>setEmail(e.target.value)} required className="w-full p-3 rounded-lg border border-gray-200" />
-          <input type="password" placeholder="Contraseña (mínimo 6 caracteres)" value={password} onChange={e=>setPassword(e.target.value)} required minLength={6} className="w-full p-3 rounded-lg border border-gray-200 dark:bg-gray-900 dark:text-white" />
+          <input type="email" placeholder="Correo electrónico" value={email} onChange={e=>setEmail(e.target.value)} required className="w-full p-3.5 rounded-2xl border border-gray-200 outline-none focus:border-primary transition-colors" />
+          <input type="password" placeholder="Contraseña" value={password} onChange={e=>setPassword(e.target.value)} required minLength={6} className="w-full p-3.5 rounded-2xl border border-gray-200 outline-none focus:border-primary transition-colors dark:bg-gray-900 dark:text-white" />
           
-          <button type="submit" className="w-full bg-primary text-white font-bold py-3.5 rounded-full hover:bg-blue-600 transition-colors">
-            {isLogin ? 'Iniciar Sesión' : 'Registrarse'}
+          <button 
+            type="submit" 
+            disabled={isLoading}
+            className="w-full bg-primary text-white font-bold py-4 rounded-full hover:bg-blue-600 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {isLoading ? (
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              isLogin ? 'Iniciar Sesión' : 'Registrarse'
+            )}
           </button>
         </form>
 
-        <button onClick={() => setIsLogin(!isLogin)} className="w-full mt-4 text-gray-500 text-sm hover:underline">
+        <button onClick={() => setIsLogin(!isLogin)} className="w-full mt-6 text-gray-500 text-sm hover:underline font-medium">
           {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
         </button>
       </div>
