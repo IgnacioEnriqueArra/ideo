@@ -3,11 +3,12 @@ import { motion, AnimatePresence } from 'motion/react';
 import {
   Users, FileText, GitFork, MessageSquare, ShieldCheck, Trash2,
   RefreshCw, Search, BadgeCheck, X, BarChart3, Bell, TrendingUp,
-  Eye, ChevronRight, Shield, AlertTriangle, CheckCircle
+  Eye, ChevronRight, Shield, AlertTriangle, CheckCircle, LayoutDashboard,
+  Mail, Calendar, ArrowUpRight, Filter
 } from 'lucide-react';
 import { supabase } from '../supabase';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { formatDistanceToNow } from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 // ─── Types ───────────────────────────────────────────────
@@ -20,33 +21,43 @@ interface AdminMessage { id: string; conversationId: string; senderId: string; c
 interface Stats { users: number; ideas: number; branches: number; feedbacks: number; messages: number; }
 
 // ─── Stat Card ───────────────────────────────────────────
-const StatCard = ({ icon: Icon, label, value, color }: { icon: any; label: string; value: number; color: string }) => (
+const StatCard = ({ icon: Icon, label, value, color, delay }: { icon: any; label: string; value: number; color: string; delay: number }) => (
   <motion.div
-    initial={{ opacity: 0, y: 12 }}
-    animate={{ opacity: 1, y: 0 }}
-    className={`bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex items-center gap-3`}
+    initial={{ opacity: 0, scale: 0.95 }}
+    animate={{ opacity: 1, scale: 1 }}
+    transition={{ delay }}
+    className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm transition-all hover:shadow-md group"
   >
-    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
-      <Icon className="w-5 h-5 text-white" />
+    <div className="flex items-start justify-between">
+      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${color} shadow-lg shadow-current/10`}>
+        <Icon className="w-6 h-6 text-white" />
+      </div>
+      <ArrowUpRight className="w-5 h-5 text-gray-300 group-hover:text-gray-900 transition-colors" />
     </div>
-    <div>
-      <p className="text-xs text-gray-400 font-medium">{label}</p>
-      <p className="text-2xl font-black text-gray-900">{value.toLocaleString()}</p>
+    <div className="mt-5">
+      <p className="text-sm text-gray-400 font-bold uppercase tracking-wider">{label}</p>
+      <p className="text-4xl font-black text-gray-900 mt-1">{value.toLocaleString()}</p>
     </div>
   </motion.div>
 );
 
-// ─── Section Header ───────────────────────────────────────────
-const SectionTab = ({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) => (
+// ─── Sidebar Item ─────────────────────────────────────────
+const SidebarItem = ({ icon: Icon, label, active, onClick }: { icon: any; label: string; active: boolean; onClick: () => void }) => (
   <button
     onClick={onClick}
-    className={`px-3 py-1.5 rounded-full text-sm font-bold transition-all ${active ? 'bg-gray-900 text-white' : 'text-gray-500 hover:bg-gray-100'}`}
+    className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200 ${
+      active 
+        ? 'bg-gray-900 text-white shadow-xl shadow-gray-900/10 scale-[1.02]' 
+        : 'text-gray-500 hover:bg-gray-100'
+    }`}
   >
-    {label}
+    <Icon className={`w-5 h-5 ${active ? 'text-white' : 'text-gray-400'}`} />
+    <span className="font-bold text-[15px]">{label}</span>
+    {active && <motion.div layoutId="active" className="ml-auto w-1.5 h-1.5 rounded-full bg-white" />}
   </button>
 );
 
-// ─── Main Admin Component ────────────────────────────────
+// ─── Main Component ──────────────────────────────────────
 export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [section, setSection] = useState<'overview' | 'users' | 'ideas' | 'branches' | 'feedbacks' | 'messages'>('overview');
   const [stats, setStats] = useState<Stats>({ users: 0, ideas: 0, branches: 0, feedbacks: 0, messages: 0 });
@@ -102,331 +113,284 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
     setConfirmDelete(null);
   };
 
-  const getUserName = (id: string) => users.find(u => u.id === id)?.handle ?? id.slice(0, 8);
+  const getUser = (id: string) => users.find(u => u.id === id);
+  const getUserName = (id: string) => getUser(id)?.handle ?? id.slice(0, 8);
 
-  const filteredUsers = users.filter(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.handle.toLowerCase().includes(search.toLowerCase()));
-  const filteredIdeas = ideas.filter(i => i.content.toLowerCase().includes(search.toLowerCase()));
-  const filteredBranches = branches.filter(b => b.content.toLowerCase().includes(search.toLowerCase()));
-  const filteredFeedbacks = feedbacks.filter(f => f.content.toLowerCase().includes(search.toLowerCase()));
-  const filteredMessages = messages.filter(m => m.content.toLowerCase().includes(search.toLowerCase()));
+  const filteredData = {
+    users: users.filter(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.handle.toLowerCase().includes(search.toLowerCase())),
+    ideas: ideas.filter(i => i.content.toLowerCase().includes(search.toLowerCase())),
+    branches: branches.filter(b => b.content.toLowerCase().includes(search.toLowerCase())),
+    feedbacks: feedbacks.filter(f => f.content.toLowerCase().includes(search.toLowerCase())),
+    messages: messages.filter(m => m.content.toLowerCase().includes(search.toLowerCase()))
+  };
 
   return (
-    <motion.div
-      initial={{ x: '100%' }}
-      animate={{ x: 0 }}
-      exit={{ x: '100%' }}
-      transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-      className="fixed inset-0 z-50 bg-gray-50 flex flex-col max-w-md mx-auto"
-    >
-      {/* Header */}
-      <div className="bg-gray-900 text-white px-4 pt-12 pb-4">
-        <div className="flex items-center justify-between mb-1">
-          <button onClick={onBack} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-            <X className="w-5 h-5" />
-          </button>
-          <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-yellow-400" />
-            <span className="text-xs font-bold text-yellow-400 uppercase tracking-widest">Admin Panel</span>
+    <div className="fixed inset-0 z-50 bg-gray-50 flex overflow-hidden">
+      {/* ─── SIDEBAR ─── */}
+      <div className="w-72 bg-white border-r border-gray-100 flex flex-col pt-10 px-4 shrink-0 shadow-2xl shadow-gray-200/50">
+        <div className="px-4 mb-10 flex items-center gap-3">
+          <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center">
+            <Shield className="w-6 h-6 text-yellow-400" />
           </div>
-          <button onClick={fetchAll} className={`p-2 hover:bg-white/10 rounded-full transition-colors ${loading ? 'animate-spin' : ''}`}>
-            <RefreshCw className="w-4 h-4" />
-          </button>
-        </div>
-        <h1 className="text-2xl font-black tracking-tight mt-2">ideo. Dashboard</h1>
-        <p className="text-gray-400 text-xs mt-0.5">Control total de la plataforma</p>
-      </div>
-
-      {/* Nav Tabs */}
-      <div className="bg-white border-b border-gray-200 px-3 py-2 flex gap-1.5 overflow-x-auto no-scrollbar">
-        {[
-          { key: 'overview', label: '📊 Resumen' },
-          { key: 'users',    label: '👥 Usuarios' },
-          { key: 'ideas',    label: '💡 Ideas' },
-          { key: 'branches', label: '🌿 Branches' },
-          { key: 'feedbacks',label: '💬 Feedback' },
-          { key: 'messages', label: '✉️ Mensajes' },
-        ].map(tab => (
-          <SectionTab key={tab.key} label={tab.label} active={section === tab.key} onClick={() => { setSection(tab.key as any); setSearch(''); }} />
-        ))}
-      </div>
-
-      {/* Search */}
-      {section !== 'overview' && (
-        <div className="bg-white border-b border-gray-100 px-4 py-2.5">
-          <div className="flex items-center gap-2 bg-gray-100 rounded-full px-3 py-2">
-            <Search className="w-4 h-4 text-gray-400 shrink-0" />
-            <input
-              type="text"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Buscar..."
-              className="flex-1 bg-transparent text-sm outline-none text-gray-900 placeholder:text-gray-400"
-            />
-            {search && <button onClick={() => setSearch('')}><X className="w-3.5 h-3.5 text-gray-400" /></button>}
+          <div>
+            <h1 className="text-xl font-black text-gray-900 uppercase tracking-tighter">ideo.admin</h1>
+            <p className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">System Terminal</p>
           </div>
         </div>
-      )}
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto">
-        {loading && (
-          <div className="flex items-center justify-center h-40">
-            <div className="w-8 h-8 border-2 border-gray-200 border-t-gray-900 rounded-full animate-spin" />
-          </div>
-        )}
+        <div className="space-y-1.5">
+          <SidebarItem icon={LayoutDashboard} label="Dashboard" active={section === 'overview'} onClick={() => setSection('overview')} />
+          <SidebarItem icon={Users} label="Usuarios" active={section === 'users'} onClick={() => setSection('users')} />
+          <SidebarItem icon={FileText} label="Ideas Root" active={section === 'ideas'} onClick={() => setSection('ideas')} />
+          <SidebarItem icon={GitFork} label="Branches" active={section === 'branches'} onClick={() => setSection('branches')} />
+          <SidebarItem icon={MessageSquare} label="Feedback" active={section === 'feedbacks'} onClick={() => setSection('feedbacks')} />
+          <SidebarItem icon={Mail} label="Mensajes DM" active={section === 'messages'} onClick={() => setSection('messages')} />
+        </div>
 
-        {!loading && section === 'overview' && (
-          <div className="p-4 space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <StatCard icon={Users}        label="Usuarios"   value={stats.users}     color="bg-blue-500" />
-              <StatCard icon={FileText}     label="Ideas"      value={stats.ideas}     color="bg-purple-500" />
-              <StatCard icon={GitFork}      label="Branches"   value={stats.branches}  color="bg-green-500" />
-              <StatCard icon={MessageSquare}label="Feedbacks"  value={stats.feedbacks} color="bg-orange-500" />
+        <div className="mt-auto mb-8 space-y-2">
+          <div className="px-4 py-4 rounded-3xl bg-gray-50 border border-gray-100">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-xs font-bold text-gray-600">Sistema Online</span>
             </div>
-            <StatCard icon={Bell} label="Mensajes DM" value={stats.messages} color="bg-pink-500" />
-
-            {/* Verified users summary */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <BadgeCheck className="w-5 h-5 text-blue-500" />
-                <h3 className="font-bold text-gray-900">Usuarios Verificados</h3>
-              </div>
-              <div className="space-y-2">
-                {users.filter(u => u.verified).length === 0 ? (
-                  <p className="text-gray-400 text-sm">Ningún usuario verificado aún.</p>
-                ) : (
-                  users.filter(u => u.verified).map(u => (
-                    <div key={u.id} className="flex items-center gap-2">
-                      <Avatar className="w-7 h-7 rounded-full">
-                        <AvatarImage src={u.avatar} />
-                        <AvatarFallback>{u.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm font-medium text-gray-900">@{u.handle}</span>
-                      <BadgeCheck className="w-3.5 h-3.5 text-blue-500 ml-auto" />
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            {/* Recent activity */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <TrendingUp className="w-5 h-5 text-gray-700" />
-                <h3 className="font-bold text-gray-900">Ideas Recientes</h3>
-              </div>
-              <div className="space-y-2">
-                {ideas.slice(0, 5).map(idea => (
-                  <div key={idea.id} className="flex items-start gap-2 py-1.5 border-b border-gray-50 last:border-0">
-                    <div className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-2 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-gray-600 truncate">{idea.content}</p>
-                      <p className="text-[10px] text-gray-400">@{getUserName(idea.authorId)} · {formatDistanceToNow(new Date(idea.createdAt), { addSuffix: true, locale: es })}</p>
-                    </div>
-                    <span className="text-xs text-gray-400 shrink-0">❤️ {idea.likes}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <p className="text-[10px] text-gray-400 leading-tight">Acceso autorizado. Todas las acciones son registradas.</p>
           </div>
-        )}
+          <button onClick={onBack} className="w-full py-4 text-xs font-black text-gray-400 hover:text-red-500 transition-colors uppercase tracking-widest">
+            Cerrar Sesión Admin
+          </button>
+        </div>
+      </div>
 
-        {!loading && section === 'users' && (
-          <div className="divide-y divide-gray-100">
-            {filteredUsers.map(user => (
-              <motion.div
-                key={user.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="bg-white px-4 py-3.5 flex items-center gap-3"
-              >
-                <Avatar className="w-11 h-11 rounded-full shrink-0">
-                  <AvatarImage src={user.avatar} />
-                  <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1">
-                    <p className="font-bold text-gray-900 text-sm truncate">{user.name}</p>
-                    {user.verified && <BadgeCheck className="w-3.5 h-3.5 text-blue-500 shrink-0" />}
-                  </div>
-                  <p className="text-gray-400 text-xs">@{user.handle}</p>
-                  <div className="flex items-center gap-3 mt-0.5">
-                    <span className="text-[10px] text-gray-400">👥 {user.followers?.length ?? 0} seguidores</span>
-                    <span className="text-[10px] text-gray-400">📝 {ideas.filter(i => i.authorId === user.id).length} ideas</span>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1.5 shrink-0">
-                  <button
-                    onClick={() => toggleVerified(user)}
-                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-bold transition-all ${
-                      user.verified
-                        ? 'bg-blue-100 text-blue-600 border border-blue-200'
-                        : 'bg-gray-100 text-gray-500 border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200'
-                    }`}
-                  >
-                    <BadgeCheck className="w-3 h-3" />
-                    {user.verified ? 'Verificado' : 'Verificar'}
-                  </button>
-                  <button
-                    onClick={() => setConfirmDelete({ type: 'user', id: user.id })}
-                    className="flex items-center gap-1 px-2.5 py-1.5 bg-red-50 text-red-500 border border-red-100 rounded-full text-[11px] font-bold hover:bg-red-100 transition-all"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                    Eliminar
-                  </button>
-                </div>
-              </motion.div>
-            ))}
+      {/* ─── MAIN CONTENT ─── */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-10 shrink-0">
+          <div className="flex items-center gap-4">
+             <h2 className="text-[20px] font-black text-gray-900 capitalize">{section === 'overview' ? 'Vista General' : section}</h2>
+             <div className="h-6 w-[1px] bg-gray-100" />
+             <div className="flex items-center gap-2 bg-gray-50 rounded-full px-4 py-2 border border-blue-50">
+               <Filter className="w-3.5 h-3.5 text-blue-500" />
+               <span className="text-xs font-bold text-blue-600 uppercase">Live Data</span>
+             </div>
           </div>
-        )}
 
-        {!loading && section === 'ideas' && (
-          <div className="divide-y divide-gray-100">
-            {filteredIdeas.map(idea => (
-              <div key={idea.id} className="bg-white px-4 py-3.5">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <span className="text-[11px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">
-                        @{getUserName(idea.authorId)}
-                      </span>
-                      <span className="text-[11px] text-gray-400">
-                        {formatDistanceToNow(new Date(idea.createdAt), { addSuffix: true, locale: es })}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-800 leading-snug line-clamp-3">{idea.content}</p>
-                    <div className="flex items-center gap-3 mt-2">
-                      <span className="text-[11px] text-gray-400">❤️ {idea.likes} • 🌿 {branches.filter(b => b.ideaId === idea.id).length} branches</span>
-                      {idea.tags?.length > 0 && (
-                        <div className="flex gap-1">
-                          {idea.tags.slice(0, 2).map(tag => (
-                            <span key={tag} className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">#{tag}</span>
+          <div className="flex items-center gap-6">
+            <div className="relative group">
+               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-gray-900 transition-colors" />
+               <input 
+                  type="text" 
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Buscar en la base de datos..." 
+                  className="bg-gray-50 w-80 py-2.5 pl-11 pr-4 rounded-2xl border border-gray-100 outline-none focus:bg-white focus:border-gray-900 transition-all text-sm"
+               />
+            </div>
+            <button onClick={fetchAll} className={`p-2.5 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-all ${loading ? 'animate-spin' : ''}`}>
+              <RefreshCw className="w-5 h-5 text-gray-600" />
+            </button>
+          </div>
+        </header>
+
+        <div className="flex-1 overflow-y-auto p-10 bg-[#FAFAFB]">
+          {!loading ? (
+            <AnimatePresence mode="wait">
+              {section === 'overview' && (
+                <div key="ov" className="max-w-7xl mx-auto space-y-10">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                    <StatCard icon={Users} label="Usuarios" value={stats.users} color="bg-blue-600" delay={0.1} />
+                    <StatCard icon={FileText} label="Ideas" value={stats.ideas} color="bg-indigo-600" delay={0.2} />
+                    <StatCard icon={GitFork} label="Branches" value={stats.branches} color="bg-emerald-600" delay={0.3} />
+                    <StatCard icon={MessageSquare} label="Feedbacks" value={stats.feedbacks} color="bg-amber-600" delay={0.4} />
+                    <StatCard icon={Bell} label="Mensajes DM" value={stats.messages} color="bg-pink-600" delay={0.5} />
+                  </div>
+
+                  <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                    {/* Recent Ideas */}
+                    <div className="xl:col-span-2 bg-white rounded-[2.5rem] border border-gray-100 shadow-sm p-8">
+                       <div className="flex items-center justify-between mb-8">
+                          <h3 className="text-xl font-black text-gray-900 tracking-tight">Actividad Global Reciente</h3>
+                          <button onClick={() => setSection('ideas')} className="text-sm font-bold text-blue-600 hover:underline px-4 py-2 bg-blue-50 rounded-full">Ver todos</button>
+                       </div>
+                       <div className="space-y-4">
+                          {ideas.slice(0, 6).map(idea => (
+                            <div key={idea.id} className="group flex items-center gap-4 p-4 rounded-3xl hover:bg-gray-50 transition-all border border-transparent hover:border-gray-100">
+                               <Avatar className="w-12 h-12 rounded-2xl shrink-0">
+                                 <AvatarImage src={getUser(idea.authorId)?.avatar} />
+                                 <AvatarFallback>U</AvatarFallback>
+                               </Avatar>
+                               <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                     <span className="font-bold text-gray-900 text-[15px]">@{getUserName(idea.authorId)}</span>
+                                     <span className="text-[10px] text-gray-400 font-bold uppercase">{format(new Date(idea.createdAt), 'dd MMM, HH:mm', { locale: es })}</span>
+                                  </div>
+                                  <p className="text-sm text-gray-600 truncate mt-0.5">{idea.content}</p>
+                               </div>
+                               <div className="shrink-0 flex items-center gap-4 px-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <span className="text-xs font-bold text-gray-400">❤️ {idea.likes}</span>
+                                  <button onClick={() => setConfirmDelete({ type: 'idea', id: idea.id })} className="p-2 text-red-400 hover:text-red-500 bg-red-50 rounded-xl">
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                               </div>
+                            </div>
                           ))}
+                       </div>
+                    </div>
+
+                    {/* Verification Queue / Stats */}
+                    <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm p-8">
+                        <h3 className="text-xl font-black text-gray-900 tracking-tight mb-8">Noticias de Usuario</h3>
+                        <div className="space-y-6">
+                           {users.filter(u => !u.verified).slice(0, 6).map(user => (
+                             <div key={user.id} className="flex items-center gap-4">
+                                <Avatar className="w-10 h-10 rounded-full">
+                                  <AvatarImage src={user.avatar} />
+                                </Avatar>
+                                <div className="flex-1 min-w-0">
+                                   <p className="font-bold text-gray-900 text-sm truncate">{user.name}</p>
+                                   <p className="text-xs text-gray-400">@{user.handle}</p>
+                                </div>
+                                <button onClick={() => toggleVerified(user)} className="px-3 py-1.5 bg-blue-50 text-blue-600 text-[10px] font-bold rounded-full hover:bg-blue-600 hover:text-white transition-all uppercase tracking-wider">
+                                  Verificar
+                                </button>
+                             </div>
+                           ))}
+                           <button onClick={() => setSection('users')} className="w-full py-4 text-xs font-black text-gray-400 text-center hover:text-gray-900 transition-colors uppercase tracking-[0.2em] border-t border-gray-50 mt-4">
+                             Gestionar todos los usuarios
+                           </button>
                         </div>
-                      )}
                     </div>
                   </div>
-                  {idea.mediaUrl && (
-                    <div className="w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-gray-100">
-                      <img src={idea.mediaUrl} className="w-full h-full object-cover" alt="" />
+                </div>
+              )}
+
+              {section === 'users' && (
+                <div key="usr" className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
+                  <table className="w-full text-left border-collapse">
+                    <thead className="bg-gray-50/50">
+                      <tr>
+                        <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Usuario</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">ID / Handle</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Seguidores</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Estado</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {filteredData.users.map(user => (
+                        <tr key={user.id} className="hover:bg-gray-50/50 transition-colors group">
+                          <td className="px-8 py-4">
+                            <div className="flex items-center gap-3">
+                              <Avatar className="w-10 h-10 rounded-2xl shrink-0 shadow-sm">
+                                <AvatarImage src={user.avatar} />
+                                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-bold text-gray-900 text-sm">{user.name}</p>
+                                <p className="text-xs text-gray-400">@{user.handle}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-8 py-4">
+                             <code className="text-[10px] bg-gray-100 px-2 py-1 rounded text-gray-500 font-mono">{user.id}</code>
+                          </td>
+                          <td className="px-8 py-4">
+                             <div className="flex flex-col">
+                               <span className="text-sm font-bold text-gray-900">{user.followers?.length ?? 0}</span>
+                               <span className="text-[10px] text-gray-400 font-bold uppercase ">Followers</span>
+                             </div>
+                          </td>
+                          <td className="px-8 py-4">
+                             {user.verified ? (
+                               <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-600 rounded-full border border-blue-100">
+                                 <BadgeCheck className="w-3.5 h-3.5" />
+                                 <span className="text-[10px] font-black uppercase tracking-wider">Verificado</span>
+                               </div>
+                             ) : (
+                               <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">Estandar</span>
+                             )}
+                          </td>
+                          <td className="px-8 py-4">
+                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button onClick={() => toggleVerified(user)} className="p-2 hover:bg-blue-50 text-gray-400 hover:text-blue-500 rounded-xl transition-all" title="Alternar Verificación">
+                                <ShieldCheck className="w-5 h-5" />
+                              </button>
+                              <button onClick={() => setConfirmDelete({ type: 'user', id: user.id })} className="p-2 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-xl transition-all" title="Eliminar Usuario">
+                                <Trash2 className="w-5 h-5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {['ideas', 'branches', 'feedbacks', 'messages'].includes(section) && (
+                <div key="grid" className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
+                  {(section === 'ideas' ? filteredData.ideas : section === 'branches' ? filteredData.branches : section === 'feedbacks' ? filteredData.feedbacks : filteredData.messages).map((item: any) => (
+                    <div key={item.id} className="bg-white rounded-[2rem] border border-gray-100 shadow-sm p-6 flex flex-col group transition-all hover:translate-y-[-4px] hover:shadow-xl hover:shadow-gray-200/40">
+                       <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-2">
+                             <Avatar className="w-8 h-8 rounded-full">
+                               <AvatarImage src={getUser(item.authorId || item.senderId)?.avatar} />
+                             </Avatar>
+                             <div>
+                               <p className="text-xs font-bold text-gray-900">@{getUserName(item.authorId || item.senderId)}</p>
+                               <p className="text-[10px] text-gray-400">{format(new Date(item.createdAt), 'dd MMMM yyyy', { locale: es })}</p>
+                             </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {item.likes !== undefined && <span className="text-[10px] font-black text-gray-400">❤️ {item.likes}</span>}
+                            <button onClick={() => setConfirmDelete({ type: section.slice(0, -1), id: item.id })} className="p-2 text-gray-300 hover:text-red-500 bg-gray-50 hover:bg-red-50 rounded-xl transition-all">
+                               <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                       </div>
+                       <div className="flex-1">
+                          <p className="text-sm text-gray-700 leading-relaxed overflow-wrap-break-word">{item.content}</p>
+                          {item.mediaUrl && (
+                             <img src={item.mediaUrl} className="mt-4 rounded-2xl w-full h-40 object-cover border border-gray-50" />
+                          )}
+                       </div>
                     </div>
-                  )}
+                  ))}
                 </div>
-                <div className="flex justify-end mt-2">
-                  <button
-                    onClick={() => setConfirmDelete({ type: 'idea', id: idea.id })}
-                    className="flex items-center gap-1 px-2.5 py-1.5 bg-red-50 text-red-500 border border-red-100 rounded-full text-[11px] font-bold hover:bg-red-100 transition-all"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                    Eliminar
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {!loading && section === 'branches' && (
-          <div className="divide-y divide-gray-100">
-            {filteredBranches.map(branch => (
-              <div key={branch.id} className="bg-white px-4 py-3.5">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <span className="text-[11px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">@{getUserName(branch.authorId)}</span>
-                  <span className="text-[11px] text-gray-400">{formatDistanceToNow(new Date(branch.createdAt), { addSuffix: true, locale: es })}</span>
-                </div>
-                <p className="text-sm text-gray-800 leading-snug line-clamp-2">{branch.content}</p>
-                <div className="flex items-center justify-between mt-2">
-                  <span className="text-[11px] text-gray-400">❤️ {branch.likes} • 💬 {feedbacks.filter(f => f.branchId === branch.id).length} comentarios</span>
-                  <button
-                    onClick={() => setConfirmDelete({ type: 'branch', id: branch.id })}
-                    className="flex items-center gap-1 px-2.5 py-1.5 bg-red-50 text-red-500 border border-red-100 rounded-full text-[11px] font-bold hover:bg-red-100 transition-all"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                    Eliminar
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {!loading && section === 'feedbacks' && (
-          <div className="divide-y divide-gray-100">
-            {filteredFeedbacks.map(fb => (
-              <div key={fb.id} className="bg-white px-4 py-3.5">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <span className="text-[11px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full">@{getUserName(fb.authorId)}</span>
-                  <span className="text-[11px] text-gray-400">{formatDistanceToNow(new Date(fb.createdAt), { addSuffix: true, locale: es })}</span>
-                </div>
-                <p className="text-sm text-gray-800 leading-snug line-clamp-2">{fb.content}</p>
-                <div className="flex justify-end mt-2">
-                  <button
-                    onClick={() => setConfirmDelete({ type: 'feedback', id: fb.id })}
-                    className="flex items-center gap-1 px-2.5 py-1.5 bg-red-50 text-red-500 border border-red-100 rounded-full text-[11px] font-bold hover:bg-red-100 transition-all"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                    Eliminar
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {!loading && section === 'messages' && (
-          <div className="divide-y divide-gray-100">
-            {filteredMessages.map(msg => (
-              <div key={msg.id} className="bg-white px-4 py-3.5">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <span className="text-[11px] font-bold text-pink-600 bg-pink-50 px-2 py-0.5 rounded-full">@{getUserName(msg.senderId)}</span>
-                  {msg.read ? (
-                    <span className="flex items-center gap-0.5 text-[10px] text-green-500"><CheckCircle className="w-3 h-3" />Leído</span>
-                  ) : (
-                    <span className="flex items-center gap-0.5 text-[10px] text-gray-400"><Eye className="w-3 h-3" />No leído</span>
-                  )}
-                  <span className="text-[11px] text-gray-400 ml-auto">{formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true, locale: es })}</span>
-                </div>
-                <p className="text-sm text-gray-800 leading-snug line-clamp-2">{msg.content}</p>
-                <div className="flex justify-end mt-2">
-                  <button
-                    onClick={() => setConfirmDelete({ type: 'message', id: msg.id })}
-                    className="flex items-center gap-1 px-2.5 py-1.5 bg-red-50 text-red-500 border border-red-100 rounded-full text-[11px] font-bold hover:bg-red-100 transition-all"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                    Eliminar
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+              )}
+            </AnimatePresence>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full gap-4">
+               <div className="w-12 h-12 border-4 border-gray-100 border-t-gray-900 rounded-full animate-spin" />
+               <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Sincronizando Base de Datos...</p>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Confirm Delete Modal */}
+      {/* ─── MODALS ─── */}
       <AnimatePresence>
         {confirmDelete && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-6"
+            className="fixed inset-0 bg-gray-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-6"
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-3xl p-6 w-full max-w-xs shadow-2xl"
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-white rounded-[3rem] p-10 w-full max-w-sm shadow-2xl text-center"
             >
-              <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <AlertTriangle className="w-7 h-7 text-red-500" />
+              <div className="w-20 h-20 bg-red-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-inner">
+                <AlertTriangle className="w-10 h-10 text-red-500" />
               </div>
-              <h2 className="text-lg font-black text-gray-900 text-center">¿Eliminar?</h2>
-              <p className="text-sm text-gray-500 text-center mt-1 mb-5">Esta acción es permanente y no se puede deshacer.</p>
-              <div className="flex gap-3">
-                <button onClick={() => setConfirmDelete(null)} className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-2xl hover:bg-gray-200 transition-colors">
+              <h2 className="text-2xl font-black text-gray-900 tracking-tight">Confirmar Eliminación</h2>
+              <p className="text-[15px] text-gray-500 mt-2 mb-8 leading-relaxed">¿Estás seguro de que deseas borrar este registro de la base de datos? Esta acción es <span className="text-red-500 font-bold">irreversible</span>.</p>
+              <div className="flex gap-4">
+                <button onClick={() => setConfirmDelete(null)} className="flex-1 py-4 bg-gray-100 text-gray-700 font-black rounded-3xl hover:bg-gray-200 transition-all uppercase tracking-widest text-xs">
                   Cancelar
                 </button>
-                <button onClick={handleDelete} className="flex-1 py-3 bg-red-500 text-white font-bold rounded-2xl hover:bg-red-600 transition-colors">
+                <button onClick={handleDelete} className="flex-1 py-4 bg-red-500 text-white font-black rounded-3xl hover:bg-red-600 transition-all shadow-xl shadow-red-500/30 uppercase tracking-widest text-xs">
                   Eliminar
                 </button>
               </div>
@@ -434,6 +398,6 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 };
