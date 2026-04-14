@@ -33,7 +33,7 @@ interface ChatProps {
 }
 
 const ChatView: React.FC<ChatProps> = ({ conversation, otherUserId, onBack }) => {
-  const { currentUser, users } = useAppContext();
+  const { currentUser, users, ideas } = useAppContext();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -146,10 +146,8 @@ const ChatView: React.FC<ChatProps> = ({ conversation, otherUserId, onBack }) =>
             const isMine = msg.senderId === currentUser?.id;
             const sharedPostMatch = msg.content.match(/^\[SHARED_POST:(.+)\]$/);
             const sharedIdeaId = sharedPostMatch ? sharedPostMatch[1] : null;
-            const sharedIdea = sharedIdeaId ? (useAppContext().ideas.find(i => i.id === sharedIdeaId)) : null;
-            
-            // Solo mostramos el estado en el ÚLTIMO mensaje enviado por mí
-            const isLastMessage = index === messages.length - 1;
+            const sharedIdea = sharedIdeaId ? ideas.find(i => i.id === sharedIdeaId) : null;
+            const isLastMine = isMine && !messages.slice(index + 1).some(m => m.senderId === currentUser?.id);
 
             return (
               <motion.div
@@ -157,47 +155,52 @@ const ChatView: React.FC<ChatProps> = ({ conversation, otherUserId, onBack }) =>
                 initial={{ opacity: 0, y: 8, scale: 0.96 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.18 }}
-                className={`flex flex-col w-full ${isMine ? 'items-end' : 'items-start'}`}
               >
-                <div className={`max-w-[85%] px-4 py-2.5 rounded-[20px] text-[15px] leading-snug shadow-sm bg-white border ${
-                  isMine
-                    ? 'text-gray-900 border-gray-100 rounded-br-md shadow-sm'
-                    : 'text-gray-900 border-primary rounded-bl-md shadow-sm'
-                }`}>
-                  {sharedIdea ? (
-                    <div 
-                      onClick={() => window.dispatchEvent(new CustomEvent('open-post', { detail: sharedIdea.id }))}
-                      className="cursor-pointer bg-gray-50 rounded-xl overflow-hidden border border-gray-100 p-2 space-y-2 hover:bg-gray-100 transition-colors"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Avatar className="w-5 h-5 rounded-full">
-                          <AvatarImage src={sharedIdea.author.avatar} />
-                          <AvatarFallback>{sharedIdea.author.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <span className="font-bold text-[12px] text-gray-900">@{sharedIdea.author.handle}</span>
-                      </div>
-                      <p className="text-[13px] line-clamp-3 leading-tight text-gray-700">{sharedIdea.content}</p>
-                      {sharedIdea.mediaUrl && (
-                        <div className="rounded-lg overflow-hidden h-24 bg-gray-200">
-                           <img src={sharedIdea.mediaUrl} className="w-full h-full object-cover" alt="" />
+                {/* Row that pushes bubble to the correct side */}
+                <div className={`flex ${isMine ? 'justify-end' : 'justify-start'} w-full`}>
+                  <div className={`max-w-[80%] px-4 py-2.5 rounded-[20px] text-[15px] leading-snug bg-white border shadow-sm ${
+                    isMine
+                      ? 'border-gray-200 rounded-br-md'
+                      : 'border-primary rounded-bl-md'
+                  }`}>
+                    {sharedIdea ? (
+                      <div
+                        onClick={() => window.dispatchEvent(new CustomEvent('open-post', { detail: sharedIdea.id }))}
+                        className="cursor-pointer bg-gray-50 rounded-xl border border-gray-100 p-2.5 space-y-2 hover:bg-gray-100 transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Avatar className="w-5 h-5 rounded-full">
+                            <AvatarImage src={sharedIdea.author.avatar} />
+                            <AvatarFallback>{sharedIdea.author.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <span className="font-bold text-[12px] text-gray-900">@{sharedIdea.author.handle}</span>
                         </div>
-                      )}
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-primary">Ver Idea ➔</div>
-                    </div>
-                  ) : sharedIdeaId ? (
-                    <div className="text-xs italic text-gray-400">Idea no disponible</div>
-                  ) : (
-                    <p>{msg.content}</p>
-                  )}
+                        <p className="text-[13px] line-clamp-3 leading-tight text-gray-700">{sharedIdea.content}</p>
+                        {sharedIdea.mediaUrl && (
+                          <div className="rounded-lg overflow-hidden h-24 bg-gray-200">
+                            <img src={sharedIdea.mediaUrl} className="w-full h-full object-cover" alt="" />
+                          </div>
+                        )}
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-primary">Ver Idea ➔</div>
+                      </div>
+                    ) : sharedIdeaId ? (
+                      <div className="text-xs italic text-gray-400">Idea no disponible</div>
+                    ) : (
+                      <p className="text-gray-900">{msg.content}</p>
+                    )}
+                  </div>
                 </div>
-                
-                <div className={`flex items-center gap-1.5 mt-1 px-1 ${isMine ? 'flex-row-reverse' : ''}`}>
+
+                {/* Timestamp + Read status below bubble */}
+                <div className={`flex items-center gap-1.5 mt-1 px-1 ${isMine ? 'justify-end' : 'justify-start'}`}>
                   <span className="text-[10px] text-gray-400">
                     {formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true, locale: es })}
                   </span>
-                  {isMine && isLastMessage && (
-                    <span className={`text-[10px] font-bold ${msg.read ? 'text-primary' : 'text-gray-300'}`}>
-                      {msg.read ? 'Leído' : 'Enviado'}
+                  {isLastMine && (
+                    <span className={`text-[10px] font-semibold ${
+                      msg.read ? 'text-primary' : 'text-gray-300'
+                    }`}>
+                      {msg.read ? '• Leído' : '• Enviado'}
                     </span>
                   )}
                 </div>
