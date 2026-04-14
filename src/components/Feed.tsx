@@ -44,8 +44,8 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
         >
           <Menu className="w-5 h-5 text-gray-700" />
         </button>
-        <div className="flex items-center gap-2">
-          <span className="text-xl font-black text-gray-900 tracking-tight">ideo</span>
+        <div className="flex items-center gap-1">
+          <span className="text-xl font-black text-primary tracking-tight">ideo.</span>
         </div>
         <button 
           className="p-2 -mr-2 hover:bg-gray-50 rounded-full transition-colors relative"
