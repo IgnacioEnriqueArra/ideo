@@ -45,12 +45,6 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
           <Menu className="w-5 h-5 text-gray-700" />
         </button>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-sm shadow-primary/30">
-            <svg width="10" height="15" viewBox="0 0 36 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="18" cy="6" r="6" fill="white"/>
-              <rect x="10" y="18" width="16" height="34" rx="8" fill="white"/>
-            </svg>
-          </div>
           <span className="text-xl font-black text-gray-900 tracking-tight">ideo</span>
         </div>
         <button 
