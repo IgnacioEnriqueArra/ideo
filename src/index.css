@@ -195,11 +195,19 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
     }
   body {
     @apply bg-background text-foreground;
+    overscroll-behavior-y: none;
+    touch-action: pan-x pan-y;
     }
   html {
     @apply font-sans;
     }
+  input, textarea, select, [contenteditable="true"], .selectable {
+    user-select: text !important;
+    font-size: 16px !important; /* Evita zoom automático en iOS */
+  }
 }
