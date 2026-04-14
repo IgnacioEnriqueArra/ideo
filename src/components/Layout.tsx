@@ -13,8 +13,8 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, onCompose }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { currentUser, notifications, logout } = useAppContext();
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const { currentUser, notifications, logout, unreadMessagesCount } = useAppContext();
+  const unreadNotificationsCount = notifications.filter(n => !n.read).length;
 
   useEffect(() => {
     const handleOpenMenu = () => setIsMenuOpen(true);
@@ -54,12 +54,17 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
         </button>
         <button onClick={() => setActiveTab('notifications')} className="p-2 flex-1 flex justify-center relative">
           <Bell className={`w-6 h-6 ${activeTab === 'notifications' ? 'text-primary fill-primary/10' : 'text-gray-400 dark:text-gray-500'}`} />
-          {unreadCount > 0 && (
+          {unreadNotificationsCount > 0 && (
             <span className="absolute top-1.5 right-1/2 -mr-3 w-2 h-2 bg-red-500 rounded-full" />
           )}
         </button>
-        <button onClick={() => setActiveTab('messages')} className="p-2 flex-1 flex justify-center">
+        <button onClick={() => setActiveTab('messages')} className="p-2 flex-1 flex justify-center relative">
           <MessageSquare className={`w-6 h-6 ${activeTab === 'messages' ? 'text-primary fill-primary/10' : 'text-gray-400 dark:text-gray-500'}`} />
+          {unreadMessagesCount > 0 && (
+            <span className="absolute top-1.5 right-1/2 -mr-3 bg-red-500 text-white text-[10px] font-bold min-w-4 h-4 rounded-full flex items-center justify-center px-1 border-2 border-white dark:border-gray-950">
+              {unreadMessagesCount}
+            </span>
+          )}
         </button>
         <button onClick={() => setActiveTab('profile')} className="p-2 flex-1 flex justify-center">
           <User className={`w-6 h-6 ${activeTab === 'profile' ? 'text-primary fill-primary/10' : 'text-gray-400 dark:text-gray-500'}`} />

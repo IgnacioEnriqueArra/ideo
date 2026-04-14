@@ -314,25 +314,37 @@ const NewMessageModal: React.FC<NewMessageModalProps> = ({ onSelectUser, onClose
 //  MAIN MESSAGES LIST
 // ──────────────────────────────────────────────────
 export const Messages: React.FC = () => {
-  const { currentUser, users } = useAppContext();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversation, setActiveConversation] = useState<{ conv: Conversation; otherId: string } | null>(null);
   const [showNewMessage, setShowNewMessage] = useState(false);
+  const [unreadConvs, setUnreadConvs] = useState<string[]>([]);
 
   useEffect(() => {
     if (!currentUser) return;
     const fetchConversations = async () => {
-      const { data } = await supabase
+      const { data: convs } = await supabase
         .from('conversations')
         .select('*')
         .contains('participantIds', [currentUser.id])
         .order('lastMessageAt', { ascending: false });
-      if (data) setConversations(data);
+      
+      if (convs) {
+        setConversations(convs);
+        // Check which ones are unread
+        const { data: unreadMsgs } = await supabase
+          .from('messages')
+          .select('conversationId')
+          .eq('read', false)
+          .neq('senderId', currentUser.id);
+        
+        const unreadIds = Array.from(new Set(unreadMsgs?.map(m => m.conversationId) || []));
+        setUnreadConvs(unreadIds);
+      }
     };
     fetchConversations();
 
-    // Realtime for conversations list
-    const channel = supabase
+    // Realtime for conversations list and unread status
+    const convChannel = supabase
       .channel(`convs-${currentUser.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, payload => {
         const conv = payload.new as Conversation;
@@ -346,8 +358,37 @@ export const Messages: React.FC = () => {
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    const msgChannel = supabase
+      .channel(`unread-tracker-${currentUser.id}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async (payload) => {
+         if (payload.new.senderId !== currentUser.id) {
+            const { data } = await supabase.from('conversations').select('participantIds').eq('id', payload.new.conversationId).single();
+            if (data?.participantIds.includes(currentUser.id)) {
+               setUnreadConvs(prev => Array.from(new Set([...prev, payload.new.conversationId])));
+            }
+         }
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, (payload) => {
+         if (payload.new.read && !payload.old.read && payload.new.senderId !== currentUser.id) {
+            // Re-fetch or manually check if still unread messages in this conversation
+            // For simplicity, just remove from unread if current user marks it
+            setUnreadConvs(prev => prev.filter(id => id !== payload.new.conversationId));
+         }
+      })
+      .subscribe();
+
+    return () => { 
+      supabase.removeChannel(convChannel); 
+      supabase.removeChannel(msgChannel);
+    };
   }, [currentUser?.id]);
+
+  useEffect(() => {
+    // If we open a conversation, remove it from unreadConvs
+    if (activeConversation) {
+      setUnreadConvs(prev => prev.filter(id => id !== activeConversation.conv.id));
+    }
+  }, [activeConversation]);
 
   const openOrCreateConversation = async (otherUserId: string) => {
     if (!currentUser) return;
@@ -431,14 +472,23 @@ export const Messages: React.FC = () => {
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-gray-900 text-[15px] truncate">{other?.name || 'Usuario'}</span>
-                    {conv.lastMessageAt && (
-                      <span className="text-gray-400 text-xs shrink-0 ml-2">
-                        {formatDistanceToNow(new Date(conv.lastMessageAt), { addSuffix: false, locale: es })}
-                      </span>
-                    )}
+                    <span className={`font-bold text-gray-900 text-[15px] truncate ${unreadConvs.includes(conv.id) ? 'font-black' : 'font-bold'}`}>
+                      {other?.name || 'Usuario'}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      {conv.lastMessageAt && (
+                        <span className={`text-xs shrink-0 ${unreadConvs.includes(conv.id) ? 'text-primary font-bold' : 'text-gray-400'}`}>
+                          {formatDistanceToNow(new Date(conv.lastMessageAt), { addSuffix: false, locale: es })}
+                        </span>
+                      )}
+                      {unreadConvs.includes(conv.id) && (
+                        <div className="w-2.5 h-2.5 bg-primary rounded-full shadow-sm" />
+                      )}
+                    </div>
                   </div>
-                  <p className="text-gray-500 text-sm truncate mt-0.5">{conv.lastMessage || 'Conversación iniciada'}</p>
+                  <p className={`text-sm truncate mt-0.5 ${unreadConvs.includes(conv.id) ? 'text-gray-900 font-bold' : 'text-gray-500 font-normal'}`}>
+                    {conv.lastMessage || 'Conversación iniciada'}
+                  </p>
                 </div>
                 <button 
                   onClick={(e) => deleteConversation(e, conv.id)}

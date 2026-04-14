@@ -35,6 +35,8 @@ type AppContextType = {
   signup?: (email: string, password: string, name: string, handle: string) => Promise<void>;
   loginRedirect: () => void;
   isAuthReady: boolean;
+  unreadMessagesCount: number;
+  playNotificationSound: () => void;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -48,6 +50,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [bookmarks, setBookmarks] = useState<string[]>([]);
   const [userLikes, setUserLikes] = useState<string[]>([]);
   const [rawNotifications, setRawNotifications] = useState<Notification[]>([]);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const [isAuthReady, setIsAuthReady] = useState(false);
 
   useEffect(() => {
@@ -129,30 +132,48 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const fetchUserSpecific = async () => {
-      const [bRes, lRes, nRes] = await Promise.all([
+      const [bRes, lRes, nRes, mRes] = await Promise.all([
         supabase.from('bookmarks').select('*').eq('userId', currentUser.id),
         supabase.from('likes').select('*').eq('userId', currentUser.id),
-        supabase.from('notifications').select('*').eq('recipientId', currentUser.id).order('createdAt', { ascending: false })
+        supabase.from('notifications').select('*').eq('recipientId', currentUser.id).order('createdAt', { ascending: false }),
+        supabase.from('messages').select('id').eq('read', false).neq('senderId', currentUser.id)
       ]);
       if (bRes.data) setBookmarks(bRes.data.map((b: any) => b.ideaId));
       if (lRes.data) setUserLikes(lRes.data.map((l: any) => l.targetId));
       if (nRes.data) setRawNotifications(nRes.data);
+      if (mRes.data) setUnreadMessagesCount(mRes.data.length);
     };
     fetchUserSpecific();
 
     const channel = supabase.channel(`user-${currentUser.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'bookmarks', filter: `userId=eq.${currentUser.id}` }, payload => {
          if (payload.eventType === 'INSERT') setBookmarks(prev => { const x = prev.includes((payload.new as any).ideaId); return x ? prev : [...prev, (payload.new as any).ideaId] });
-         if (payload.eventType === 'DELETE') fetchUserSpecific(); // IDs missing in old
+         if (payload.eventType === 'DELETE') fetchUserSpecific(); 
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'likes', filter: `userId=eq.${currentUser.id}` }, payload => {
          if (payload.eventType === 'INSERT') setUserLikes(prev => { const x = prev.includes((payload.new as any).targetId); return x ? prev : [...prev, (payload.new as any).targetId] });
          if (payload.eventType === 'DELETE') fetchUserSpecific();
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `recipientId=eq.${currentUser.id}` }, payload => {
-         if (payload.eventType === 'INSERT') setRawNotifications(prev => { const x = prev.find(n => n.id === payload.new.id); return x ? prev : [payload.new as Notification, ...prev] });
-         if (payload.eventType === 'UPDATE') setRawNotifications(prev => prev.map(n => n.id === payload.new.id ? payload.new as Notification : n));
-         if (payload.eventType === 'DELETE') setRawNotifications(prev => prev.filter(n => n.id !== payload.old.id));
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `recipientId=eq.${currentUser.id}` }, payload => {
+         setRawNotifications(prev => [payload.new as Notification, ...prev]);
+         playNotificationSound();
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `recipientId=eq.${currentUser.id}` }, payload => {
+         setRawNotifications(prev => prev.map(n => n.id === payload.new.id ? payload.new as Notification : n));
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async (payload) => {
+         // Verificamos si el mensaje es para una conversación donde participo
+         const { data: conv } = await supabase.from('conversations').select('participantIds').eq('id', payload.new.conversationId).single();
+         if (conv?.participantIds.includes(currentUser.id) && payload.new.senderId !== currentUser.id) {
+            setUnreadMessagesCount(prev => prev + 1);
+            playNotificationSound();
+         }
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, (payload) => {
+         // Si se marca como leido, disminuimos el contador
+         if (payload.new.read && !payload.old.read && payload.new.senderId !== currentUser.id) {
+            setUnreadMessagesCount(prev => Math.max(0, prev - 1));
+         }
       })
       .subscribe();
 
@@ -175,6 +196,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
     return { id: rawIdea.id, author, content: rawIdea.content, createdAt: rawIdea.createdAt, likes: rawIdea.likes || 0, tags: rawIdea.tags || [], branches: ideaBranches, mediaUrl: rawIdea.mediaUrl };
   });
+
+  const playNotificationSound = () => {
+    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+    audio.volume = 0.5;
+    audio.play().catch(e => console.log('Bloqueo de audio por navegador', e));
+  };
 
   const notifications = rawNotifications.map(n => {
     const actor = users.find(u => u.id === n.actorId) || { id: n.actorId, name: 'Usuario', handle: 'usuario', avatar: '', followers: [], following: [] };
@@ -439,7 +466,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   return (
-    <AppContext.Provider value={{ currentUser, users, ideas, bookmarks, userLikes, notifications, addIdea, addBranch, addFeedback, likeIdea, likeBranch, toggleBookmark, updateProfile, markNotificationsRead, toggleFollow, deleteIdea, deleteAccount, logout, login, signup, loginRedirect, isAuthReady }}>
+    <AppContext.Provider value={{ currentUser, users, ideas, bookmarks, userLikes, notifications, addIdea, addBranch, addFeedback, likeIdea, likeBranch, toggleBookmark, updateProfile, markNotificationsRead, toggleFollow, deleteIdea, deleteAccount, logout, login, signup, loginRedirect, isAuthReady, unreadMessagesCount, playNotificationSound }}>
       {children}
     </AppContext.Provider>
   );
