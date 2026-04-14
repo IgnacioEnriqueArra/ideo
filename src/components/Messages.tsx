@@ -142,11 +142,14 @@ const ChatView: React.FC<ChatProps> = ({ conversation, otherUserId, onBack }) =>
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
         <AnimatePresence initial={false}>
-          {messages.map((msg) => {
+          {messages.map((msg, index) => {
             const isMine = msg.senderId === currentUser?.id;
             const sharedPostMatch = msg.content.match(/^\[SHARED_POST:(.+)\]$/);
             const sharedIdeaId = sharedPostMatch ? sharedPostMatch[1] : null;
             const sharedIdea = sharedIdeaId ? (useAppContext().ideas.find(i => i.id === sharedIdeaId)) : null;
+            
+            // Solo mostramos el estado en el ÚLTIMO mensaje enviado por mí
+            const isLastMessage = index === messages.length - 1;
 
             return (
               <motion.div
@@ -154,12 +157,12 @@ const ChatView: React.FC<ChatProps> = ({ conversation, otherUserId, onBack }) =>
                 initial={{ opacity: 0, y: 8, scale: 0.96 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.18 }}
-                className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}
+                className={`flex flex-col w-full ${isMine ? 'items-end' : 'items-start'}`}
               >
                 <div className={`max-w-[85%] px-4 py-2.5 rounded-[20px] text-[15px] leading-snug shadow-sm bg-white border ${
                   isMine
-                    ? 'text-gray-900 border-gray-100 rounded-br-md'
-                    : 'text-gray-900 border-primary rounded-bl-md'
+                    ? 'text-gray-900 border-gray-100 rounded-br-md shadow-sm'
+                    : 'text-gray-900 border-primary rounded-bl-md shadow-sm'
                 }`}>
                   {sharedIdea ? (
                     <div 
@@ -192,7 +195,7 @@ const ChatView: React.FC<ChatProps> = ({ conversation, otherUserId, onBack }) =>
                   <span className="text-[10px] text-gray-400">
                     {formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true, locale: es })}
                   </span>
-                  {isMine && (
+                  {isMine && isLastMessage && (
                     <span className={`text-[10px] font-bold ${msg.read ? 'text-primary' : 'text-gray-300'}`}>
                       {msg.read ? 'Leído' : 'Enviado'}
                     </span>
