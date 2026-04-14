@@ -27,18 +27,30 @@ function AppContent() {
 
   if (isDesktop) {
     return (
-      <div className="h-[100dvh] w-full bg-slate-50 flex items-center justify-center p-6 text-center">
+      <div className="h-[100dvh] w-full bg-white flex flex-col items-center justify-center p-6 text-center">
         <div className="max-w-sm">
-          <div className="w-20 h-20 bg-primary rounded-3xl flex items-center justify-center mb-8 mx-auto shadow-xl shadow-primary/20">
-            <span className="text-white font-bold text-4xl">i.</span>
+          <div className="w-24 h-24 bg-primary rounded-[2rem] flex items-center justify-center mb-8 mx-auto shadow-2xl shadow-primary/30 transform transition-transform hover:scale-105 duration-500">
+            <span className="text-white font-black text-5xl italic tracking-tighter" style={{ fontFamily: 'system-ui' }}>i</span>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Ideo está en camino.</h1>
-          <p className="text-gray-600 text-lg leading-relaxed mb-8">
-            Actualmente solo tenemos disponible la <span className="text-primary font-bold">versión móvil</span>. La experiencia para PC llegará próximamente.
+          <h1 className="text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">Ideo está en camino.</h1>
+          <p className="text-gray-500 text-lg leading-relaxed mb-10">
+            Nuestra experiencia completa para escritorio está siendo construida. Por ahora, disfruta de la <span className="text-primary font-bold">versión móvil</span>.
           </p>
-          <div className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm inline-block">
-            <p className="text-sm text-gray-400 font-medium uppercase tracking-wider mb-2">Escanea o abre en tu móvil</p>
-            <div className="text-primary font-mono font-bold">ideo-social.app</div>
+          
+          <div className="flex flex-col items-center gap-4 p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 shadow-inner">
+            <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+              <img 
+                src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://ideo-orcin.vercel.app" 
+                alt="QR Code" 
+                className="w-40 h-40"
+              />
+            </div>
+            <div className="mt-2">
+              <p className="text-[11px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-3">Escanea para abrir en tu móvil</p>
+              <div className="px-4 py-2 bg-white rounded-full border border-slate-200 text-primary font-mono font-bold text-sm shadow-sm inline-block">
+                ideo-orcin.vercel.app
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -49,7 +61,7 @@ function AppContent() {
     return (
       <div className="h-[100dvh] w-full bg-white dark:bg-gray-950 max-w-md mx-auto border-x border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center p-6 transition-colors">
         <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-6 animate-pulse">
-          <span className="text-white font-bold text-3xl">i.</span>
+          <span className="text-white font-black text-3xl italic tracking-tighter" style={{ fontFamily: 'system-ui' }}>i</span>
         </div>
       </div>
     );
@@ -143,10 +155,10 @@ function AuthScreen() {
 
   return (
       <div className="h-[100dvh] w-full bg-white dark:bg-gray-950 max-w-md mx-auto border-x border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center p-6 transition-colors">
-        <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-6">
-          <span className="text-white font-bold text-3xl">i.</span>
+        <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-primary/20">
+          <span className="text-white font-black text-3xl italic tracking-tighter" style={{ fontFamily: 'system-ui' }}>i</span>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center">Welcome to Ideo.</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center">Bienvenido a Ideo.</h1>
         <p className="text-gray-500 text-center mb-8">Escribe, comparte y construye ideas.</p>
         
         <form onSubmit={handleSubmit} className="w-full space-y-4">
