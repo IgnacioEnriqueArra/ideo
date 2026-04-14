@@ -382,6 +382,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await supabase.from('users').update({ name, handle, bio, avatar }).eq('id', currentUser.id);
   };
 
+  const markNotificationsRead = async () => {
+    if (!currentUser) return;
+    setRawNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    const unreadIds = rawNotifications.filter(n => !n.read).map(n => n.id);
+    if (unreadIds.length > 0) {
+      await supabase.from('notifications').update({ read: true }).in('id', unreadIds);
+    }
+  };
+
   const clearAllNotifications = async () => {
     if (!currentUser) return;
     setRawNotifications([]);
