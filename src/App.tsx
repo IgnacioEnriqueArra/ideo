@@ -17,6 +17,33 @@ function AppContent() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('home');
   const [isComposeOpen, setIsComposeOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth > 640);
+
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth > 640);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  if (isDesktop) {
+    return (
+      <div className="h-[100dvh] w-full bg-slate-50 flex items-center justify-center p-6 text-center">
+        <div className="max-w-sm">
+          <div className="w-20 h-20 bg-primary rounded-3xl flex items-center justify-center mb-8 mx-auto shadow-xl shadow-primary/20">
+            <span className="text-white font-bold text-4xl">i.</span>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Ideo está en camino.</h1>
+          <p className="text-gray-600 text-lg leading-relaxed mb-8">
+            Actualmente solo tenemos disponible la <span className="text-primary font-bold">versión móvil</span>. La experiencia para PC llegará próximamente.
+          </p>
+          <div className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm inline-block">
+            <p className="text-sm text-gray-400 font-medium uppercase tracking-wider mb-2">Escanea o abre en tu móvil</p>
+            <div className="text-primary font-mono font-bold">ideo-social.app</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthReady) {
     return (
