@@ -1,6 +1,6 @@
 import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { MessageSquare, Heart, GitFork, Share, Bookmark, MoreHorizontal } from 'lucide-react';
+import { MessageSquare, Heart, GitFork, Share, Bookmark, MoreHorizontal, BadgeCheck } from 'lucide-react';
 import { Branch } from '../types';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { useAppContext } from '../AppContext';
@@ -43,18 +43,19 @@ export const BranchCard: React.FC<BranchCardProps> = ({ branch, onClick, onUserC
           
           <div className="flex items-start justify-between">
             <div className="flex flex-col">
-              <div className="flex items-center gap-1.5 text-[15px]">
-                <span 
-                  className="font-bold text-gray-900 truncate cursor-pointer hover:underline"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (onUserClick) onUserClick(branch.author.id);
-                  }}
-                >
-                  {branch.author.name}
-                </span>
-                <span className="text-gray-500 truncate">@{branch.author.handle}</span>
-              </div>
+                <div className="flex items-center gap-1.5 text-[15px]">
+                  <span 
+                    className="font-bold text-gray-900 truncate cursor-pointer hover:underline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onUserClick) onUserClick(branch.author.id);
+                    }}
+                  >
+                    {branch.author.name}
+                  </span>
+                  {branch.author.verified && <BadgeCheck className="w-4 h-4 text-blue-500 fill-blue-500/10 shrink-0" />}
+                  <span className="text-gray-500 truncate">@{branch.author.handle}</span>
+                </div>
               <span className="text-gray-500 text-[13px] mt-0.5">
                 {formatDistanceToNow(new Date(branch.createdAt), { addSuffix: true }).replace('about ', '')}
               </span>

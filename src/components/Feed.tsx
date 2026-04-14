@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, Bell, Search } from 'lucide-react';
+import { Menu, Bell, Search, BadgeCheck } from 'lucide-react';
 import { useAppContext } from '../AppContext';
 import { IdeaCard } from './IdeaCard';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -129,7 +129,10 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
                 >
                   <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-lg bg-white" />
                   <div>
-                    <div className="font-bold text-gray-900">{user.name}</div>
+                    <div className="font-bold text-gray-900 flex items-center gap-1">
+                      {user.name}
+                      {user.verified && <BadgeCheck className="w-3.5 h-3.5 text-blue-500 fill-blue-500/10" />}
+                    </div>
                     <div className="text-sm text-gray-500">@{user.handle}</div>
                   </div>
                 </div>

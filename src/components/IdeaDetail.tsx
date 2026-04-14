@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { ArrowLeft, GitFork, MessageSquare, Heart, Bookmark, Share, MoreHorizontal } from 'lucide-react';
+import { ArrowLeft, GitFork, MessageSquare, Heart, Bookmark, Share, MoreHorizontal, BadgeCheck } from 'lucide-react';
 import { useAppContext } from '../AppContext';
 import { BranchCard } from './BranchCard';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -61,15 +60,16 @@ export const IdeaDetail: React.FC<IdeaDetailProps> = ({ ideaId, onBack, onUserCl
               <AvatarImage src={idea.author.avatar} />
               <AvatarFallback>{idea.author.name.charAt(0)}</AvatarFallback>
             </Avatar>
-            <div>
-              <div 
-                className="font-bold text-gray-900 cursor-pointer hover:underline"
-                onClick={() => onUserClick && onUserClick(idea.author.id)}
-              >
-                {idea.author.name}
+              <div className="flex items-center gap-1.5">
+                <div 
+                  className="font-bold text-gray-900 cursor-pointer hover:underline"
+                  onClick={() => onUserClick && onUserClick(idea.author.id)}
+                >
+                  {idea.author.name}
+                </div>
+                {idea.author.verified && <BadgeCheck className="w-4 h-4 text-blue-500 fill-blue-500/10 shrink-0" />}
               </div>
               <div className="text-gray-500 text-[15px]">@{idea.author.handle}</div>
-            </div>
           </div>
           <div className="relative">
             <button 

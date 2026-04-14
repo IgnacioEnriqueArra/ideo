@@ -133,7 +133,7 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
             <Shield className="w-6 h-6 text-yellow-400" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-gray-900 uppercase tracking-tighter">ideo.admin</h1>
+            <h1 className="text-xl font-black text-gray-900 uppercase tracking-tighter">Agent Panel</h1>
             <p className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">System Terminal</p>
           </div>
         </div>
@@ -156,7 +156,7 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
             <p className="text-[10px] text-gray-400 leading-tight">Acceso autorizado. Todas las acciones son registradas.</p>
           </div>
           <button onClick={onBack} className="w-full py-4 text-xs font-black text-gray-400 hover:text-red-500 transition-colors uppercase tracking-widest">
-            Cerrar Sesión Admin
+            Cerrar Sesión
           </button>
         </div>
       </div>
@@ -166,11 +166,6 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
         <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-10 shrink-0">
           <div className="flex items-center gap-4">
              <h2 className="text-[20px] font-black text-gray-900 capitalize">{section === 'overview' ? 'Vista General' : section}</h2>
-             <div className="h-6 w-[1px] bg-gray-100" />
-             <div className="flex items-center gap-2 bg-gray-50 rounded-full px-4 py-2 border border-blue-50">
-               <Filter className="w-3.5 h-3.5 text-blue-500" />
-               <span className="text-xs font-bold text-blue-600 uppercase">Live Data</span>
-             </div>
           </div>
 
           <div className="flex items-center gap-6">

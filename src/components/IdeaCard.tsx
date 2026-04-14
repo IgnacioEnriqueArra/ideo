@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { MessageSquare, GitFork, Heart, Share, Bookmark, MoreHorizontal } from 'lucide-react';
+import { MessageSquare, GitFork, Heart, Share, Bookmark, MoreHorizontal, BadgeCheck } from 'lucide-react';
 import { Idea } from '../types';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { useAppContext } from '../AppContext';
@@ -52,6 +52,7 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = fa
                 >
                   {idea.author.name}
                 </span>
+                {idea.author.verified && <BadgeCheck className="w-4 h-4 text-blue-500 fill-blue-500/10" />}
                 <span className="text-gray-500 truncate">@{idea.author.handle}</span>
               </div>
               <span className="text-gray-500 text-[13px] mt-0.5">

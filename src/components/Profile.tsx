@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Search, MoreHorizontal } from 'lucide-react';
+import { ArrowLeft, Search, MoreHorizontal, BadgeCheck } from 'lucide-react';
 import { useAppContext } from '../AppContext';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { IdeaCard } from './IdeaCard';
@@ -40,7 +39,10 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
             <ArrowLeft className="w-5 h-5 text-gray-900" />
           </button>
           <div>
-            <h1 className="text-xl font-bold text-gray-900 leading-tight">{profileUser.name}</h1>
+            <div className="flex items-center gap-1">
+              <h1 className="text-xl font-bold text-gray-900 leading-tight truncate">{profileUser.name}</h1>
+              {profileUser.verified && <BadgeCheck className="w-4 h-4 text-blue-500 fill-blue-500/10 shrink-0" />}
+            </div>
             <div className="text-xs text-gray-500">{userIdeas.length} posts</div>
           </div>
         </div>
@@ -88,7 +90,10 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
           </div>
 
           <div className="mt-3">
-            <h2 className="text-xl font-bold text-gray-900">{profileUser.name}</h2>
+            <div className="flex items-center gap-1.5">
+              <h2 className="text-xl font-bold text-gray-900">{profileUser.name}</h2>
+              {profileUser.verified && <BadgeCheck className="w-5 h-5 text-blue-500 fill-blue-500/10 shrink-0" />}
+            </div>
             <div className="text-gray-500 text-[15px]">@{profileUser.handle}</div>
           </div>
 
