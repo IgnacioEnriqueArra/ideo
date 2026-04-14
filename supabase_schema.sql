@@ -9,6 +9,7 @@ CREATE TABLE public.users (
   bio TEXT,
   followers UUID[] DEFAULT '{}',
   following UUID[] DEFAULT '{}',
+  verified BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -19,6 +20,7 @@ CREATE TABLE public.ideas (
   content TEXT NOT NULL,
   tags TEXT[] DEFAULT '{}',
   likes INTEGER DEFAULT 0,
+  "mediaUrl" TEXT,
   "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -67,6 +69,24 @@ CREATE TABLE public.notifications (
   "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- CONVERSATIONS TABLE
+CREATE TABLE public.conversations (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  "participantIds" UUID[] DEFAULT '{}',
+  "lastMessage" TEXT,
+  "lastMessageAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- MESSAGES TABLE
+CREATE TABLE public.messages (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  "conversationId" UUID REFERENCES public.conversations(id) ON DELETE CASCADE,
+  "senderId" UUID REFERENCES public.users(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  read BOOLEAN DEFAULT false,
+  "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Enable RLS (Optional, but recommended. Here we make it fully permissive to match Firebase free-flow prototype style)
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ideas ENABLE ROW LEVEL SECURITY;
@@ -75,6 +95,8 @@ ALTER TABLE public.feedbacks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.likes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.bookmarks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.conversations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Allow public read/write" ON public.users FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow public read/write" ON public.ideas FOR ALL USING (true) WITH CHECK (true);
@@ -83,3 +105,5 @@ CREATE POLICY "Allow public read/write" ON public.feedbacks FOR ALL USING (true)
 CREATE POLICY "Allow public read/write" ON public.likes FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow public read/write" ON public.bookmarks FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow public read/write" ON public.notifications FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow public read/write" ON public.conversations FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow public read/write" ON public.messages FOR ALL USING (true) WITH CHECK (true);

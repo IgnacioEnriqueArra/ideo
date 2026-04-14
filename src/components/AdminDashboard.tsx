@@ -54,7 +54,6 @@ const SidebarItem = ({ icon: Icon, label, active, onClick }: { icon: any; label:
   >
     <Icon className={`w-5 h-5 ${active ? 'text-white' : 'text-gray-400'}`} />
     <span className="font-bold text-[15px]">{label}</span>
-    {active && <motion.div layoutId="active" className="ml-auto w-1.5 h-1.5 rounded-full bg-white" />}
   </button>
 );
 
@@ -90,8 +89,9 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
 
   const getUser = (id: string) => users.find(u => u.id === id);
   const getUserName = (id: string | undefined) => {
-    if (!id) return 'sistema';
-    return getUser(id)?.handle ?? id.slice(0, 8);
+    if (!id) return 'anónimo';
+    const u = getUser(id);
+    return u?.handle ?? id.slice(0, 8);
   };
 
   const filteredData = {
@@ -193,7 +193,7 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
                                   </div>
                                   <p className="text-sm text-gray-600 truncate mt-0.5">{idea.content}</p>
                                </div>
-                               <div className="shrink-0 flex items-center gap-4 px-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                               <div className="shrink-0 flex items-center gap-4 px-6 transition-opacity">
                                   <span className="text-xs font-bold text-gray-400">❤️ {idea.likes}</span>
                                   <button onClick={() => setConfirmDelete({ type: 'idea', id: idea.id })} className="p-2 text-red-400 hover:text-red-500 bg-red-50 rounded-xl">
                                     <Trash2 className="w-4 h-4" />
@@ -259,7 +259,7 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
                             </div>
                           </td>
                           <td className="px-8 py-4">
-                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex items-center justify-end gap-2 transition-opacity">
                               <button onClick={() => toggleVerified(user.id)} className="p-2 hover:bg-blue-50 text-gray-400 hover:text-blue-500 rounded-xl transition-all" title="Alternar Verificación">
                                 <ShieldCheck className="w-5 h-5" />
                               </button>
@@ -291,7 +291,7 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
                           </div>
                           <div className="flex items-center gap-2">
                             {item.likes !== undefined && <span className="text-[10px] font-black text-gray-400">❤️ {item.likes}</span>}
-                            <button onClick={() => setConfirmDelete({ type: section.slice(0, -1), id: item.id })} className="p-2 text-gray-300 hover:text-red-500 bg-gray-50 hover:bg-red-50 rounded-xl transition-all">
+                            <button onClick={() => setConfirmDelete({ type: section.slice(0, -1), id: item.id })} className="p-2 text-gray-500 hover:text-red-500 bg-gray-50 hover:bg-red-50 rounded-xl transition-all">
                                <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
