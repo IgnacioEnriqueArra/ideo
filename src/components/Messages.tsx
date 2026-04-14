@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Send, Search, Edit } from 'lucide-react';
+import { ArrowLeft, Send, Search, Edit, Trash2 } from 'lucide-react';
 import { useAppContext } from '../AppContext';
 import { supabase } from '../supabase';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -322,6 +322,14 @@ export const Messages: React.FC = () => {
     setShowNewMessage(false);
   };
 
+  const deleteConversation = async (e: React.MouseEvent, conversationId: string) => {
+    e.stopPropagation();
+    if (!confirm('¿Estás seguro de que quieres eliminar esta conversación?')) return;
+    
+    setConversations(prev => prev.filter(c => c.id !== conversationId));
+    await supabase.from('conversations').delete().eq('id', conversationId);
+  };
+
   return (
     <div className="relative h-full overflow-hidden">
       {/* Conv List */}
@@ -362,7 +370,7 @@ export const Messages: React.FC = () => {
               <button
                 key={conv.id}
                 onClick={() => setActiveConversation({ conv, otherId })}
-                className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors text-left"
+                className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors text-left group"
               >
                 <Avatar className="w-12 h-12 rounded-full shrink-0">
                   <AvatarImage src={other?.avatar} />
@@ -379,6 +387,12 @@ export const Messages: React.FC = () => {
                   </div>
                   <p className="text-gray-500 text-sm truncate mt-0.5">{conv.lastMessage || 'Conversación iniciada'}</p>
                 </div>
+                <button 
+                  onClick={(e) => deleteConversation(e, conv.id)}
+                  className="p-2 text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </button>
             );
           })}

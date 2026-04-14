@@ -5,6 +5,8 @@ import { Idea } from '../types';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { useAppContext } from '../AppContext';
 
+import { ShareModal } from './ShareModal';
+
 interface IdeaCardProps {
   idea: Idea;
   onClick?: () => void;
@@ -17,6 +19,7 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = fa
   const isBookmarked = bookmarks.includes(idea.id);
   const isLiked = userLikes.includes(idea.id);
   const [showMenu, setShowMenu] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   return (
     <div 
@@ -24,6 +27,7 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = fa
       onClick={onClick}
     >
       <div className="flex gap-3">
+        {/* ... (Previous Avatar and Info Code) */}
         <Avatar 
           className="w-10 h-10 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
           onClick={(e) => {
@@ -124,7 +128,7 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = fa
               <div className="p-1.5 rounded-full group-hover:bg-primary/10">
                 <GitFork className="w-[18px] h-[18px]" />
               </div>
-              <span className="text-[13px]">{idea.branches.length} branches</span>
+              <span className="text-[13px]">{idea.branches.length}</span>
             </button>
 
             <button 
@@ -156,8 +160,7 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = fa
               className="flex items-center gap-1.5 hover:text-primary transition-colors group"
               onClick={(e) => {
                 e.stopPropagation();
-                const text = `Check out this idea by ${idea.author.name}:\n\n"${idea.content}"\n\n${window.location.origin}/`;
-                navigator.clipboard.writeText(text).then(() => alert("Link y descripción copiados al portapapeles."));
+                setIsShareOpen(true);
               }}
             >
               <div className="p-1.5 rounded-full group-hover:bg-primary/10">
@@ -167,6 +170,11 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = fa
           </div>
         </div>
       </div>
+      <ShareModal 
+        idea={idea} 
+        isOpen={isShareOpen} 
+        onClose={() => setIsShareOpen(false)} 
+      />
     </div>
   );
 };
