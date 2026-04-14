@@ -299,18 +299,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteIdea = async (ideaId: string) => {
-    await supabase.from('ideas').delete().eq('id', ideaId); // Realtime will handle local state
+    setRawIdeas(prev => prev.filter(i => i.id !== ideaId));
+    await supabase.from('ideas').delete().eq('id', ideaId);
   };
 
-  const deleteBranch = async (id: string) => await supabase.from('branches').delete().eq('id', id);
-  const deleteFeedback = async (id: string) => await supabase.from('feedbacks').delete().eq('id', id);
-  const deleteMessage = async (id: string) => await supabase.from('messages').delete().eq('id', id);
-  const deleteUser = async (id: string) => await supabase.from('users').delete().eq('id', id);
+  const deleteBranch = async (id: string) => {
+    setRawBranches(prev => prev.filter(b => b.id !== id));
+    await supabase.from('branches').delete().eq('id', id);
+  };
+
+  const deleteFeedback = async (id: string) => {
+    setRawFeedbacks(prev => prev.filter(f => f.id !== id));
+    await supabase.from('feedbacks').delete().eq('id', id);
+  };
+
+  const deleteMessage = async (id: string) => {
+    setAllMessages(prev => prev.filter(m => m.id !== id));
+    await supabase.from('messages').delete().eq('id', id);
+  };
+
+  const deleteUser = async (id: string) => {
+    setUsers(prev => prev.filter(u => u.id !== id));
+    await supabase.from('users').delete().eq('id', id);
+  };
 
   const toggleVerified = async (userId: string) => {
     const user = users.find(u => u.id === userId);
     if (!user) return;
-    await supabase.from('users').update({ verified: !user.verified }).eq('id', userId);
+    const newVal = !user.verified;
+    // Optimistic Update
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, verified: newVal } : u));
+    await supabase.from('users').update({ verified: newVal }).eq('id', userId);
   };
 
   const addBranch = async (ideaId: string, content: string) => {
