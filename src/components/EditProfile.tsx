@@ -20,15 +20,44 @@ export const EditProfile: React.FC<EditProfileProps> = ({ isOpen, onClose }) => 
 
   if (!isOpen) return null;
 
+  const compressImage = async (file: File, maxWidth = 800, quality = 0.6): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        if (width > maxWidth) {
+          height = (maxWidth / width) * height;
+          width = maxWidth;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob); else reject(new Error('Error al comprimir'));
+        }, 'image/jpeg', quality);
+      };
+      img.onerror = reject;
+    });
+  };
+
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      
+      // Vista previa inmediata
+      const localUrl = URL.createObjectURL(file);
+      setAvatar(localUrl);
+      
       setIsUploading(true);
       try {
-        const file = e.target.files[0];
-        const fileExt = file.name.split('.').pop();
-        const fileName = `avatar-${currentUser.id}-${Math.random()}.${fileExt}`;
+        const compressedBlob = await compressImage(file);
+        const fileName = `avatar-${currentUser.id}-${Math.random()}.jpg`;
         const { supabase } = await import('../supabase');
-        const { data, error } = await supabase.storage.from('media').upload(`public/${fileName}`, file);
+        const { data, error } = await supabase.storage.from('media').upload(`public/${fileName}`, compressedBlob);
         if (!error && data) {
            const publicUrl = supabase.storage.from('media').getPublicUrl(data.path).data.publicUrl;
            setAvatar(publicUrl);

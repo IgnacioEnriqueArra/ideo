@@ -181,6 +181,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return { ...n, actor };
   });
 
+  const compressImage = async (file: File, maxWidth = 1200, quality = 0.7): Promise<Blob> => {
+    if (file.type.startsWith('video/')) return file; // No comprimimos video en cliente
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        if (width > maxWidth) {
+          height = (maxWidth / width) * height;
+          width = maxWidth;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob); else reject(new Error('Error al comprimir'));
+        }, 'image/jpeg', quality);
+      };
+      img.onerror = reject;
+    });
+  };
+
   const createNotification = async (recipientId: string, type: Notification['type'], targetId: string) => {
     if (!currentUser || currentUser.id === recipientId) return;
     await supabase.from('notifications').insert({ recipientId, actorId: currentUser.id, type, targetId, createdAt: new Date().toISOString(), read: false });
@@ -194,7 +219,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (mediaFile) {
       const fileExt = mediaFile.name.split('.').pop();
       const fileName = `${tempId}-${Math.random()}.${fileExt}`;
-      const { data, error } = await supabase.storage.from('media').upload(`public/${fileName}`, mediaFile);
+      const fileToUpload = await compressImage(mediaFile);
+      const { data, error } = await supabase.storage.from('media').upload(`public/${fileName}`, fileToUpload);
       if (!error && data) {
          mediaUrl = supabase.storage.from('media').getPublicUrl(data.path).data.publicUrl;
       }
