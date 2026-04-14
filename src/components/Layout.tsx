@@ -9,10 +9,9 @@ interface LayoutProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   onCompose?: () => void;
-  onTitleTap?: () => void;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, onCompose, onTitleTap }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, onCompose }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { currentUser, notifications, logout, unreadMessagesCount } = useAppContext();
   const unreadNotificationsCount = notifications.filter(n => !n.read).length;
@@ -91,12 +90,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               className="fixed top-0 left-0 bottom-0 w-[280px] bg-white dark:bg-gray-900 z-50 shadow-2xl flex flex-col transition-colors"
             >
               <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-start">
-                <button onClick={onTitleTap} className="text-left">
-                  <Avatar className="w-12 h-12 rounded-lg">
-                    <AvatarImage src={currentUser.avatar} />
-                    <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                </button>
+                <Avatar className="w-12 h-12 rounded-lg">
+                  <AvatarImage src={currentUser.avatar} />
+                  <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+                </Avatar>
                 <button onClick={() => setIsMenuOpen(false)} className="p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-full">
                   <X className="w-5 h-5 text-gray-500" />
                 </button>
@@ -145,13 +142,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 >
                   <Smartphone className="w-6 h-6" />
                   <span className="font-bold text-[17px]">Instalar App</span>
-                </button>
-                <button
-                  className="w-full flex items-center gap-4 px-4 py-3 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-500/10 transition-colors"
-                  onClick={() => { onTitleTap?.(); setIsMenuOpen(false); }}
-                >
-                  <Shield className="w-6 h-6" />
-                  <span className="font-bold text-[17px]">Admin Panel</span>
                 </button>
               </div>
 

@@ -20,16 +20,6 @@ function AppContent() {
   const [activeTab, setActiveTab] = useState('home');
   const [isComposeOpen, setIsComposeOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth > 640);
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
-
-  // Secret admin trigger: tap the title 5 times quickly
-  const [titleTaps, setTitleTaps] = useState(0);
-  const handleTitleTap = () => {
-    const next = titleTaps + 1;
-    setTitleTaps(next);
-    if (next >= 5) { setIsAdminOpen(true); setTitleTaps(0); }
-    setTimeout(() => setTitleTaps(0), 2000);
-  };
 
   useEffect(() => {
     const handleResize = () => setIsDesktop(window.innerWidth > 640);
@@ -45,7 +35,18 @@ function AppContent() {
     };
   }, []);
 
+  // Admin logic for PC
+  const isAdminPath = window.location.pathname === '/agent';
+
   if (isDesktop) {
+    if (isAdminPath) {
+      return (
+        <div className="h-screen w-full bg-gray-50 overflow-hidden">
+           <AdminDashboard onBack={() => window.location.href = '/'} />
+        </div>
+      );
+    }
+
     return (
       <div className="h-[100dvh] w-full bg-white flex flex-col items-center justify-center p-6 text-center">
         <div className="max-w-sm">
@@ -133,23 +134,19 @@ function AppContent() {
   };
 
   return (
-    <Layout
-      activeTab={activeTab}
+    <Layout 
+      activeTab={activeTab} 
       setActiveTab={(tab) => {
         setSelectedIdeaId(null);
         setSelectedUserId(null);
         setActiveTab(tab);
-      }}
+      }} 
       onCompose={() => setIsComposeOpen(true)}
-      onTitleTap={handleTitleTap}
     >
       <AnimatePresence mode="wait">
         {renderContent()}
       </AnimatePresence>
       <ComposeModal isOpen={isComposeOpen} onClose={() => setIsComposeOpen(false)} />
-      <AnimatePresence>
-        {isAdminOpen && <AdminDashboard onBack={() => setIsAdminOpen(false)} />}
-      </AnimatePresence>
     </Layout>
   );
 }
