@@ -44,8 +44,8 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
         >
           <Menu className="w-5 h-5 text-gray-700" />
         </button>
-        <h1 className="text-xl font-black text-primary italic tracking-tighter flex items-center pr-1" style={{ fontFamily: 'system-ui' }}>
-          ideo
+        <h1 className="text-xl font-black text-primary tracking-tighter flex items-center" style={{ fontFamily: 'system-ui' }}>
+          Ideo
         </h1>
         <button 
           className="p-2 -mr-2 hover:bg-gray-50 rounded-full transition-colors relative"
