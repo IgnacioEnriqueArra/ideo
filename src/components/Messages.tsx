@@ -33,7 +33,7 @@ interface ChatProps {
 }
 
 const ChatView: React.FC<ChatProps> = ({ conversation, otherUserId, onBack }) => {
-  const { currentUser, users, ideas } = useAppContext();
+  const { currentUser, users, ideas, setActiveConversationId } = useAppContext();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -56,6 +56,7 @@ const ChatView: React.FC<ChatProps> = ({ conversation, otherUserId, onBack }) =>
         .neq('senderId', currentUser!.id);
     };
     fetchMessages();
+    setActiveConversationId(conversation.id);
 
     // Realtime subscription for new messages in this conversation
     const channel = supabase
@@ -83,7 +84,10 @@ const ChatView: React.FC<ChatProps> = ({ conversation, otherUserId, onBack }) =>
       )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => { 
+      supabase.removeChannel(channel); 
+      setActiveConversationId(null);
+    };
   }, [conversation.id]);
 
   useEffect(() => {

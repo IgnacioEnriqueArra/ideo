@@ -27,6 +27,8 @@ type AppContextType = {
   toggleBookmark: (ideaId: string) => void;
   updateProfile: (name: string, handle: string, bio: string, avatar: string) => void;
   markNotificationsRead: () => void;
+  clearAllNotifications: () => void;
+  deleteNotification: (id: string) => void;
   toggleFollow: (userId: string) => void;
   deleteIdea: (ideaId: string) => void;
   deleteAccount: () => Promise<void>;
@@ -37,6 +39,9 @@ type AppContextType = {
   isAuthReady: boolean;
   unreadMessagesCount: number;
   playNotificationSound: () => void;
+  activeConversationId: string | null;
+  setActiveConversationId: (id: string | null) => void;
+  clearAllNotifications: () => void;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -51,6 +56,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [userLikes, setUserLikes] = useState<string[]>([]);
   const [rawNotifications, setRawNotifications] = useState<Notification[]>([]);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
 
   useEffect(() => {
@@ -163,10 +169,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async (payload) => {
          // Verificamos si el mensaje es para una conversación donde participo
-         const { data: conv } = await supabase.from('conversations').select('participantIds').eq('id', payload.new.conversationId).single();
+         const { data: conv } = await supabase.from('conversations').select('id, participantIds').eq('id', payload.new.conversationId).single();
          if (conv?.participantIds.includes(currentUser.id) && payload.new.senderId !== currentUser.id) {
             setUnreadMessagesCount(prev => prev + 1);
-            playNotificationSound();
+            // Solo suena si NO tengo el chat abierto
+            if (activeConversationId !== payload.new.conversationId) {
+               playNotificationSound();
+            }
          }
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, (payload) => {
@@ -198,9 +207,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const playNotificationSound = () => {
-    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-    audio.volume = 0.5;
-    audio.play().catch(e => console.log('Bloqueo de audio por navegador', e));
+    // Sonido más limpio y premium (Digital Pop)
+    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
+    audio.volume = 0.4;
+    audio.play().catch(e => console.log('Audio blocked', e));
   };
 
   const notifications = rawNotifications.map(n => {
@@ -372,12 +382,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await supabase.from('users').update({ name, handle, bio, avatar }).eq('id', currentUser.id);
   };
 
-  const markNotificationsRead = async () => {
+  const clearAllNotifications = async () => {
     if (!currentUser) return;
-    setRawNotifications(prev => prev.map(n => ({ ...n, read: true })));
-    const unreadNotifs = rawNotifications.filter(n => !n.read);
-    const updates = unreadNotifs.map(n => supabase.from('notifications').update({ read: true }).eq('id', n.id));
-    await Promise.all(updates);
+    setRawNotifications([]);
+    await supabase.from('notifications').delete().eq('recipientId', currentUser.id);
+  };
+
+  const deleteNotification = async (id: string) => {
+    setRawNotifications(prev => prev.filter(n => n.id !== id));
+    await supabase.from('notifications').delete().eq('id', id);
   };
 
   const toggleFollow = async (userId: string) => {
@@ -466,7 +479,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   return (
-    <AppContext.Provider value={{ currentUser, users, ideas, bookmarks, userLikes, notifications, addIdea, addBranch, addFeedback, likeIdea, likeBranch, toggleBookmark, updateProfile, markNotificationsRead, toggleFollow, deleteIdea, deleteAccount, logout, login, signup, loginRedirect, isAuthReady, unreadMessagesCount, playNotificationSound }}>
+    <AppContext.Provider value={{ currentUser, users, ideas, bookmarks, userLikes, notifications, addIdea, addBranch, addFeedback, likeIdea, likeBranch, toggleBookmark, updateProfile, markNotificationsRead, deleteIdea, deleteAccount, logout, login, signup, loginRedirect, isAuthReady, unreadMessagesCount, playNotificationSound, activeConversationId, setActiveConversationId, clearAllNotifications, deleteNotification, toggleFollow }}>
       {children}
     </AppContext.Provider>
   );
