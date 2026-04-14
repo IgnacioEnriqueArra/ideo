@@ -442,9 +442,9 @@ export const Messages: React.FC = () => {
                 </div>
                 <button 
                   onClick={(e) => deleteConversation(e, conv.id)}
-                  className="p-2 text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                  className="p-2 text-red-500 hover:text-red-700 transition-colors flex-shrink-0"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-5 h-5" />
                 </button>
               </button>
             );
