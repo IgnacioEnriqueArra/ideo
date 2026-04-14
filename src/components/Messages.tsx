@@ -314,6 +314,7 @@ const NewMessageModal: React.FC<NewMessageModalProps> = ({ onSelectUser, onClose
 //  MAIN MESSAGES LIST
 // ──────────────────────────────────────────────────
 export const Messages: React.FC = () => {
+  const { currentUser, users } = useAppContext();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversation, setActiveConversation] = useState<{ conv: Conversation; otherId: string } | null>(null);
   const [showNewMessage, setShowNewMessage] = useState(false);
