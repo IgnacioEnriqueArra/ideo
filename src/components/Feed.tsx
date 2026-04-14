@@ -98,9 +98,9 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
 
           {/* CTA post */}
           <div className="p-6 border-b border-gray-100 flex flex-col items-center justify-center bg-gradient-to-br from-primary/5 to-transparent">
-            <h2 className="text-lg font-bold text-gray-900 mb-2">Comparte tu próxima idea</h2>
+            <h2 className="text-lg font-bold text-gray-900 mb-2">Comparte tu idea, proyecto o trabajo</h2>
             <p className="text-gray-500 text-[15px] mb-4 text-center max-w-sm">
-              Únete a la comunidad de Ideo. Comparte proyectos, haz branches y colabora.
+              Únete a la comunidad de Ideo. Publica en qué estás trabajando, haz haz branches y colabora con otros.
             </p>
             <button 
               className="bg-primary text-white font-bold py-2.5 px-6 rounded-full hover:bg-blue-600 transition-all shadow-sm active:scale-95"
