@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { ArrowLeft, GitFork, MessageSquare, Heart, Bookmark, Share, MoreHorizontal, BadgeCheck } from 'lucide-react';
 import { useAppContext } from '../AppContext';
 import { BranchCard } from './BranchCard';

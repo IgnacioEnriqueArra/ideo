@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { ArrowLeft, Search, MoreHorizontal, BadgeCheck } from 'lucide-react';
 import { useAppContext } from '../AppContext';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -13,7 +14,7 @@ interface ProfileProps {
 
 export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
   const { currentUser, users, ideas, toggleFollow, userLikes } = useAppContext();
-  const [activeTab, setActiveTab] = React.useState<'ideas' | 'branches' | 'likes'>('ideas');
+  const [activeTab, setActiveTab] = useState<'ideas' | 'branches' | 'likes'>('ideas');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const profileUser = userId ? users.find(u => u.id === userId) || currentUser : currentUser;
