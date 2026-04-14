@@ -15,8 +15,30 @@ export const EditProfile: React.FC<EditProfileProps> = ({ isOpen, onClose }) => 
   const [handle, setHandle] = useState(currentUser.handle);
   const [bio, setBio] = useState(currentUser.bio || '');
   const [avatar, setAvatar] = useState(currentUser.avatar);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setIsUploading(true);
+      try {
+        const file = e.target.files[0];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `avatar-${currentUser.id}-${Math.random()}.${fileExt}`;
+        const { supabase } = await import('../supabase');
+        const { data, error } = await supabase.storage.from('media').upload(`public/${fileName}`, file);
+        if (!error && data) {
+           const publicUrl = supabase.storage.from('media').getPublicUrl(data.path).data.publicUrl;
+           setAvatar(publicUrl);
+        }
+      } catch(e) {
+        console.error(e);
+      }
+      setIsUploading(false);
+    }
+  };
 
   const handleSave = () => {
     updateProfile(name, handle, bio, avatar);
@@ -48,7 +70,8 @@ export const EditProfile: React.FC<EditProfileProps> = ({ isOpen, onClose }) => 
           </div>
           <button 
             onClick={handleSave}
-            className="bg-gray-900 text-white px-4 py-1.5 rounded-full font-bold text-sm"
+            disabled={isUploading}
+            className="bg-gray-900 text-white px-4 py-1.5 rounded-full font-bold text-sm disabled:opacity-50"
           >
             Save
           </button>
@@ -57,18 +80,23 @@ export const EditProfile: React.FC<EditProfileProps> = ({ isOpen, onClose }) => 
         <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-6">
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
-              <Avatar className="w-24 h-24 rounded-full border-4 border-white shadow-sm">
-                <AvatarImage src={avatar} />
+              <Avatar className="w-24 h-24 rounded-full border-4 border-white shadow-sm overflow-hidden bg-white">
+                <AvatarImage src={avatar} className="object-cover" />
                 <AvatarFallback>{name.charAt(0)}</AvatarFallback>
               </Avatar>
-              <button className="absolute inset-0 bg-black/30 rounded-full flex items-center justify-center text-white hover:bg-black/40 transition-colors">
-                <Camera className="w-6 h-6" />
+              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleAvatarUpload} />
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                className="absolute inset-0 bg-black/30 rounded-full flex items-center justify-center text-white hover:bg-black/40 transition-colors disabled:opacity-50"
+              >
+                {isUploading ? <span className="animate-spin text-xl">⏳</span> : <Camera className="w-6 h-6" />}
               </button>
             </div>
             <input 
               type="text" 
-              placeholder="Avatar URL" 
-              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              placeholder="También puedes pegar una URL de imagen externa aquí..." 
+              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary mt-2"
               value={avatar}
               onChange={(e) => setAvatar(e.target.value)}
             />

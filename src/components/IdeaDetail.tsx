@@ -3,7 +3,7 @@ import { ArrowLeft, GitFork, MessageSquare, Heart, Bookmark, Share, MoreHorizont
 import { useAppContext } from '../AppContext';
 import { BranchCard } from './BranchCard';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface IdeaDetailProps {
@@ -209,20 +209,21 @@ export const IdeaDetail: React.FC<IdeaDetailProps> = ({ ideaId, onBack, onUserCl
                         <AvatarFallback>{feedback.author.name.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
-                        <div className="flex items-center gap-1.5 text-[15px]">
-                          <span 
-                            className="font-bold text-gray-900 cursor-pointer hover:underline"
-                            onClick={() => onUserClick && onUserClick(feedback.author.id)}
-                          >
-                            {feedback.author.name}
-                          </span>
-                          <span className="text-gray-500">@{feedback.author.handle}</span>
-                          <span className="text-gray-500">·</span>
-                          <span className="text-gray-500">
-                            {format(new Date(feedback.createdAt), 'MMM d')}
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-1.5 text-[15px]">
+                            <span 
+                              className="font-bold text-gray-900 cursor-pointer hover:underline"
+                              onClick={() => onUserClick && onUserClick(feedback.author.id)}
+                            >
+                              {feedback.author.name}
+                            </span>
+                            <span className="text-gray-500">@{feedback.author.handle}</span>
+                          </div>
+                          <span className="text-gray-500 text-[13px] mt-0.5">
+                            {formatDistanceToNow(new Date(feedback.createdAt), { addSuffix: true }).replace('about ', '')}
                           </span>
                         </div>
-                        <p className="text-[15px] text-gray-900 mt-0.5">{feedback.content}</p>
+                        <p className="text-[15px] text-gray-900 mt-1">{feedback.content}</p>
                         <div className="flex gap-4 mt-2 text-gray-400">
                           <button className="flex items-center gap-1 hover:text-red-500">
                             <Heart className="w-3.5 h-3.5" />
