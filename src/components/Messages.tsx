@@ -68,6 +68,17 @@ const ChatView: React.FC<ChatProps> = ({ conversation, otherUserId, onBack }) =>
             if (prev.find(m => m.id === payload.new.id)) return prev;
             return [...prev, payload.new as Message];
           });
+          // If we receive a message in the active chat, mark it as read
+          if (payload.new.senderId !== currentUser?.id) {
+             supabase.from('messages').update({ read: true }).eq('id', payload.new.id).then();
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'messages', filter: `conversationId=eq.${conversation.id}` },
+        (payload) => {
+          setMessages(prev => prev.map(m => m.id === payload.new.id ? payload.new as Message : m));
         }
       )
       .subscribe();
@@ -143,41 +154,49 @@ const ChatView: React.FC<ChatProps> = ({ conversation, otherUserId, onBack }) =>
                 initial={{ opacity: 0, y: 8, scale: 0.96 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.18 }}
-                className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}
+                className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}
               >
-                <div className={`max-w-[85%] px-4 py-2.5 rounded-[20px] text-[15px] leading-snug shadow-sm ${
+                <div className={`max-w-[85%] px-4 py-2.5 rounded-[20px] text-[15px] leading-snug shadow-sm bg-white border ${
                   isMine
-                    ? 'bg-primary text-white rounded-br-md'
-                    : 'bg-gray-100 text-gray-900 rounded-bl-md'
+                    ? 'text-gray-900 border-gray-100 rounded-br-md'
+                    : 'text-gray-900 border-primary rounded-bl-md'
                 }`}>
                   {sharedIdea ? (
                     <div 
                       onClick={() => window.dispatchEvent(new CustomEvent('open-post', { detail: sharedIdea.id }))}
-                      className="cursor-pointer bg-white/10 dark:bg-black/10 rounded-xl overflow-hidden border border-white/20 p-2 space-y-2 hover:bg-white/20 transition-colors"
+                      className="cursor-pointer bg-gray-50 rounded-xl overflow-hidden border border-gray-100 p-2 space-y-2 hover:bg-gray-100 transition-colors"
                     >
                       <div className="flex items-center gap-2">
                         <Avatar className="w-5 h-5 rounded-full">
                           <AvatarImage src={sharedIdea.author.avatar} />
                           <AvatarFallback>{sharedIdea.author.name.charAt(0)}</AvatarFallback>
                         </Avatar>
-                        <span className="font-bold text-[12px]">@{sharedIdea.author.handle}</span>
+                        <span className="font-bold text-[12px] text-gray-900">@{sharedIdea.author.handle}</span>
                       </div>
-                      <p className="text-[13px] line-clamp-3 leading-tight opacity-90">{sharedIdea.content}</p>
+                      <p className="text-[13px] line-clamp-3 leading-tight text-gray-700">{sharedIdea.content}</p>
                       {sharedIdea.mediaUrl && (
-                        <div className="rounded-lg overflow-hidden h-24 bg-black/5">
+                        <div className="rounded-lg overflow-hidden h-24 bg-gray-200">
                            <img src={sharedIdea.mediaUrl} className="w-full h-full object-cover" alt="" />
                         </div>
                       )}
-                      <div className="text-[10px] font-bold uppercase tracking-wider opacity-60">Ver Idea ➔</div>
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-primary">Ver Idea ➔</div>
                     </div>
                   ) : sharedIdeaId ? (
-                    <div className="text-xs italic opacity-60">Idea no disponible</div>
+                    <div className="text-xs italic text-gray-400">Idea no disponible</div>
                   ) : (
                     <p>{msg.content}</p>
                   )}
-                  <p className={`text-[10px] mt-1 ${isMine ? 'text-white/60 text-right' : 'text-gray-400'}`}>
+                </div>
+                
+                <div className={`flex items-center gap-1.5 mt-1 px-1 ${isMine ? 'flex-row-reverse' : ''}`}>
+                  <span className="text-[10px] text-gray-400">
                     {formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true, locale: es })}
-                  </p>
+                  </span>
+                  {isMine && (
+                    <span className={`text-[10px] font-bold ${msg.read ? 'text-primary' : 'text-gray-300'}`}>
+                      {msg.read ? 'Leído' : 'Enviado'}
+                    </span>
+                  )}
                 </div>
               </motion.div>
             );
