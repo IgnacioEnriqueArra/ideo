@@ -198,6 +198,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (!error && data) {
          mediaUrl = supabase.storage.from('media').getPublicUrl(data.path).data.publicUrl;
       }
+    } else {
+      // Detección automática de links para captura de pantalla
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      const match = content.match(urlRegex);
+      if (match && match[0]) {
+        const detectedUrl = match[0];
+        // Usamos Microlink para generar una captura de pantalla de la URL detectada
+        mediaUrl = `https://api.microlink.io/?url=${encodeURIComponent(detectedUrl)}&screenshot=true&embed=screenshot.url`;
+      }
     }
 
     const newIdea = { id: tempId, authorId: currentUser.id, content, createdAt: new Date().toISOString(), likes: 0, tags, mediaUrl };

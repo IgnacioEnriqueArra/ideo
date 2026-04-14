@@ -90,7 +90,13 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = fa
           </div>
 
           <p className={`mt-1 text-gray-900 leading-snug whitespace-pre-wrap ${isDetail ? 'text-lg' : 'text-[15px]'}`}>
-            {idea.content}
+            {idea.content.split(' ').map((part, i) => {
+              const urlRegex = /(https?:\/\/[^\s]+)/g;
+              if (part.match(urlRegex)) {
+                return <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all" onClick={e => e.stopPropagation()}>{part} </a>;
+              }
+              return part + ' ';
+            })}
           </p>
 
           {idea.mediaUrl && (
