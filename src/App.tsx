@@ -40,7 +40,7 @@ function AppContent() {
           <div className="flex flex-col items-center gap-4 p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 shadow-inner">
             <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
               <img 
-                src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://ideo-orcin.vercel.app" 
+                src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://ideonetwork.vercel.app" 
                 alt="QR Code" 
                 className="w-40 h-40"
               />
@@ -48,7 +48,7 @@ function AppContent() {
             <div className="mt-2">
               <p className="text-[11px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-3">Escanea para abrir en tu móvil</p>
               <div className="px-4 py-2 bg-white rounded-full border border-slate-200 text-primary font-mono font-bold text-sm shadow-sm inline-block">
-                ideo-orcin.vercel.app
+                ideonetwork.vercel.app
               </div>
             </div>
           </div>
