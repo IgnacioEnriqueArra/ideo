@@ -67,8 +67,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({ idea, isOpen, onClose })
         convId = newConvId;
       }
 
-      // 2. Send Message with link to post
-      const shareText = `Te compartí un post de @${idea.author.handle}:\n\n"${idea.content.substring(0, 50)}${idea.content.length > 50 ? '...' : ''}"\n\nVer post: ${window.location.origin}/idea/${idea.id}`;
+      // 2. Send Message with structured post ID
+      const shareText = `[SHARED_POST:${idea.id}]`;
       
       await supabase.from('messages').insert({
         id: crypto.randomUUID(),

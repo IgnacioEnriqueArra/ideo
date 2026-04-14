@@ -133,6 +133,10 @@ const ChatView: React.FC<ChatProps> = ({ conversation, otherUserId, onBack }) =>
         <AnimatePresence initial={false}>
           {messages.map((msg) => {
             const isMine = msg.senderId === currentUser?.id;
+            const sharedPostMatch = msg.content.match(/^\[SHARED_POST:(.+)\]$/);
+            const sharedIdeaId = sharedPostMatch ? sharedPostMatch[1] : null;
+            const sharedIdea = sharedIdeaId ? (useAppContext().ideas.find(i => i.id === sharedIdeaId)) : null;
+
             return (
               <motion.div
                 key={msg.id}
@@ -141,12 +145,36 @@ const ChatView: React.FC<ChatProps> = ({ conversation, otherUserId, onBack }) =>
                 transition={{ duration: 0.18 }}
                 className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}
               >
-                <div className={`max-w-[75%] px-4 py-2.5 rounded-[20px] text-[15px] leading-snug shadow-sm ${
+                <div className={`max-w-[85%] px-4 py-2.5 rounded-[20px] text-[15px] leading-snug shadow-sm ${
                   isMine
                     ? 'bg-primary text-white rounded-br-md'
                     : 'bg-gray-100 text-gray-900 rounded-bl-md'
                 }`}>
-                  <p>{msg.content}</p>
+                  {sharedIdea ? (
+                    <div 
+                      onClick={() => window.dispatchEvent(new CustomEvent('open-post', { detail: sharedIdea.id }))}
+                      className="cursor-pointer bg-white/10 dark:bg-black/10 rounded-xl overflow-hidden border border-white/20 p-2 space-y-2 hover:bg-white/20 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Avatar className="w-5 h-5 rounded-full">
+                          <AvatarImage src={sharedIdea.author.avatar} />
+                          <AvatarFallback>{sharedIdea.author.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <span className="font-bold text-[12px]">@{sharedIdea.author.handle}</span>
+                      </div>
+                      <p className="text-[13px] line-clamp-3 leading-tight opacity-90">{sharedIdea.content}</p>
+                      {sharedIdea.mediaUrl && (
+                        <div className="rounded-lg overflow-hidden h-24 bg-black/5">
+                           <img src={sharedIdea.mediaUrl} className="w-full h-full object-cover" alt="" />
+                        </div>
+                      )}
+                      <div className="text-[10px] font-bold uppercase tracking-wider opacity-60">Ver Idea ➔</div>
+                    </div>
+                  ) : sharedIdeaId ? (
+                    <div className="text-xs italic opacity-60">Idea no disponible</div>
+                  ) : (
+                    <p>{msg.content}</p>
+                  )}
                   <p className={`text-[10px] mt-1 ${isMine ? 'text-white/60 text-right' : 'text-gray-400'}`}>
                     {formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true, locale: es })}
                   </p>
@@ -389,7 +417,7 @@ export const Messages: React.FC = () => {
                 </div>
                 <button 
                   onClick={(e) => deleteConversation(e, conv.id)}
-                  className="p-2 text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                  className="p-2 text-red-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>

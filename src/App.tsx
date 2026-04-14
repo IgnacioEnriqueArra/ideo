@@ -22,8 +22,16 @@ function AppContent() {
 
   useEffect(() => {
     const handleResize = () => setIsDesktop(window.innerWidth > 640);
+    const handleOpenPost = (e: any) => {
+      setSelectedIdeaId(e.detail);
+      setActiveTab('home'); // Ensure we are on home to see the detail
+    };
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener('open-post', handleOpenPost);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('open-post', handleOpenPost);
+    };
   }, []);
 
   if (isDesktop) {
