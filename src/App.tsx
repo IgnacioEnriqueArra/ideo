@@ -10,6 +10,7 @@ import { Messages } from './components/Messages';
 import { Layout } from './components/Layout';
 import { ComposeModal } from './components/ComposeModal';
 import { Settings } from './components/Settings';
+import { AdminDashboard } from './components/AdminDashboard';
 import { AnimatePresence } from 'motion/react';
 
 function AppContent() {
@@ -19,6 +20,16 @@ function AppContent() {
   const [activeTab, setActiveTab] = useState('home');
   const [isComposeOpen, setIsComposeOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth > 640);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
+
+  // Secret admin trigger: tap the title 5 times quickly
+  const [titleTaps, setTitleTaps] = useState(0);
+  const handleTitleTap = () => {
+    const next = titleTaps + 1;
+    setTitleTaps(next);
+    if (next >= 5) { setIsAdminOpen(true); setTitleTaps(0); }
+    setTimeout(() => setTitleTaps(0), 2000);
+  };
 
   useEffect(() => {
     const handleResize = () => setIsDesktop(window.innerWidth > 640);
@@ -122,19 +133,23 @@ function AppContent() {
   };
 
   return (
-    <Layout 
-      activeTab={activeTab} 
+    <Layout
+      activeTab={activeTab}
       setActiveTab={(tab) => {
         setSelectedIdeaId(null);
         setSelectedUserId(null);
         setActiveTab(tab);
-      }} 
+      }}
       onCompose={() => setIsComposeOpen(true)}
+      onTitleTap={handleTitleTap}
     >
       <AnimatePresence mode="wait">
         {renderContent()}
       </AnimatePresence>
       <ComposeModal isOpen={isComposeOpen} onClose={() => setIsComposeOpen(false)} />
+      <AnimatePresence>
+        {isAdminOpen && <AdminDashboard onBack={() => setIsAdminOpen(false)} />}
+      </AnimatePresence>
     </Layout>
   );
 }

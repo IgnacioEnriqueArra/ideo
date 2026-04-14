@@ -6,6 +6,7 @@ export type User = {
   bio?: string;
   followers: string[];
   following: string[];
+  verified?: boolean;
 };
 
 export type Feedback = {

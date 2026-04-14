@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Home, FileText, MessageSquare, User, Plus, X, Settings, Bookmark, LogOut, Smartphone, Bell } from 'lucide-react';
+import { Home, FileText, MessageSquare, User, Plus, X, Settings, Bookmark, LogOut, Smartphone, Bell, BadgeCheck, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAppContext } from '../AppContext';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -9,9 +9,10 @@ interface LayoutProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   onCompose?: () => void;
+  onTitleTap?: () => void;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, onCompose }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, onCompose, onTitleTap }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { currentUser, notifications, logout, unreadMessagesCount } = useAppContext();
   const unreadNotificationsCount = notifications.filter(n => !n.read).length;
@@ -90,17 +91,22 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               className="fixed top-0 left-0 bottom-0 w-[280px] bg-white dark:bg-gray-900 z-50 shadow-2xl flex flex-col transition-colors"
             >
               <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-start">
-                <Avatar className="w-12 h-12 rounded-lg">
-                  <AvatarImage src={currentUser.avatar} />
-                  <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
-                </Avatar>
+                <button onClick={onTitleTap} className="text-left">
+                  <Avatar className="w-12 h-12 rounded-lg">
+                    <AvatarImage src={currentUser.avatar} />
+                    <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                </button>
                 <button onClick={() => setIsMenuOpen(false)} className="p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-full">
                   <X className="w-5 h-5 text-gray-500" />
                 </button>
               </div>
               
               <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
-                <div className="font-bold text-gray-900 dark:text-white text-lg">{currentUser.name}</div>
+                <div className="flex items-center gap-1.5">
+                  <div className="font-bold text-gray-900 dark:text-white text-lg">{currentUser.name}</div>
+                  {(currentUser as any).verified && <BadgeCheck className="w-4 h-4 text-blue-500" />}
+                </div>
                 <div className="text-gray-500 text-[15px]">@{currentUser.handle}</div>
                 <div className="flex gap-4 mt-3 text-[15px]">
                   <div className="flex gap-1"><span className="font-bold text-gray-900 dark:text-white">{currentUser.following?.length || 0}</span> <span className="text-gray-500">Following</span></div>
@@ -139,6 +145,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 >
                   <Smartphone className="w-6 h-6" />
                   <span className="font-bold text-[17px]">Instalar App</span>
+                </button>
+                <button
+                  className="w-full flex items-center gap-4 px-4 py-3 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-500/10 transition-colors"
+                  onClick={() => { onTitleTap?.(); setIsMenuOpen(false); }}
+                >
+                  <Shield className="w-6 h-6" />
+                  <span className="font-bold text-[17px]">Admin Panel</span>
                 </button>
               </div>
 
