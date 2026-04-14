@@ -31,6 +31,11 @@ type AppContextType = {
   deleteNotification: (id: string) => void;
   toggleFollow: (userId: string) => void;
   deleteIdea: (ideaId: string) => void;
+  deleteBranch: (branchId: string) => void;
+  deleteFeedback: (feedbackId: string) => void;
+  deleteMessage: (messageId: string) => void;
+  deleteUser: (userId: string) => void;
+  toggleVerified: (userId: string) => void;
   deleteAccount: () => Promise<void>;
   logout: () => void;
   login: (email?: string, password?: string) => Promise<void>;
@@ -42,6 +47,9 @@ type AppContextType = {
   activeConversationId: string | null;
   setActiveConversationId: (id: string | null) => void;
   clearAllNotifications: () => void;
+  rawBranches: any[];
+  rawFeedbacks: any[];
+  allMessages: any[];
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -52,6 +60,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [rawIdeas, setRawIdeas] = useState<any[]>([]);
   const [rawBranches, setRawBranches] = useState<any[]>([]);
   const [rawFeedbacks, setRawFeedbacks] = useState<any[]>([]);
+  const [allMessages, setAllMessages] = useState<any[]>([]);
   const [bookmarks, setBookmarks] = useState<string[]>([]);
   const [userLikes, setUserLikes] = useState<string[]>([]);
   const [rawNotifications, setRawNotifications] = useState<Notification[]>([]);
@@ -73,6 +82,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (iRes.data) setRawIdeas(iRes.data);
       if (bRes.data) setRawBranches(bRes.data);
       if (fRes.data) setRawFeedbacks(fRes.data);
+      
+      const { data: mRes } = await supabase.from('messages').select('*').order('createdAt', { ascending: false });
+      if (mRes) setAllMessages(mRes);
       
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
@@ -97,7 +109,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const channel = supabase.channel('public-db')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, payload => {
         if (payload.eventType === 'INSERT') setUsers(p => { const x = p.find(u => u.id === payload.new.id); return x ? p : [...p, payload.new as User] });
-        if (payload.eventType === 'UPDATE') setUsers(p => p.map(u => u.id === payload.new.id ? payload.new as User : u));
+        if (payload.eventType === 'UPDATE') {
+           const updated = payload.new as User;
+           setUsers(p => p.map(u => u.id === updated.id ? updated : u));
+           if (currentUser?.id === updated.id) setCurrentUser(updated);
+        }
         if (payload.eventType === 'DELETE') setUsers(p => p.filter(u => u.id !== payload.old.id));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'ideas' }, payload => {
@@ -114,6 +130,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (payload.eventType === 'INSERT') setRawFeedbacks(p => { const x = p.find(i => i.id === payload.new.id); return x ? p : [...p, payload.new] });
         if (payload.eventType === 'UPDATE') setRawFeedbacks(p => p.map(f => f.id === payload.new.id ? payload.new : f));
         if (payload.eventType === 'DELETE') setRawFeedbacks(p => p.filter(f => f.id !== payload.old.id));
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, payload => {
+        if (payload.eventType === 'INSERT') setAllMessages(p => [payload.new, ...p]);
+        if (payload.eventType === 'UPDATE') setAllMessages(p => p.map(m => m.id === payload.new.id ? payload.new : m));
+        if (payload.eventType === 'DELETE') setAllMessages(p => p.filter(m => m.id !== payload.old.id));
       })
       .subscribe();
 
@@ -278,9 +299,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteIdea = async (ideaId: string) => {
-    if (!currentUser) return;
-    setRawIdeas(prev => prev.filter(i => i.id !== ideaId));
-    await supabase.from('ideas').delete().eq('id', ideaId);
+    await supabase.from('ideas').delete().eq('id', ideaId); // Realtime will handle local state
+  };
+
+  const deleteBranch = async (id: string) => await supabase.from('branches').delete().eq('id', id);
+  const deleteFeedback = async (id: string) => await supabase.from('feedbacks').delete().eq('id', id);
+  const deleteMessage = async (id: string) => await supabase.from('messages').delete().eq('id', id);
+  const deleteUser = async (id: string) => await supabase.from('users').delete().eq('id', id);
+
+  const toggleVerified = async (userId: string) => {
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
+    await supabase.from('users').update({ verified: !user.verified }).eq('id', userId);
   };
 
   const addBranch = async (ideaId: string, content: string) => {
@@ -488,7 +518,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   return (
-    <AppContext.Provider value={{ currentUser, users, ideas, bookmarks, userLikes, notifications, addIdea, addBranch, addFeedback, likeIdea, likeBranch, toggleBookmark, updateProfile, markNotificationsRead, deleteIdea, deleteAccount, logout, login, signup, loginRedirect, isAuthReady, unreadMessagesCount, playNotificationSound, activeConversationId, setActiveConversationId, clearAllNotifications, deleteNotification, toggleFollow }}>
+    <AppContext.Provider value={{ 
+      currentUser, users, ideas, bookmarks, userLikes, notifications, 
+      addIdea, addBranch, addFeedback, likeIdea, likeBranch, toggleBookmark, 
+      updateProfile, markNotificationsRead, deleteIdea, deleteBranch, deleteFeedback, deleteMessage, 
+      deleteUser, toggleVerified, deleteAccount, logout, login, signup, loginRedirect, isAuthReady, unreadMessagesCount, 
+      playNotificationSound, activeConversationId, setActiveConversationId, clearAllNotifications, deleteNotification, toggleFollow,
+      rawBranches, rawFeedbacks, allMessages
+    }}>
       {children}
     </AppContext.Provider>
   );

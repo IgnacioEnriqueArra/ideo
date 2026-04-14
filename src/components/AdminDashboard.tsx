@@ -10,6 +10,7 @@ import { supabase } from '../supabase';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useAppContext } from '../AppContext';
 
 // ─── Types ───────────────────────────────────────────────
 interface AdminUser { id: string; name: string; handle: string; avatar: string; bio?: string; followers: string[]; following: string[]; verified?: boolean; createdAt?: string; }
@@ -59,57 +60,31 @@ const SidebarItem = ({ icon: Icon, label, active, onClick }: { icon: any; label:
 
 // ─── Main Component ──────────────────────────────────────
 export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+  const { 
+    users, ideas, rawBranches, rawFeedbacks, allMessages,
+    deleteIdea, deleteBranch, deleteFeedback, deleteMessage, deleteUser, toggleVerified
+  } = useAppContext();
+  
   const [section, setSection] = useState<'overview' | 'users' | 'ideas' | 'branches' | 'feedbacks' | 'messages'>('overview');
-  const [stats, setStats] = useState<Stats>({ users: 0, ideas: 0, branches: 0, feedbacks: 0, messages: 0 });
-  const [users, setUsers] = useState<AdminUser[]>([]);
-  const [ideas, setIdeas] = useState<AdminIdea[]>([]);
-  const [branches, setBranches] = useState<AdminBranch[]>([]);
-  const [feedbacks, setFeedbacks] = useState<AdminFeedback[]>([]);
-  const [messages, setMessages] = useState<AdminMessage[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<{ type: string; id: string } | null>(null);
 
-  const fetchAll = useCallback(async () => {
-    setLoading(true);
-    const [uRes, iRes, bRes, fRes, mRes] = await Promise.all([
-      supabase.from('users').select('*').order('name'),
-      supabase.from('ideas').select('*').order('createdAt', { ascending: false }),
-      supabase.from('branches').select('*').order('createdAt', { ascending: false }),
-      supabase.from('feedbacks').select('*').order('createdAt', { ascending: false }),
-      supabase.from('messages').select('*').order('createdAt', { ascending: false }),
-    ]);
-    if (uRes.data) setUsers(uRes.data);
-    if (iRes.data) setIdeas(iRes.data);
-    if (bRes.data) setBranches(bRes.data);
-    if (fRes.data) setFeedbacks(fRes.data);
-    if (mRes.data) setMessages(mRes.data);
-    setStats({
-      users: uRes.data?.length ?? 0,
-      ideas: iRes.data?.length ?? 0,
-      branches: bRes.data?.length ?? 0,
-      feedbacks: fRes.data?.length ?? 0,
-      messages: mRes.data?.length ?? 0,
-    });
-    setLoading(false);
-  }, []);
-
-  useEffect(() => { fetchAll(); }, []);
-
-  const toggleVerified = async (user: AdminUser) => {
-    const newVal = !user.verified;
-    setUsers(prev => prev.map(u => u.id === user.id ? { ...u, verified: newVal } : u));
-    await supabase.from('users').update({ verified: newVal }).eq('id', user.id);
+  const stats: Stats = {
+    users: users.length,
+    ideas: ideas.length,
+    branches: rawBranches.length,
+    feedbacks: rawFeedbacks.length,
+    messages: allMessages.length
   };
 
   const handleDelete = async () => {
     if (!confirmDelete) return;
     const { type, id } = confirmDelete;
-    if (type === 'user') { setUsers(prev => prev.filter(u => u.id !== id)); await supabase.from('users').delete().eq('id', id); }
-    if (type === 'idea') { setIdeas(prev => prev.filter(i => i.id !== id)); await supabase.from('ideas').delete().eq('id', id); }
-    if (type === 'branch') { setBranches(prev => prev.filter(b => b.id !== id)); await supabase.from('branches').delete().eq('id', id); }
-    if (type === 'feedback') { setFeedbacks(prev => prev.filter(f => f.id !== id)); await supabase.from('feedbacks').delete().eq('id', id); }
-    if (type === 'message') { setMessages(prev => prev.filter(m => m.id !== id)); await supabase.from('messages').delete().eq('id', id); }
+    if (type === 'user') await deleteUser(id);
+    if (type === 'idea') await deleteIdea(id);
+    if (type === 'branch') await deleteBranch(id);
+    if (type === 'feedback') await deleteFeedback(id);
+    if (type === 'message') await deleteMessage(id);
     setConfirmDelete(null);
   };
 
@@ -119,9 +94,9 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
   const filteredData = {
     users: users.filter(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.handle.toLowerCase().includes(search.toLowerCase())),
     ideas: ideas.filter(i => i.content.toLowerCase().includes(search.toLowerCase())),
-    branches: branches.filter(b => b.content.toLowerCase().includes(search.toLowerCase())),
-    feedbacks: feedbacks.filter(f => f.content.toLowerCase().includes(search.toLowerCase())),
-    messages: messages.filter(m => m.content.toLowerCase().includes(search.toLowerCase()))
+    branches: rawBranches.filter(b => b.content.toLowerCase().includes(search.toLowerCase())),
+    feedbacks: rawFeedbacks.filter(f => f.content.toLowerCase().includes(search.toLowerCase())),
+    messages: allMessages.filter(m => m.content.toLowerCase().includes(search.toLowerCase()))
   };
 
   return (
@@ -179,15 +154,11 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
                   className="bg-gray-50 w-80 py-2.5 pl-11 pr-4 rounded-2xl border border-gray-100 outline-none focus:bg-white focus:border-gray-900 transition-all text-sm"
                />
             </div>
-            <button onClick={fetchAll} className={`p-2.5 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-all ${loading ? 'animate-spin' : ''}`}>
-              <RefreshCw className="w-5 h-5 text-gray-600" />
-            </button>
           </div>
         </header>
 
         <div className="flex-1 overflow-y-auto p-10 bg-[#FAFAFB]">
-          {!loading ? (
-            <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait">
               {section === 'overview' && (
                 <div key="ov" className="max-w-7xl mx-auto space-y-10">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
@@ -243,7 +214,7 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
                                    <p className="font-bold text-gray-900 text-sm truncate">{user.name}</p>
                                    <p className="text-xs text-gray-400">@{user.handle}</p>
                                 </div>
-                                <button onClick={() => toggleVerified(user)} className="px-3 py-1.5 bg-blue-50 text-blue-600 text-[10px] font-bold rounded-full hover:bg-blue-600 hover:text-white transition-all uppercase tracking-wider">
+                                <button onClick={() => toggleVerified(user.id)} className="px-3 py-1.5 bg-blue-50 text-blue-600 text-[10px] font-bold rounded-full hover:bg-blue-600 hover:text-white transition-all uppercase tracking-wider">
                                   Verificar
                                 </button>
                              </div>
@@ -263,9 +234,6 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
                     <thead className="bg-gray-50/50">
                       <tr>
                         <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Usuario</th>
-                        <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">ID / Handle</th>
-                        <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Seguidores</th>
-                        <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Estado</th>
                         <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Acciones</th>
                       </tr>
                     </thead>
@@ -279,33 +247,17 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
                                 <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                               </Avatar>
                               <div>
-                                <p className="font-bold text-gray-900 text-sm">{user.name}</p>
+                                <div className="flex items-center gap-1.5">
+                                  <p className="font-bold text-gray-900 text-sm">{user.name}</p>
+                                  {user.verified && <BadgeCheck className="w-3.5 h-3.5 text-blue-500 fill-blue-500/10" />}
+                                </div>
                                 <p className="text-xs text-gray-400">@{user.handle}</p>
                               </div>
                             </div>
                           </td>
                           <td className="px-8 py-4">
-                             <code className="text-[10px] bg-gray-100 px-2 py-1 rounded text-gray-500 font-mono">{user.id}</code>
-                          </td>
-                          <td className="px-8 py-4">
-                             <div className="flex flex-col">
-                               <span className="text-sm font-bold text-gray-900">{user.followers?.length ?? 0}</span>
-                               <span className="text-[10px] text-gray-400 font-bold uppercase ">Followers</span>
-                             </div>
-                          </td>
-                          <td className="px-8 py-4">
-                             {user.verified ? (
-                               <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-600 rounded-full border border-blue-100">
-                                 <BadgeCheck className="w-3.5 h-3.5" />
-                                 <span className="text-[10px] font-black uppercase tracking-wider">Verificado</span>
-                               </div>
-                             ) : (
-                               <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">Estandar</span>
-                             )}
-                          </td>
-                          <td className="px-8 py-4">
                             <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button onClick={() => toggleVerified(user)} className="p-2 hover:bg-blue-50 text-gray-400 hover:text-blue-500 rounded-xl transition-all" title="Alternar Verificación">
+                              <button onClick={() => toggleVerified(user.id)} className="p-2 hover:bg-blue-50 text-gray-400 hover:text-blue-500 rounded-xl transition-all" title="Alternar Verificación">
                                 <ShieldCheck className="w-5 h-5" />
                               </button>
                               <button onClick={() => setConfirmDelete({ type: 'user', id: user.id })} className="p-2 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-xl transition-all" title="Eliminar Usuario">
@@ -352,12 +304,6 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
                 </div>
               )}
             </AnimatePresence>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full gap-4">
-               <div className="w-12 h-12 border-4 border-gray-100 border-t-gray-900 rounded-full animate-spin" />
-               <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Sincronizando Base de Datos...</p>
-            </div>
-          )}
         </div>
       </div>
 
