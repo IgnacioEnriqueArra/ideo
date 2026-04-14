@@ -89,7 +89,10 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
   };
 
   const getUser = (id: string) => users.find(u => u.id === id);
-  const getUserName = (id: string) => getUser(id)?.handle ?? id.slice(0, 8);
+  const getUserName = (id: string | undefined) => {
+    if (!id) return 'sistema';
+    return getUser(id)?.handle ?? id.slice(0, 8);
+  };
 
   const filteredData = {
     users: users.filter(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.handle.toLowerCase().includes(search.toLowerCase())),

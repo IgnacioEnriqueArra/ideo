@@ -79,7 +79,7 @@ export const NewsFeed: React.FC = () => {
                   <h2 className="font-bold text-gray-900 leading-tight mb-1">{article.title}</h2>
                   <p className="text-sm text-gray-500 line-clamp-2 mb-2">{article.description}</p>
                   <div className="flex flex-wrap gap-1">
-                    {article.tag_list.slice(0, 3).map(tag => (
+                    {article.tag_list?.slice(0, 3).map(tag => (
                       <span key={tag} className="text-[10px] font-mono text-primary bg-primary/10 px-1.5 py-0.5 rounded">
                         #{tag}
                       </span>
