@@ -6,6 +6,7 @@ import { Profile } from './components/Profile';
 import { NewsFeed } from './components/NewsFeed';
 import { Notifications } from './components/Notifications';
 import { Bookmarks } from './components/Bookmarks';
+import { Messages } from './components/Messages';
 import { Layout } from './components/Layout';
 import { ComposeModal } from './components/ComposeModal';
 import { Settings } from './components/Settings';
@@ -104,6 +105,8 @@ function AppContent() {
         return <Bookmarks key="bookmarks" onBack={() => setActiveTab('home')} onUserClick={setSelectedUserId} />;
       case 'settings':
         return <Settings key="settings" onBack={() => setActiveTab('home')} />;
+      case 'messages':
+        return <Messages key="messages" />;
       case 'home':
       default:
         return <Feed key="feed" onSelectIdea={setSelectedIdeaId} onUserClick={setSelectedUserId} onNotificationsClick={() => setActiveTab('notifications')} />;

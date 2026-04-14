@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Home, FileText, PlaySquare, User, Plus, X, Settings, Bookmark, LogOut, Smartphone, Bell } from 'lucide-react';
+import { Home, FileText, MessageSquare, User, Plus, X, Settings, Bookmark, LogOut, Smartphone, Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAppContext } from '../AppContext';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -57,6 +57,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
           {unreadCount > 0 && (
             <span className="absolute top-1.5 right-1/2 -mr-3 w-2 h-2 bg-red-500 rounded-full" />
           )}
+        </button>
+        <button onClick={() => setActiveTab('messages')} className="p-2 flex-1 flex justify-center">
+          <MessageSquare className={`w-6 h-6 ${activeTab === 'messages' ? 'text-primary fill-primary/10' : 'text-gray-400 dark:text-gray-500'}`} />
         </button>
         <button onClick={() => setActiveTab('profile')} className="p-2 flex-1 flex justify-center">
           <User className={`w-6 h-6 ${activeTab === 'profile' ? 'text-primary fill-primary/10' : 'text-gray-400 dark:text-gray-500'}`} />
