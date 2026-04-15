@@ -88,14 +88,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        await fetchCurrentUser(session.user.id);
+        await fetchCurrentUser(session.user.id, session.user.email);
       } else {
         setIsAuthReady(true);
       }
 
       const { data } = supabase.auth.onAuthStateChange(async (_event, session) => {
         if (session?.user) {
-          await fetchCurrentUser(session.user.id);
+          await fetchCurrentUser(session.user.id, session.user.email);
         } else {
           setCurrentUser(null);
         }
@@ -144,9 +144,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, []);
 
-  const fetchCurrentUser = async (id: string) => {
+  const fetchCurrentUser = async (id: string, email?: string) => {
     const { data } = await supabase.from('users').select('*').eq('id', id).single();
-    if (data) setCurrentUser(data as User);
+    if (data) setCurrentUser({ ...data, email: email || '' } as User);
     setIsAuthReady(true);
   };
 
@@ -496,7 +496,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (error) throw error;
 
       if (data.user) {
-        const newUser: User = {
+        // We don't save email in public.users table as per schema, but we need it for the User type in App
+        const newUserToInsert = {
           id: data.user.id,
           name,
           handle,
@@ -505,13 +506,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           followers: [],
           following: []
         };
-        const { error: insertError } = await supabase.from('users').insert(newUser);
+        const { error: insertError } = await supabase.from('users').insert(newUserToInsert);
         if (insertError) throw insertError;
         
         // Si Supabase tiene desactivado "Confirm email", data.session tendrá valor
         // y onAuthStateChange se activará solo. Pero para asegurar mayor velocidad:
         if (data.session) {
-           await fetchCurrentUser(data.user.id);
+           await fetchCurrentUser(data.user.id, data.user.email);
         } else {
            alert("Registro exitoso. Si no se inicia sesión automáticamente, por favor confirma tu correo electrónico.");
         }
