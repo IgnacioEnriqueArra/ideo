@@ -183,12 +183,12 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
                           {ideas.slice(0, 6).map(idea => (
                             <div key={idea.id} className="group flex items-center gap-4 p-4 rounded-3xl hover:bg-gray-50 transition-all border border-transparent hover:border-gray-100">
                                <Avatar className="w-12 h-12 rounded-2xl shrink-0">
-                                 <AvatarImage src={getUser(idea.authorId)?.avatar} />
+                                 <AvatarImage src={getUser(idea.author.id)?.avatar} />
                                  <AvatarFallback>U</AvatarFallback>
                                </Avatar>
                                <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2">
-                                     <span className="font-bold text-gray-900 text-[15px]">@{getUserName(idea.authorId)}</span>
+                                     <span className="font-bold text-gray-900 text-[15px]">@{getUserName(idea.author.id)}</span>
                                      <span className="text-[10px] text-gray-400 font-bold uppercase">{format(new Date(idea.createdAt), 'dd MMM, HH:mm', { locale: es })}</span>
                                   </div>
                                   <p className="text-sm text-gray-600 truncate mt-0.5">{idea.content}</p>
@@ -282,10 +282,10 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
                        <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-2">
                              <Avatar className="w-8 h-8 rounded-full">
-                               <AvatarImage src={getUser(item.authorId || item.senderId)?.avatar} />
+                               <AvatarImage src={getUser(item.author?.id || item.authorId || item.senderId)?.avatar} />
                              </Avatar>
                              <div>
-                               <p className="text-xs font-bold text-gray-900">@{getUserName(item.authorId || item.senderId)}</p>
+                               <p className="text-xs font-bold text-gray-900">@{getUserName(item.author?.id || item.authorId || item.senderId)}</p>
                                <p className="text-[10px] text-gray-400">{format(new Date(item.createdAt), 'dd MMMM yyyy', { locale: es })}</p>
                              </div>
                           </div>
