@@ -38,47 +38,48 @@ function AppContent() {
   // Admin logic for PC
   const isAdminPath = window.location.pathname === '/agent';
 
-  if (isDesktop && isAdminPath) {
-    if (!isAuthReady) {
-      return (
-        <div className="h-screen w-full bg-white flex items-center justify-center">
-          <div className="animate-pulse text-4xl font-black text-primary tracking-tighter">ideo.</div>
-        </div>
-      );
-    }
-
-    if (!currentUser || currentUser.email !== 'ignacioarra.it@gmail.com') {
-      return (
-        <div className="h-screen w-full bg-gray-50 flex flex-col items-center justify-center p-6">
-          <div className="max-w-md w-full">
-            {!currentUser ? (
-              <AuthScreen />
-            ) : (
-              <div className="bg-white p-8 rounded-[2.5rem] border border-red-100 shadow-xl text-center">
-                <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
-                  ✕
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Acceso Restringido</h2>
-                <p className="text-gray-500 mb-8">Esta sección es solo para administradores autorizados.</p>
-                <button 
-                  onClick={() => window.location.href = '/'}
-                  className="w-full bg-primary text-white font-bold py-4 rounded-full hover:bg-blue-600 transition-all"
-                >
-                  Volver al Inicio
-                </button>
-              </div>
-            )}
+  if (isDesktop) {
+    if (isAdminPath) {
+      if (!isAuthReady) {
+        return (
+          <div className="h-screen w-full bg-white flex items-center justify-center">
+            <div className="animate-pulse text-4xl font-black text-primary tracking-tighter">ideo.</div>
           </div>
+        );
+      }
+
+      if (!currentUser || currentUser.email !== 'ignacioarra.it@gmail.com') {
+        return (
+          <div className="h-screen w-full bg-gray-50 flex flex-col items-center justify-center p-6">
+            <div className="max-w-md w-full">
+              {!currentUser ? (
+                <AuthScreen />
+              ) : (
+                <div className="bg-white p-8 rounded-[2.5rem] border border-red-100 shadow-xl text-center">
+                  <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
+                    ✕
+                  </div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Acceso Restringido</h2>
+                  <p className="text-gray-500 mb-8">Esta sección es solo para administradores autorizados.</p>
+                  <button 
+                    onClick={() => window.location.href = '/'}
+                    className="w-full bg-primary text-white font-bold py-4 rounded-full hover:bg-blue-600 transition-all"
+                  >
+                    Volver al Inicio
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="h-screen w-full bg-gray-50 overflow-hidden">
+           <AdminDashboard onBack={() => window.location.href = '/'} />
         </div>
       );
     }
-
-    return (
-      <div className="h-screen w-full bg-gray-50 overflow-hidden">
-         <AdminDashboard onBack={() => window.location.href = '/'} />
-      </div>
-    );
-  }
 
     return (
       <div className="h-[100dvh] w-full bg-white flex flex-col items-center justify-center p-6 text-center">
