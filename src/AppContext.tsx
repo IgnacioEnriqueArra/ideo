@@ -38,8 +38,8 @@ type AppContextType = {
   toggleVerified: (userId: string) => void;
   deleteAccount: () => Promise<void>;
   logout: () => void;
-  login: (email?: string, password?: string) => Promise<void>;
-  signup?: (email: string, password: string, name: string, handle: string) => Promise<void>;
+  login: (seedPhrase: string) => Promise<void>;
+  signup?: (seedPhrase: string) => Promise<void>;
   loginRedirect: () => void;
   isAuthReady: boolean;
   unreadMessagesCount: number;
@@ -495,42 +495,47 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const login = async (email?: string, password?: string) => {
-    if (email && password) {
+  const formatSeedPhrase = (phrase: string) => phrase.trim().toLowerCase().replace(/\s+/g, '-');
+  const getEmailFromSeed = (phrase: string) => `${formatSeedPhrase(phrase)}@ideo.network`;
+
+  const login = async (seedPhrase: string) => {
+    if (seedPhrase) {
+      const email = getEmailFromSeed(seedPhrase);
+      const password = formatSeedPhrase(seedPhrase);
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) alert(error.message);
+      if (error) alert("Recovery key is invalid or the account doesn't exist.");
     }
   };
 
-  const signup = async (email: string, password: string, name: string, handle: string) => {
+  const signup = async (seedPhrase: string) => {
     try {
+      const email = getEmailFromSeed(seedPhrase);
+      const password = formatSeedPhrase(seedPhrase);
       const { data, error } = await supabase.auth.signUp({ email, password });
       if (error) throw error;
 
       if (data.user) {
-        // We don't save email in public.users table as per schema, but we need it for the User type in App
+        // Generate pseudo-anonymous details
+        const tempHandle = 'user_' + data.user.id.substring(0, 8);
+        const randomHex = Math.floor(Math.random()*16777215).toString(16);
         const newUserToInsert = {
           id: data.user.id,
-          name,
-          handle,
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.user.id}`,
-          bio: '¡Hola a todos!',
+          name: 'Anon_' + data.user.id.substring(0, 4),
+          handle: tempHandle,
+          avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${data.user.id}&backgroundColor=${randomHex}`,
+          bio: 'Just arrived at ideo.',
           followers: [],
           following: []
         };
         const { error: insertError } = await supabase.from('users').insert(newUserToInsert);
         if (insertError) throw insertError;
         
-        // Si Supabase tiene desactivado "Confirm email", data.session tendrá valor
-        // y onAuthStateChange se activará solo. Pero para asegurar mayor velocidad:
         if (data.session) {
            await fetchCurrentUser(data.user.id, data.user.email);
-        } else {
-           alert("Registro exitoso. Si no se inicia sesión automáticamente, por favor confirma tu correo electrónico.");
         }
       }
     } catch (error: any) {
-      alert(error.message || "Ocurrió un error en el registro");
+      alert(error.message || "An error occurred during account creation");
     }
   };
 
