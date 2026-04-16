@@ -13,7 +13,7 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, onCompose }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { currentUser, ideas, notifications, logout, unreadMessagesCount, setAuthModalOpen, globalSearchQuery, setGlobalSearchQuery } = useAppContext();
+  const { currentUser, ideas, users, notifications, logout, unreadMessagesCount, setAuthModalOpen, globalSearchQuery, setGlobalSearchQuery, toggleFollow } = useAppContext();
   const unreadNotificationsCount = notifications.filter(n => !n.read).length;
 
   useEffect(() => {
@@ -179,15 +179,51 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
           <div className="bg-gray-50 dark:bg-gray-900/50 rounded-3xl p-6 border border-gray-100 dark:border-gray-800">
             <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4">A quién seguir</h3>
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-bold">I</div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-sm truncate dark:text-white">Ideo Team</p>
-                  <p className="text-xs text-gray-500 truncate">@ideo_official</p>
-                </div>
-                <button className="bg-gray-900 text-white text-xs font-bold px-4 py-1.5 rounded-full hover:bg-black transition-colors">Seguir</button>
-              </div>
+              {users
+                .filter(u => u.id !== currentUser?.id)
+                .slice(0, 4)
+                .map((suggestedUser) => (
+                  <div key={suggestedUser.id} className="flex items-center gap-3">
+                    <Avatar 
+                      className="w-10 h-10 rounded-xl cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={() => window.dispatchEvent(new CustomEvent('open-user', { detail: suggestedUser.id }))}
+                    >
+                      <AvatarImage src={suggestedUser.avatar} />
+                      <AvatarFallback>{suggestedUser.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div 
+                      className="flex-1 min-w-0 cursor-pointer"
+                      onClick={() => window.dispatchEvent(new CustomEvent('open-user', { detail: suggestedUser.id }))}
+                    >
+                      <div className="flex items-center gap-1">
+                        <p className="font-bold text-sm truncate dark:text-white hover:underline">{suggestedUser.name}</p>
+                        {suggestedUser.verified && <BadgeCheck className="w-3.5 h-3.5 text-blue-500 fill-blue-500/10 shrink-0" />}
+                      </div>
+                      <p className="text-xs text-gray-500 truncate">@{suggestedUser.handle}</p>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        if (!currentUser) {
+                          setAuthModalOpen(true);
+                        } else {
+                          toggleFollow(suggestedUser.id);
+                        }
+                      }}
+                      className={`${
+                        currentUser?.following?.includes(suggestedUser.id)
+                          ? 'bg-white text-gray-900 border border-gray-200 hover:bg-red-50 hover:text-red-500 hover:border-red-100'
+                          : 'bg-gray-900 text-white hover:bg-black'
+                      } text-xs font-bold px-4 py-1.5 rounded-full transition-all`}
+                    >
+                      {currentUser?.following?.includes(suggestedUser.id) ? 'Siguiendo' : 'Seguir'}
+                    </button>
+                  </div>
+                ))}
+              {users.length <= 1 && (
+                <p className="text-sm text-gray-400 italic">Buscando mentes creativas...</p>
+              )}
             </div>
+            <button className="text-primary text-sm font-bold mt-6 hover:underline text-left">Mostrar más</button>
           </div>
         </aside>
 
