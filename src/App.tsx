@@ -39,76 +39,44 @@ function AppContent() {
   // Admin logic for PC
   const isAdminPath = window.location.pathname === '/agent';
 
-  if (isDesktop) {
-    if (isAdminPath) {
-      if (!isAuthReady) {
-        return (
-          <div className="h-screen w-full bg-white flex items-center justify-center">
-            <div className="animate-pulse text-4xl font-black text-primary tracking-tighter">ideo.</div>
-          </div>
-        );
-      }
-
-      if (!currentUser || currentUser.email !== 'ignacioarra.it@gmail.com') {
-        return (
-          <div className="h-screen w-full bg-gray-50 flex flex-col items-center justify-center p-6">
-            <div className="max-w-md w-full">
-              {!currentUser ? (
-                <AuthScreen />
-              ) : (
-                <div className="bg-white p-8 rounded-[2.5rem] border border-red-100 shadow-xl text-center">
-                  <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
-                    ✕
-                  </div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Acceso Restringido</h2>
-                  <p className="text-gray-500 mb-8">Esta sección es solo para administradores autorizados.</p>
-                  <button 
-                    onClick={() => window.location.href = '/'}
-                    className="w-full bg-primary text-white font-bold py-4 rounded-full hover:bg-blue-600 transition-all"
-                  >
-                    Volver al Inicio
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      }
-
+  if (isDesktop && isAdminPath) {
+    if (!isAuthReady) {
       return (
-        <div className="h-screen w-full bg-gray-50 overflow-hidden">
-           <AdminDashboard onBack={() => window.location.href = '/'} />
+        <div className="h-screen w-full bg-white flex items-center justify-center">
+          <div className="animate-pulse text-4xl font-black text-primary tracking-tighter">ideo.</div>
+        </div>
+      );
+    }
+
+    if (!currentUser || currentUser.email !== 'ignacioarra.it@gmail.com') {
+      return (
+        <div className="h-screen w-full bg-gray-50 flex flex-col items-center justify-center p-6">
+          <div className="max-w-md w-full">
+            {!currentUser ? (
+              <AuthScreen />
+            ) : (
+              <div className="bg-white p-8 rounded-[2.5rem] border border-red-100 shadow-xl text-center">
+                <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
+                  ✕
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Acceso Restringido</h2>
+                <p className="text-gray-500 mb-8">Esta sección es solo para administradores autorizados.</p>
+                <button 
+                  onClick={() => window.location.href = '/'}
+                  className="w-full bg-primary text-white font-bold py-4 rounded-full hover:bg-blue-600 transition-all"
+                >
+                  Volver al Inicio
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       );
     }
 
     return (
-      <div className="h-[100dvh] w-full bg-white flex flex-col items-center justify-center p-6 text-center">
-        <div className="max-w-sm">
-          <div className="mb-8">
-            <span className="text-6xl font-black text-primary tracking-tighter">ideo.</span>
-          </div>
-          <h1 className="text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">Ideo está en camino.</h1>
-          <p className="text-gray-500 text-lg leading-relaxed mb-10">
-            Nuestra experiencia completa para escritorio está siendo construida. Por ahora, disfruta de la <span className="text-primary font-bold">versión móvil</span>.
-          </p>
-          
-          <div className="flex flex-col items-center gap-4 p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 shadow-inner">
-            <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
-              <img 
-                src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://ideonetwork.vercel.app" 
-                alt="QR Code" 
-                className="w-40 h-40"
-              />
-            </div>
-            <div className="mt-2">
-              <p className="text-[11px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-3">Escanea para abrir en tu móvil</p>
-              <div className="px-4 py-2 bg-white rounded-full border border-slate-200 text-primary font-mono font-bold text-sm shadow-sm inline-block">
-                ideonetwork.vercel.app
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="h-screen w-full bg-gray-50 overflow-hidden">
+         <AdminDashboard onBack={() => window.location.href = '/'} />
       </div>
     );
   }
