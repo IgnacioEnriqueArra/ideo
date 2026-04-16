@@ -334,7 +334,7 @@ function AuthScreen({ onDone }: { onDone?: () => void }) {
                    
                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
                      {generatedSeed.split(' ').map((word, index) => (
-                       <div key={index} className={`bg-gray-50 dark:bg-gray-900/80 border border-gray-200 dark:border-gray-800 py-2 sm:py-2.5 pr-4 pl-10 rounded-xl relative shadow-sm min-w-0 ${index === 4 ? 'col-span-2' : ''}`}>
+                       <div key={index} className="bg-gray-50 dark:bg-gray-900/80 border border-gray-200 dark:border-gray-800 py-2 sm:py-2.5 pr-4 pl-10 rounded-xl relative shadow-sm min-w-0">
                          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gray-200/50 dark:bg-gray-800/50 border-r border-gray-200 dark:border-gray-800 flex items-center justify-center rounded-l-xl">
                            <span className="text-gray-500 text-[10px] sm:text-xs font-mono font-bold">{index + 1}</span>
                          </div>

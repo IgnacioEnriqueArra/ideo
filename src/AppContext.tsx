@@ -149,8 +149,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   const fetchCurrentUser = async (id: string, email?: string) => {
-    const { data } = await supabase.from('users').select('*').eq('id', id).single();
-    if (data) setCurrentUser({ ...data, email: email || '' } as User);
+    const { data } = await supabase.from('users').select('*').eq('id', id).maybeSingle();
+    if (data) {
+      setCurrentUser({ ...data, email: email || '' } as User);
+    } else {
+      await supabase.auth.signOut();
+      setCurrentUser(null);
+    }
     setIsAuthReady(true);
   };
 
