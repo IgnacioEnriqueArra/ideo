@@ -8,7 +8,7 @@ interface SettingsProps {
 }
 
 export const Settings: React.FC<SettingsProps> = ({ onBack }) => {
-  const { deleteAccount } = useAppContext();
+  const { deleteAccount, logout } = useAppContext();
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -81,7 +81,6 @@ export const Settings: React.FC<SettingsProps> = ({ onBack }) => {
           <button 
             onClick={() => {
               if (window.confirm("Are you sure you want to log out?")) {
-                const { logout } = useAppContext();
                 logout();
               }
             }}

@@ -484,8 +484,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
-    setCurrentUser(null);
+    try {
+      await supabase.auth.signOut();
+      setCurrentUser(null);
+      window.location.href = '/';
+    } catch (err) {
+      console.error("Logout error:", err);
+      setCurrentUser(null);
+      window.location.href = '/';
+    }
   };
 
   const login = async (email?: string, password?: string) => {
