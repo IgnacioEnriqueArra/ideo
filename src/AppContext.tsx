@@ -485,6 +485,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const logout = async () => {
     await supabase.auth.signOut();
+    setCurrentUser(null);
   };
 
   const login = async (email?: string, password?: string) => {

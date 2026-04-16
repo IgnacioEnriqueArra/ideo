@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Trash2, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Trash2, AlertTriangle, LogOut } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAppContext } from '../AppContext';
 
@@ -67,6 +67,28 @@ export const Settings: React.FC<SettingsProps> = ({ onBack }) => {
           >
             <Trash2 className="w-5 h-5" />
             {isDeleting ? 'Deleting...' : 'Delete Account'}
+          </button>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm mt-4">
+          <div className="flex items-center gap-3 mb-2 text-gray-900">
+            <LogOut className="w-6 h-6" />
+            <h2 className="text-lg font-bold">Account Session</h2>
+          </div>
+          <p className="text-gray-500 text-sm mb-6">
+            You can log out of your account anytime. You will need to sign in again to access your private content.
+          </p>
+          <button 
+            onClick={() => {
+              if (window.confirm("Are you sure you want to log out?")) {
+                const { logout } = useAppContext();
+                logout();
+              }
+            }}
+            className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white font-bold py-3 px-4 rounded-xl hover:bg-black transition-colors"
+          >
+            <LogOut className="w-5 h-5" />
+            Log Out
           </button>
         </div>
       </div>

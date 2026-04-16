@@ -91,10 +91,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 </div>
                 
                 {/* Simple Desktop Logout Popover */}
-                <div className="absolute bottom-full left-0 mb-2 w-full hidden group-hover:block animate-in fade-in slide-in-from-bottom-2 duration-200">
+                <div className="absolute bottom-full left-0 mb-2 w-full hidden group-hover:block transition-all duration-200 z-50">
                   <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 p-2 overflow-hidden">
                     <button 
-                      onClick={logout}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        logout();
+                      }}
                       className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 text-red-500 transition-colors"
                     >
                       <LogOut className="w-5 h-5" />
@@ -304,7 +307,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                   onClick={() => { setActiveTab('settings'); setIsMenuOpen(false); }}
                 >
                   <Settings className="w-6 h-6" />
-                  <span className="font-bold text-[17px]">Configuración</span>
+                  <span className="font-bold text-[17px]">Settings</span>
                 </button>
                 <button 
                   className="w-full flex items-center gap-4 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
