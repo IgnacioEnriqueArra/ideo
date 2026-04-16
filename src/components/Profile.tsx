@@ -148,7 +148,7 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
               ))
             ) : (
               <div className="p-8 text-center text-gray-500 text-[15px]">
-                {isOwnProfile ? "No has dado me gusta a nada aún." : "Los me gusta de este usuario son privados."}
+                {isOwnProfile ? "You haven't liked anything yet." : "This user's likes are private."}
               </div>
             )
           )}

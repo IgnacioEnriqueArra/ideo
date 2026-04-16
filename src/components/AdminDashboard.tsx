@@ -89,7 +89,7 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
 
   const getUser = (id: string) => users.find(u => u.id === id);
   const getUserName = (id: string | undefined) => {
-    if (!id) return 'anónimo';
+    if (!id) return 'anonymous';
     const u = getUser(id);
     return u?.handle ?? id.slice(0, 8);
   };
@@ -118,23 +118,23 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
 
         <div className="space-y-1.5">
           <SidebarItem icon={LayoutDashboard} label="Dashboard" active={section === 'overview'} onClick={() => setSection('overview')} />
-          <SidebarItem icon={Users} label="Usuarios" active={section === 'users'} onClick={() => setSection('users')} />
-          <SidebarItem icon={FileText} label="Ideas Root" active={section === 'ideas'} onClick={() => setSection('ideas')} />
+          <SidebarItem icon={Users} label="Users" active={section === 'users'} onClick={() => setSection('users')} />
+          <SidebarItem icon={FileText} label="Root Ideas" active={section === 'ideas'} onClick={() => setSection('ideas')} />
           <SidebarItem icon={GitFork} label="Branches" active={section === 'branches'} onClick={() => setSection('branches')} />
           <SidebarItem icon={MessageSquare} label="Feedback" active={section === 'feedbacks'} onClick={() => setSection('feedbacks')} />
-          <SidebarItem icon={Mail} label="Mensajes DM" active={section === 'messages'} onClick={() => setSection('messages')} />
+          <SidebarItem icon={Mail} label="DM Messages" active={section === 'messages'} onClick={() => setSection('messages')} />
         </div>
 
         <div className="mt-auto mb-8 space-y-2">
           <div className="px-4 py-4 rounded-3xl bg-gray-50 border border-gray-100">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-xs font-bold text-gray-600">Sistema Online</span>
+              <span className="text-xs font-bold text-gray-600">System Online</span>
             </div>
-            <p className="text-[10px] text-gray-400 leading-tight">Acceso autorizado. Todas las acciones son registradas.</p>
+            <p className="text-[10px] text-gray-400 leading-tight">Authorized access. All actions are logged.</p>
           </div>
           <button onClick={onBack} className="w-full py-4 text-xs font-black text-gray-400 hover:text-red-500 transition-colors uppercase tracking-widest">
-            Cerrar Sesión
+            Logout
           </button>
         </div>
       </div>
@@ -143,7 +143,7 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-10 shrink-0">
           <div className="flex items-center gap-4">
-             <h2 className="text-[20px] font-black text-gray-900 capitalize">{section === 'overview' ? 'Vista General' : section}</h2>
+             <h2 className="text-[20px] font-black text-gray-900 capitalize">{section === 'overview' ? 'Overview' : section}</h2>
           </div>
 
           <div className="flex items-center gap-6">
@@ -153,7 +153,7 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
                   type="text" 
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  placeholder="Buscar en la base de datos..." 
+                  placeholder="Search database..." 
                   className="bg-gray-50 w-80 py-2.5 pl-11 pr-4 rounded-2xl border border-gray-100 outline-none focus:bg-white focus:border-gray-900 transition-all text-sm"
                />
             </div>
@@ -165,31 +165,31 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
               {section === 'overview' && (
                 <div key="ov" className="max-w-7xl mx-auto space-y-10">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-                    <StatCard icon={Users} label="Usuarios" value={stats.users} color="bg-blue-600" delay={0.1} />
+                    <StatCard icon={Users} label="Users" value={stats.users} color="bg-blue-600" delay={0.1} />
                     <StatCard icon={FileText} label="Ideas" value={stats.ideas} color="bg-indigo-600" delay={0.2} />
                     <StatCard icon={GitFork} label="Branches" value={stats.branches} color="bg-emerald-600" delay={0.3} />
                     <StatCard icon={MessageSquare} label="Feedbacks" value={stats.feedbacks} color="bg-amber-600" delay={0.4} />
-                    <StatCard icon={Bell} label="Mensajes DM" value={stats.messages} color="bg-pink-600" delay={0.5} />
+                    <StatCard icon={Bell} label="DM Messages" value={stats.messages} color="bg-pink-600" delay={0.5} />
                   </div>
 
                   <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
                     {/* Recent Ideas */}
                     <div className="xl:col-span-2 bg-white rounded-[2.5rem] border border-gray-100 shadow-sm p-8">
                        <div className="flex items-center justify-between mb-8">
-                          <h3 className="text-xl font-black text-gray-900 tracking-tight">Actividad Global Reciente</h3>
-                          <button onClick={() => setSection('ideas')} className="text-sm font-bold text-blue-600 hover:underline px-4 py-2 bg-blue-50 rounded-full">Ver todos</button>
+                          <h3 className="text-xl font-black text-gray-900 tracking-tight">Recent Global Activity</h3>
+                          <button onClick={() => setSection('ideas')} className="text-sm font-bold text-blue-600 hover:underline px-4 py-2 bg-blue-50 rounded-full">View all</button>
                        </div>
                        <div className="space-y-4">
                           {ideas.slice(0, 6).map(idea => (
                             <div key={idea.id} className="group flex items-center gap-4 p-4 rounded-3xl hover:bg-gray-50 transition-all border border-transparent hover:border-gray-100">
                                <Avatar className="w-12 h-12 rounded-2xl shrink-0">
-                                 <AvatarImage src={getUser(idea.author.id)?.avatar} />
+                                 <AvatarImage src={getUser(idea.authorId)?.avatar} />
                                  <AvatarFallback>U</AvatarFallback>
                                </Avatar>
                                <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2">
-                                     <span className="font-bold text-gray-900 text-[15px]">@{getUserName(idea.author.id)}</span>
-                                     <span className="text-[10px] text-gray-400 font-bold uppercase">{format(new Date(idea.createdAt), 'dd MMM, HH:mm', { locale: es })}</span>
+                                     <span className="font-bold text-gray-900 text-[15px]">@{getUserName(idea.authorId)}</span>
+                                     <span className="text-[10px] text-gray-400 font-bold uppercase">{format(new Date(idea.createdAt), 'dd MMM, HH:mm')}</span>
                                   </div>
                                   <p className="text-sm text-gray-600 truncate mt-0.5">{idea.content}</p>
                                </div>
@@ -206,7 +206,7 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
 
                     {/* Verification Queue / Stats */}
                     <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm p-8">
-                        <h3 className="text-xl font-black text-gray-900 tracking-tight mb-8">Noticias de Usuario</h3>
+                        <h3 className="text-xl font-black text-gray-900 tracking-tight mb-8">User Updates</h3>
                         <div className="space-y-6">
                            {users.filter(u => !u.verified).slice(0, 6).map(user => (
                              <div key={user.id} className="flex items-center gap-4">
@@ -218,12 +218,12 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
                                    <p className="text-xs text-gray-400">@{user.handle}</p>
                                 </div>
                                 <button onClick={() => toggleVerified(user.id)} className="px-3 py-1.5 bg-blue-50 text-blue-600 text-[10px] font-bold rounded-full hover:bg-blue-600 hover:text-white transition-all uppercase tracking-wider">
-                                  Verificar
+                                  Verify
                                 </button>
                              </div>
                            ))}
                            <button onClick={() => setSection('users')} className="w-full py-4 text-xs font-black text-gray-400 text-center hover:text-gray-900 transition-colors uppercase tracking-[0.2em] border-t border-gray-50 mt-4">
-                             Gestionar todos los usuarios
+                             Manage all users
                            </button>
                         </div>
                     </div>
@@ -236,8 +236,8 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
                   <table className="w-full text-left border-collapse">
                     <thead className="bg-gray-50/50">
                       <tr>
-                        <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Usuario</th>
-                        <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Acciones</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">User</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
@@ -260,10 +260,10 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
                           </td>
                           <td className="px-8 py-4">
                             <div className="flex items-center justify-end gap-2 transition-opacity">
-                              <button onClick={() => toggleVerified(user.id)} className="p-2 hover:bg-blue-50 text-gray-400 hover:text-blue-500 rounded-xl transition-all" title="Alternar Verificación">
+                              <button onClick={() => toggleVerified(user.id)} className="p-2 hover:bg-blue-50 text-gray-400 hover:text-blue-500 rounded-xl transition-all" title="Toggle Verification">
                                 <ShieldCheck className="w-5 h-5" />
                               </button>
-                              <button onClick={() => setConfirmDelete({ type: 'user', id: user.id })} className="p-2 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-xl transition-all" title="Eliminar Usuario">
+                              <button onClick={() => setConfirmDelete({ type: 'user', id: user.id })} className="p-2 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-xl transition-all" title="Delete User">
                                 <Trash2 className="w-5 h-5" />
                               </button>
                             </div>
@@ -286,7 +286,7 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
                              </Avatar>
                              <div>
                                <p className="text-xs font-bold text-gray-900">@{getUserName(item.author?.id || item.authorId || item.senderId)}</p>
-                               <p className="text-[10px] text-gray-400">{format(new Date(item.createdAt), 'dd MMMM yyyy', { locale: es })}</p>
+                               <p className="text-[10px] text-gray-400">{format(new Date(item.createdAt), 'dd MMMM yyyy')}</p>
                              </div>
                           </div>
                           <div className="flex items-center gap-2">
@@ -328,14 +328,14 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
               <div className="w-20 h-20 bg-red-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-inner">
                 <AlertTriangle className="w-10 h-10 text-red-500" />
               </div>
-              <h2 className="text-2xl font-black text-gray-900 tracking-tight">Confirmar Eliminación</h2>
-              <p className="text-[15px] text-gray-500 mt-2 mb-8 leading-relaxed">¿Estás seguro de que deseas borrar este registro de la base de datos? Esta acción es <span className="text-red-500 font-bold">irreversible</span>.</p>
+              <h2 className="text-2xl font-black text-gray-900 tracking-tight">Confirm Deletion</h2>
+              <p className="text-[15px] text-gray-500 mt-2 mb-8 leading-relaxed">Are you sure you want to delete this record from the database? This action is <span className="text-red-500 font-bold">irreversible</span>.</p>
               <div className="flex gap-4">
                 <button onClick={() => setConfirmDelete(null)} className="flex-1 py-4 bg-gray-100 text-gray-700 font-black rounded-3xl hover:bg-gray-200 transition-all uppercase tracking-widest text-xs">
-                  Cancelar
+                  Cancel
                 </button>
                 <button onClick={handleDelete} className="flex-1 py-4 bg-red-500 text-white font-black rounded-3xl hover:bg-red-600 transition-all shadow-xl shadow-red-500/30 uppercase tracking-widest text-xs">
-                  Eliminar
+                  Delete
                 </button>
               </div>
             </motion.div>

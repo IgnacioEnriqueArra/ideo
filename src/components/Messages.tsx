@@ -138,7 +138,7 @@ const ChatView: React.FC<ChatProps> = ({ conversation, otherUserId, onBack }) =>
           <AvatarFallback className="bg-primary text-white text-sm font-bold">{otherUser?.name?.charAt(0) || '?'}</AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
-          <div className="font-bold text-gray-900 text-[15px] truncate">{otherUser?.name || 'Usuario'}</div>
+          <div className="font-bold text-gray-900 text-[15px] truncate">{otherUser?.name || 'User'}</div>
           <div className="text-gray-400 text-xs">@{otherUser?.handle}</div>
         </div>
       </div>
@@ -188,7 +188,7 @@ const ChatView: React.FC<ChatProps> = ({ conversation, otherUserId, onBack }) =>
                         <div className="text-[10px] font-bold uppercase tracking-wider text-primary">Ver Idea ➔</div>
                       </div>
                     ) : sharedIdeaId ? (
-                      <div className="text-xs italic text-gray-400">Idea no disponible</div>
+                      <div className="text-xs italic text-gray-400">Idea not available</div>
                     ) : (
                       <p className="text-gray-900">{msg.content}</p>
                     )}
@@ -198,13 +198,13 @@ const ChatView: React.FC<ChatProps> = ({ conversation, otherUserId, onBack }) =>
                 {/* Timestamp + Read status below bubble */}
                 <div className={`flex items-center gap-1.5 mt-1 px-1 ${isMine ? 'justify-end' : 'justify-start'}`}>
                   <span className="text-[10px] text-gray-400">
-                    {formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true, locale: es })}
+                    {formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true })}
                   </span>
                   {isLastMine && (
                     <span className={`text-[10px] font-semibold ${
                       msg.read ? 'text-primary' : 'text-gray-300'
                     }`}>
-                      {msg.read ? '• Leído' : '• Enviado'}
+                      {msg.read ? '• Read' : '• Sent'}
                     </span>
                   )}
                 </div>
@@ -219,7 +219,7 @@ const ChatView: React.FC<ChatProps> = ({ conversation, otherUserId, onBack }) =>
       <div className="flex items-end gap-2 px-3 py-3 border-t border-gray-100 bg-white pb-[calc(12px+env(safe-area-inset-bottom))]">
         <input
           type="text"
-          placeholder="Escribe un mensaje..."
+          placeholder="Write a message..."
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && sendMessage()}
@@ -271,7 +271,7 @@ const NewMessageModal: React.FC<NewMessageModalProps> = ({ onSelectUser, onClose
       >
         <div className="px-4 pt-4 pb-3 border-b border-gray-100">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-gray-900">Nuevo mensaje</h2>
+            <h2 className="text-lg font-bold text-gray-900">New message</h2>
             <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-full transition-colors">
               <ArrowLeft className="w-5 h-5 rotate-[135deg] text-gray-600" />
             </button>
@@ -280,7 +280,7 @@ const NewMessageModal: React.FC<NewMessageModalProps> = ({ onSelectUser, onClose
             <Search className="w-4 h-4 text-gray-400 shrink-0" />
             <input
               type="text"
-              placeholder="Busca un usuario..."
+              placeholder="Search for a user..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="flex-1 bg-transparent text-sm outline-none"
@@ -306,7 +306,7 @@ const NewMessageModal: React.FC<NewMessageModalProps> = ({ onSelectUser, onClose
             </button>
           ))}
           {filtered.length === 0 && (
-            <div className="p-8 text-center text-gray-400 text-sm">Sin resultados</div>
+            <div className="p-8 text-center text-gray-400 text-sm">No results</div>
           )}
         </div>
       </motion.div>
@@ -423,7 +423,7 @@ export const Messages: React.FC = () => {
 
   const deleteConversation = async (e: React.MouseEvent, conversationId: string) => {
     e.stopPropagation();
-    if (!confirm('¿Estás seguro de que quieres eliminar esta conversación?')) return;
+    if (!confirm('Are you sure you want to delete this conversation?')) return;
     
     setConversations(prev => prev.filter(c => c.id !== conversationId));
     await supabase.from('conversations').delete().eq('id', conversationId);
@@ -435,7 +435,7 @@ export const Messages: React.FC = () => {
       <div className="h-full flex flex-col">
         {/* Header */}
         <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex items-center justify-between">
-          <h1 className="text-xl font-black text-gray-900">Mensajes</h1>
+          <h1 className="text-xl font-black text-gray-900">Messages</h1>
           <button
             onClick={() => setShowNewMessage(true)}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -451,13 +451,13 @@ export const Messages: React.FC = () => {
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
                 <Send className="w-7 h-7 text-primary" />
               </div>
-              <p className="font-bold text-gray-900 text-lg">Ningún mensaje aún</p>
-              <p className="text-gray-400 text-sm">Empieza una conversación con alguien.</p>
+              <p className="font-bold text-gray-900 text-lg">No messages yet</p>
+              <p className="text-gray-400 text-sm">Start a conversation with someone.</p>
               <button
                 onClick={() => setShowNewMessage(true)}
                 className="bg-primary text-white font-bold px-6 py-2.5 rounded-full text-sm hover:bg-blue-600 transition-all active:scale-95 mt-1"
               >
-                Nuevo mensaje
+                New message
               </button>
             </div>
           )}
@@ -478,12 +478,12 @@ export const Messages: React.FC = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <span className={`font-bold text-gray-900 text-[15px] truncate ${unreadConvs.includes(conv.id) ? 'font-black' : 'font-bold'}`}>
-                      {other?.name || 'Usuario'}
+                      {other?.name || 'User'}
                     </span>
                     <div className="flex items-center gap-2">
                       {conv.lastMessageAt && (
                         <span className={`text-xs shrink-0 ${unreadConvs.includes(conv.id) ? 'text-primary font-bold' : 'text-gray-400'}`}>
-                          {formatDistanceToNow(new Date(conv.lastMessageAt), { addSuffix: false, locale: es })}
+                          {formatDistanceToNow(new Date(conv.lastMessageAt), { addSuffix: false })}
                         </span>
                       )}
                       {unreadConvs.includes(conv.id) && (
@@ -492,7 +492,7 @@ export const Messages: React.FC = () => {
                     </div>
                   </div>
                   <p className={`text-sm truncate mt-0.5 ${unreadConvs.includes(conv.id) ? 'text-gray-900 font-bold' : 'text-gray-500 font-normal'}`}>
-                    {conv.lastMessage || 'Conversación iniciada'}
+                    {conv.lastMessage || 'Conversation started'}
                   </p>
                 </div>
                 <button 

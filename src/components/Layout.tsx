@@ -36,13 +36,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
           
           <nav className="flex-1 space-y-2">
             {[
-              { id: 'home', icon: Home, label: 'Inicio' },
-              { id: 'news', icon: FileText, label: 'Noticias' },
-              { id: 'notifications', icon: Bell, label: 'Notificaciones', count: unreadNotificationsCount },
-              { id: 'messages', icon: MessageSquare, label: 'Mensajes', count: unreadMessagesCount },
-              { id: 'profile', icon: User, label: 'Perfil' },
-              { id: 'bookmarks', icon: Bookmark, label: 'Marcadores' },
-              { id: 'settings', icon: Settings, label: 'Configuración' },
+              { id: 'home', icon: Home, label: 'Home' },
+              { id: 'news', icon: FileText, label: 'News' },
+              { id: 'notifications', icon: Bell, label: 'Notifications', count: unreadNotificationsCount },
+              { id: 'messages', icon: MessageSquare, label: 'Messages', count: unreadMessagesCount },
+              { id: 'profile', icon: User, label: 'Profile' },
+              { id: 'bookmarks', icon: Bookmark, label: 'Bookmarks' },
+              { id: 'settings', icon: Settings, label: 'Settings' },
             ].map((item) => (
               <button
                 key={item.id}
@@ -70,7 +70,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               className="w-full mt-4 bg-primary text-white font-black py-4 rounded-2xl lg:rounded-full shadow-lg shadow-primary/20 hover:bg-blue-600 transition-all flex items-center justify-center gap-3 active:scale-95"
             >
               <Plus className="w-7 h-7" />
-              <span className="hidden lg:block text-lg">Postear</span>
+              <span className="hidden lg:block text-lg">Post</span>
             </button>
           </nav>
 
@@ -98,7 +98,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                       className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 text-red-500 transition-colors"
                     >
                       <LogOut className="w-5 h-5" />
-                      <span className="font-bold text-sm">Cerrar Sesión</span>
+                      <span className="font-bold text-sm">Logout</span>
                     </button>
                   </div>
                 </div>
@@ -109,7 +109,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 className="w-full flex items-center gap-3 p-3 rounded-2xl bg-gray-900 text-white hover:bg-black transition-all"
               >
                 <User className="w-6 h-6 mx-auto lg:mx-0" />
-                <span className="hidden lg:block font-bold">Entrar</span>
+                <span className="hidden lg:block font-bold">Login</span>
               </button>
             )}
           </div>
@@ -148,7 +148,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
              <Search className="w-5 h-5 text-gray-400" />
              <input 
                type="text" 
-               placeholder="Buscar en Ideo" 
+               placeholder="Search Ideo" 
                className="bg-transparent border-none focus:ring-0 text-sm w-full outline-none" 
                value={globalSearchQuery}
                onChange={(e) => setGlobalSearchQuery(e.target.value)}
@@ -156,7 +156,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
           </div>
           
           <div className="bg-gray-50 dark:bg-gray-900/50 rounded-3xl p-6 border border-gray-100 dark:border-gray-800">
-            <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4">Qué está pasando</h3>
+            <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4">What's happening</h3>
             <div className="space-y-6">
                {ideas.slice(0, 3).map((idea) => (
                  <div 
@@ -164,20 +164,20 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                    onClick={() => window.dispatchEvent(new CustomEvent('open-post', { detail: idea.id }))}
                    className="cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 -mx-4 px-4 py-2 rounded-xl transition-colors"
                  >
-                    <p className="text-xs text-gray-500 font-medium">Actualidad · {idea.author.name}</p>
+                    <p className="text-xs text-gray-500 font-medium">Trending · {idea.author.name}</p>
                     <p className="font-bold text-gray-900 dark:text-white mt-0.5 line-clamp-2">{idea.content}</p>
                     <p className="text-xs text-gray-400 mt-1">{idea.likes} likes · {idea.branches.length} branches</p>
                  </div>
                ))}
                {ideas.length === 0 && (
-                 <p className="text-sm text-gray-400 italic">No hay actividad reciente.</p>
+                 <p className="text-sm text-gray-400 italic">No recent activity.</p>
                )}
             </div>
-            <button onClick={() => setActiveTab('news')} className="text-primary text-sm font-bold mt-6 hover:underline text-left">Mostrar más</button>
+            <button onClick={() => setActiveTab('news')} className="text-primary text-sm font-bold mt-6 hover:underline text-left">Show more</button>
           </div>
 
           <div className="bg-gray-50 dark:bg-gray-900/50 rounded-3xl p-6 border border-gray-100 dark:border-gray-800">
-            <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4">A quién seguir</h3>
+            <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4">Who to follow</h3>
             <div className="space-y-4">
               {users
                 .filter(u => u.id !== currentUser?.id)
@@ -215,15 +215,15 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                           : 'bg-gray-900 text-white hover:bg-black'
                       } text-xs font-bold px-4 py-1.5 rounded-full transition-all`}
                     >
-                      {currentUser?.following?.includes(suggestedUser.id) ? 'Siguiendo' : 'Seguir'}
+                      {currentUser?.following?.includes(suggestedUser.id) ? 'Following' : 'Follow'}
                     </button>
                   </div>
                 ))}
               {users.length <= 1 && (
-                <p className="text-sm text-gray-400 italic">Buscando mentes creativas...</p>
+                <p className="text-sm text-gray-400 italic">Finding creative minds...</p>
               )}
             </div>
-            <button className="text-primary text-sm font-bold mt-6 hover:underline text-left">Mostrar más</button>
+            <button className="text-primary text-sm font-bold mt-6 hover:underline text-left">Show more</button>
           </div>
         </aside>
 
@@ -272,10 +272,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               
               <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
                 <div className="flex items-center gap-1.5">
-                  <div className="font-bold text-gray-900 dark:text-white text-lg">{currentUser?.name || 'Inicia sesión en Ideo'}</div>
+                  <div className="font-bold text-gray-900 dark:text-white text-lg">{currentUser?.name || 'Log in to Ideo'}</div>
                   {currentUser?.verified && <BadgeCheck className="w-4 h-4 text-blue-500" />}
                 </div>
-                <div className="text-gray-500 text-[15px]">@{currentUser?.handle || 'visitante'}</div>
+                <div className="text-gray-500 text-[15px]">@{currentUser?.handle || 'visitor'}</div>
                 {currentUser && (
                   <div className="flex gap-4 mt-3 text-[15px]">
                     <div className="flex gap-1"><span className="font-bold text-gray-900 dark:text-white">{currentUser.following?.length || 0}</span> <span className="text-gray-500">Following</span></div>
@@ -333,7 +333,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                     className="w-full bg-primary text-white font-bold py-3 rounded-2xl hover:bg-blue-600 transition-all flex items-center justify-center gap-2"
                   >
                     <Plus className="w-5 h-5" />
-                    <span>Iniciar Sesión</span>
+                    <span>Log in</span>
                   </button>
                 )}
               </div>

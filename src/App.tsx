@@ -59,13 +59,13 @@ function AppContent() {
                 <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
                   ✕
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Acceso Restringido</h2>
-                <p className="text-gray-500 mb-8">Esta sección es solo para administradores autorizados.</p>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Restricted Access</h2>
+                <p className="text-gray-500 mb-8">This section is for authorized administrators only.</p>
                 <button 
                   onClick={() => window.location.href = '/'}
                   className="w-full bg-primary text-white font-bold py-4 rounded-full hover:bg-blue-600 transition-all"
                 >
-                  Volver al Inicio
+                  Back to Home
                 </button>
               </div>
             )}
@@ -191,12 +191,12 @@ function AppContent() {
       {!currentUser && activeTab === 'home' && !selectedIdeaId && !selectedUserId && (
         <div className="bg-primary/5 border-b border-primary/10 p-4 animate-in slide-in-from-top duration-500">
            <div className="flex items-center justify-between gap-4">
-              <p className="text-sm font-medium text-gray-700">Explora lo mejor de <span className="font-bold text-primary">ideo.</span> Crea una cuenta para unirte a la conversación.</p>
+              <p className="text-sm font-medium text-gray-700">Explore the best of <span className="font-bold text-primary">ideo.</span> Create an account to join the conversation.</p>
               <button 
                 onClick={() => setAuthModalOpen(true)}
                 className="shrink-0 bg-primary text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm"
               >
-                Unirse ahora
+                Join now
               </button>
            </div>
         </div>
@@ -248,19 +248,19 @@ function AuthScreen({ inModal, onDone }: { inModal?: boolean, onDone?: () => voi
           <span className={`${inModal ? 'text-4xl' : 'text-5xl'} font-black text-primary tracking-tighter text-center`}>ideo.</span>
         </div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center">
-          {isLogin ? 'Bienvenido de nuevo' : 'Crea tu cuenta'}
+          {isLogin ? 'Welcome back' : 'Create your account'}
         </h1>
-        <p className="text-gray-500 text-center mb-8">Escribe, comparte y construye ideas.</p>
+        <p className="text-gray-500 text-center mb-8">Write, share and build ideas together.</p>
         
         <form onSubmit={handleSubmit} className="w-full space-y-4">
           {!isLogin && (
             <>
-              <input type="text" placeholder="Nombre completo" value={name} onChange={e=>setName(e.target.value)} required className="w-full p-3.5 rounded-2xl border border-gray-200 outline-none focus:border-primary transition-colors" />
-              <input type="text" placeholder="Nombre de usuario" value={handle} onChange={e=>setHandle(e.target.value.toLowerCase().trim())} required className="w-full p-3.5 rounded-2xl border border-gray-200 outline-none focus:border-primary transition-colors" />
+              <input type="text" placeholder="Full name" value={name} onChange={e=>setName(e.target.value)} required className="w-full p-3.5 rounded-2xl border border-gray-200 outline-none focus:border-primary transition-colors" />
+              <input type="text" placeholder="Username" value={handle} onChange={e=>setHandle(e.target.value.toLowerCase().trim())} required className="w-full p-3.5 rounded-2xl border border-gray-200 outline-none focus:border-primary transition-colors" />
             </>
           )}
-          <input type="email" placeholder="Correo electrónico" value={email} onChange={e=>setEmail(e.target.value)} required className="w-full p-3.5 rounded-2xl border border-gray-200 outline-none focus:border-primary transition-colors" />
-          <input type="password" placeholder="Contraseña" value={password} onChange={e=>setPassword(e.target.value)} required minLength={6} className="w-full p-3.5 rounded-2xl border border-gray-200 outline-none focus:border-primary transition-colors dark:bg-gray-900 dark:text-white" />
+          <input type="email" placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} required className="w-full p-3.5 rounded-2xl border border-gray-200 outline-none focus:border-primary transition-colors" />
+          <input type="password" placeholder="Password" value={password} onChange={e=>setPassword(e.target.value)} required minLength={6} className="w-full p-3.5 rounded-2xl border border-gray-200 outline-none focus:border-primary transition-colors dark:bg-gray-900 dark:text-white" />
           
           <button 
             type="submit" 
@@ -270,13 +270,13 @@ function AuthScreen({ inModal, onDone }: { inModal?: boolean, onDone?: () => voi
             {isLoading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
-              isLogin ? 'Iniciar Sesión' : 'Registrarse'
+              isLogin ? 'Log In' : 'Sign Up'
             )}
           </button>
         </form>
 
         <button onClick={() => setIsLogin(!isLogin)} className="w-full mt-6 text-gray-500 text-sm hover:underline font-medium">
-          {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
+          {isLogin ? "Don't have an account? Sign up" : "Already have an account? Log in"}
         </button>
       </div>
   );

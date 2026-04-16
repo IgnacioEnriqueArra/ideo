@@ -79,7 +79,7 @@ export const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose }) =
                 disabled={!content.trim() || isOverLimit}
                 className="bg-gray-900 text-white text-sm font-bold px-5 py-2 rounded-full hover:bg-gray-700 transition-all active:scale-95 disabled:opacity-40 shadow-md"
               >
-                Postear
+                Post
               </button>
             </div>
 
@@ -93,7 +93,7 @@ export const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose }) =
                 <div className="text-[13px] font-semibold text-gray-900 mb-1">{currentUser?.name}</div>
                 <textarea
                   ref={textareaRef}
-                  placeholder="¿Qué está pasando?"
+                  placeholder="What's happening?"
                   className="w-full min-h-[96px] text-[17px] leading-relaxed resize-none border-none focus:ring-0 p-0 bg-transparent outline-none placeholder:text-gray-400"
                   value={content}
                   onChange={(e) => {
@@ -128,7 +128,7 @@ export const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose }) =
                 <Link2 className="w-4 h-4 text-primary shrink-0" />
                 <input
                   type="url"
-                  placeholder="Añade un enlace (genera una preview automática)"
+                  placeholder="Add a link (auto-preview)"
                   className="flex-1 bg-transparent text-[14px] text-gray-900 outline-none placeholder:text-gray-400 min-w-0"
                   value={url}
                   onChange={e => setUrl(e.target.value)}
@@ -138,7 +138,7 @@ export const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose }) =
                 <Tag className="w-4 h-4 text-gray-400 shrink-0" />
                 <input
                   type="text"
-                  placeholder="Tags (ej: diseño, tech, IA)"
+                  placeholder="Tags (eg: design, tech, AI)"
                   className="flex-1 bg-transparent text-[14px] text-gray-900 outline-none placeholder:text-gray-400 min-w-0"
                   value={tags}
                   onChange={e => setTags(e.target.value)}
@@ -153,7 +153,7 @@ export const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose }) =
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   className="p-2 text-primary hover:bg-primary/10 rounded-full transition-colors"
-                  title="Adjuntar imagen o video"
+                  title="Attach image or video"
                 >
                   <ImageIcon className="w-5 h-5" />
                 </button>

@@ -124,7 +124,7 @@ export const EditProfile: React.FC<EditProfileProps> = ({ isOpen, onClose }) => 
             </div>
             <input 
               type="text" 
-              placeholder="También puedes pegar una URL de imagen externa aquí..." 
+              placeholder="Or paste an external image URL here..." 
               className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary mt-2"
               value={avatar}
               onChange={(e) => setAvatar(e.target.value)}

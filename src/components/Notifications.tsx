@@ -11,10 +11,10 @@ interface NotificationsProps {
 }
 
 const typeConfig = {
-  like:     { icon: Heart,          color: 'bg-red-500',   iconStyle: 'text-white fill-white',  label: 'le dio me gusta a tu idea.' },
-  branch:   { icon: GitFork,        color: 'bg-blue-500',  iconStyle: 'text-white',             label: 'hizo un branch desde tu idea.' },
-  feedback: { icon: MessageSquare,  color: 'bg-green-500', iconStyle: 'text-white fill-white/20',label: 'comentó en tu branch.' },
-  follow:   { icon: UserPlus,       color: 'bg-violet-500',iconStyle: 'text-white',             label: 'comenzó a seguirte.' },
+  like:     { icon: Heart,          color: 'bg-red-500',   iconStyle: 'text-white fill-white',  label: 'liked your idea.' },
+  branch:   { icon: GitFork,        color: 'bg-blue-500',  iconStyle: 'text-white',             label: 'made a branch from your idea.' },
+  feedback: { icon: MessageSquare,  color: 'bg-green-500', iconStyle: 'text-white fill-white/20',label: 'commented on your branch.' },
+  follow:   { icon: UserPlus,       color: 'bg-violet-500',iconStyle: 'text-white',             label: 'started following you.' },
 } as const;
 
 export const Notifications: React.FC<NotificationsProps> = ({ onUserClick }) => {
@@ -37,18 +37,18 @@ export const Notifications: React.FC<NotificationsProps> = ({ onUserClick }) => 
       <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 pt-4 pb-3">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-[22px] font-black text-gray-900 tracking-tight">Notificaciones</h1>
+            <h1 className="text-[22px] font-black text-gray-900 tracking-tight">Notifications</h1>
             {unreadCount > 0 && (
-              <p className="text-xs text-primary font-semibold mt-0.5">{unreadCount} nueva{unreadCount !== 1 ? 's' : ''}</p>
+              <p className="text-xs text-primary font-semibold mt-0.5">{unreadCount} new</p>
             )}
           </div>
           {notifications.length > 0 && (
             <button
-              onClick={() => { if (confirm('¿Borrar todas las notificaciones?')) clearAllNotifications(); }}
+              onClick={() => { if (confirm('Clear all notifications?')) clearAllNotifications(); }}
               className="flex items-center gap-1.5 text-xs font-bold text-red-500 hover:bg-red-50 px-3 py-2 rounded-full transition-colors border border-red-100"
             >
               <BellOff className="w-3.5 h-3.5" />
-              Limpiar
+              Clear
             </button>
           )}
         </div>
@@ -66,8 +66,8 @@ export const Notifications: React.FC<NotificationsProps> = ({ onUserClick }) => 
             <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
               <BellOff className="w-7 h-7 text-gray-300" />
             </div>
-            <p className="font-bold text-gray-900 text-[17px]">Sin notificaciones</p>
-            <p className="text-gray-400 text-sm leading-snug">Cuando alguien interactúe contigo, las verás aquí.</p>
+            <p className="font-bold text-gray-900 text-[17px]">No notifications</p>
+            <p className="text-gray-400 text-sm leading-snug">When someone interacts with you, you'll see it here.</p>
           </motion.div>
         ) : (
           <AnimatePresence initial={false}>
@@ -91,7 +91,7 @@ export const Notifications: React.FC<NotificationsProps> = ({ onUserClick }) => 
                       <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
                         <BellOff className="w-4 h-4 text-white" />
                       </div>
-                      <span className="text-[10px] text-white font-bold uppercase tracking-wide">Borrar</span>
+                      <span className="text-[10px] text-white font-bold uppercase tracking-wide">Delete</span>
                     </div>
                   </div>
 
@@ -135,7 +135,7 @@ export const Notifications: React.FC<NotificationsProps> = ({ onUserClick }) => 
                         <span className="text-gray-600">{cfg?.label}</span>
                       </p>
                       <p className="text-[12px] text-gray-400 mt-0.5">
-                        {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true, locale: es })}
+                        {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
                       </p>
                     </div>
 

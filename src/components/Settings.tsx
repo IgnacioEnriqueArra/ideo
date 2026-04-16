@@ -13,7 +13,7 @@ export const Settings: React.FC<SettingsProps> = ({ onBack }) => {
   const [error, setError] = useState<string | null>(null);
 
   const handleDelete = async () => {
-    if (!window.confirm("¿Estás súper seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.")) return;
+    if (!window.confirm("Are you absolutely sure you want to delete your account? This action cannot be undone.")) return;
     
     setIsDeleting(true);
     setError(null);
@@ -22,9 +22,9 @@ export const Settings: React.FC<SettingsProps> = ({ onBack }) => {
     } catch (err: any) {
       console.error(err);
       if (err.code === 'auth/requires-recent-login') {
-        setError("Por seguridad, debes haber iniciado sesión recientemente para eliminar tu cuenta. Por favor, cierra sesión, vuelve a entrar e inténtalo de nuevo.");
+        setError("For security reasons, you must have logged in recently to delete your account. Please log out, log back in, and try again.");
       } else {
-        setError("Hubo un error al eliminar tu cuenta. Intenta de nuevo más tarde.");
+        setError("There was an error deleting your account. Please try again later.");
       }
       setIsDeleting(false);
     }
@@ -41,17 +41,17 @@ export const Settings: React.FC<SettingsProps> = ({ onBack }) => {
         <button onClick={onBack} className="p-2 -ml-2 hover:bg-gray-50 rounded-full transition-colors">
           <ArrowLeft className="w-5 h-5 text-gray-900" />
         </button>
-        <h1 className="text-xl font-bold text-gray-900">Configuración</h1>
+        <h1 className="text-xl font-bold text-gray-900">Settings</h1>
       </div>
 
       <div className="p-4 flex-1">
         <div className="bg-white rounded-2xl border border-red-100 p-5 shadow-sm mt-4">
           <div className="flex items-center gap-3 mb-2 text-red-600">
             <AlertTriangle className="w-6 h-6" />
-            <h2 className="text-lg font-bold">Zona de Peligro</h2>
+            <h2 className="text-lg font-bold">Danger Zone</h2>
           </div>
           <p className="text-gray-500 text-sm mb-6">
-            Una vez que elimines tu cuenta, no hay vuelta atrás. Esto eliminará tu perfil, configuración y todos los datos asociados de forma permanente.
+            Once you delete your account, there is no turning back. This will permanently remove your profile, settings, and all associated data.
           </p>
 
           {error && (
@@ -66,7 +66,7 @@ export const Settings: React.FC<SettingsProps> = ({ onBack }) => {
             className="w-full flex items-center justify-center gap-2 bg-red-50 text-red-600 font-bold py-3 px-4 rounded-xl hover:bg-red-100 transition-colors disabled:opacity-50"
           >
             <Trash2 className="w-5 h-5" />
-            {isDeleting ? 'Eliminando...' : 'Eliminar Cuenta'}
+            {isDeleting ? 'Deleting...' : 'Delete Account'}
           </button>
         </div>
       </div>

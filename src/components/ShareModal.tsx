@@ -35,7 +35,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ idea, isOpen, onClose })
   }, [currentUser?.id, isOpen]);
 
   const handleCopyLink = () => {
-    const text = `Echa un vistazo a esta idea de ${idea.author.name}:\n\n"${idea.content}"\n\n${window.location.origin}/`;
+    const text = `Check out this idea from ${idea.author.name}:\n\n"${idea.content}"\n\n${window.location.origin}/`;
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -79,7 +79,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ idea, isOpen, onClose })
       });
 
       await supabase.from('conversations').update({
-        lastMessage: 'Post compartido',
+        lastMessage: 'Shared post',
         lastMessageAt: new Date().toISOString()
       }).eq('id', convId);
 
@@ -115,7 +115,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ idea, isOpen, onClose })
             onClick={e => e.stopPropagation()}
           >
             <div className="px-4 py-4 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="text-xl font-black text-gray-900">Compartir post</h2>
+              <h2 className="text-xl font-black text-gray-900">Share post</h2>
               <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                 <X className="w-5 h-5 text-gray-700" />
               </button>
@@ -131,7 +131,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ idea, isOpen, onClose })
                   {copied ? <Check className="w-5 h-5 text-green-500" /> : <Copy className="w-5 h-5" />}
                 </div>
                 <div className="text-left font-bold text-gray-900">
-                  {copied ? '¡Copiado!' : 'Copiar enlace'}
+                  {copied ? 'Copied!' : 'Copy link'}
                 </div>
               </button>
 
@@ -140,7 +140,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ idea, isOpen, onClose })
                   <Search className="w-4 h-4 text-gray-400" />
                   <input 
                     type="text" 
-                    placeholder="Buscar personas..." 
+                    placeholder="Search people..." 
                     className="bg-transparent text-sm outline-none flex-1"
                     value={search}
                     onChange={e => setSearch(e.target.value)}
@@ -175,7 +175,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ idea, isOpen, onClose })
                             : 'bg-primary text-white hover:bg-blue-600 active:scale-95 disabled:opacity-50'
                         }`}
                       >
-                        {isPending ? 'Enviando...' : isSent ? 'Enviado' : 'Enviar'}
+                        {isPending ? 'Sending...' : isSent ? 'Sent' : 'Send'}
                       </button>
                     </div>
                   );

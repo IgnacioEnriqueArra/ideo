@@ -63,7 +63,7 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input 
             type="text" 
-            placeholder="Buscar ideas, usuarios o etiquetas..." 
+            placeholder="Search ideas, users, or tags..." 
             className="w-full bg-gray-100 border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
             value={globalSearchQuery}
             onChange={(e) => setGlobalSearchQuery(e.target.value)}
@@ -97,9 +97,9 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
 
           {/* CTA post */}
           <div className="p-6 border-b border-gray-100 flex flex-col items-center justify-center bg-gradient-to-br from-primary/5 to-transparent">
-            <h2 className="text-lg font-bold text-gray-900 mb-2">Comparte tu idea, proyecto o trabajo</h2>
+            <h2 className="text-lg font-bold text-gray-900 mb-2">Share your idea, project, or work</h2>
             <p className="text-gray-500 text-[15px] mb-4 text-center max-w-sm">
-              Únete a la comunidad de Ideo. Publica en qué estás trabajando, haz haz branches y colabora con otros.
+              Join the Ideo community. Post what you're working on, branch out, and collaborate with others.
             </p>
             <button 
               className="bg-primary text-white font-bold py-2.5 px-6 rounded-full hover:bg-blue-600 transition-all shadow-sm active:scale-95"
@@ -108,7 +108,7 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
                 if (composeBtn) composeBtn.click();
               }}
             >
-              Postear Idea
+              Post Idea
             </button>
           </div>
         </>
@@ -142,7 +142,7 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
 
         {globalSearchQuery && filteredIdeas.length === 0 && filteredUsers.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
-            No se encontraron resultados para "{globalSearchQuery}"
+            No results found for "{globalSearchQuery}"
           </div>
         ) : (
           <AnimatePresence>
