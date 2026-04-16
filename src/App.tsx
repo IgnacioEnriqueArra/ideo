@@ -295,22 +295,22 @@ function AuthScreen({ onDone }: { onDone?: () => void }) {
           <X className="w-6 h-6 text-gray-400" />
         </button>
 
-        <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 overflow-y-auto">
+        <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-12 overflow-y-auto">
           <div className="w-full max-w-md mx-auto">
-            <div className="md:hidden mb-12 flex justify-center">
-              <span className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-primary tracking-tighter">fork.</span>
+            <div className="md:hidden mb-6 sm:mb-12 flex justify-center">
+              <span className="text-5xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-primary tracking-tighter">fork.</span>
             </div>
             
-            <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-3 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
               {isLogin ? 'Access Identity' : 'Generate Identity'}
             </h1>
-            <p className="text-gray-500 mb-10 text-sm leading-relaxed">
+            <p className="text-gray-500 mb-6 sm:mb-10 text-sm leading-relaxed">
               {isLogin 
                 ? 'Enter your 5-word secret recovery phrase to authenticate your session.' 
                 : 'Welcome to the future of social networks. No emails, no passwords. Just a decentralized identity you own.'}
             </p>
             
-            <form onSubmit={handleSubmit} className="w-full space-y-8">
+            <form onSubmit={handleSubmit} className="w-full space-y-4 sm:space-y-8">
               {isLogin ? (
                 <div className="space-y-3">
                   <label className="text-xs font-bold uppercase tracking-wider text-gray-500 ml-1">Recovery Phrase</label>
@@ -319,24 +319,24 @@ function AuthScreen({ onDone }: { onDone?: () => void }) {
                     value={seedPhrase} 
                     onChange={e=>setSeedPhrase(e.target.value)} 
                     required 
-                    className="w-full p-5 rounded-3xl border border-gray-200 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all dark:bg-gray-900 dark:border-gray-800 dark:focus:border-primary dark:text-white resize-none h-32 font-mono text-[15px] leading-relaxed shadow-sm block" 
+                    className="w-full p-4 sm:p-5 rounded-3xl border border-gray-200 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all dark:bg-gray-900 dark:border-gray-800 dark:focus:border-primary dark:text-white resize-none h-28 sm:h-32 font-mono text-sm sm:text-[15px] leading-relaxed shadow-sm block" 
                   />
                 </div>
               ) : (
-                <div className="space-y-6">
-                   <div className="bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-900/50 p-5 rounded-2xl flex items-start gap-4 shadow-sm">
-                     <div className="text-orange-500 mt-0.5 text-xl leading-none">⚠️</div>
-                     <div className="text-sm text-orange-800 dark:text-orange-200 leading-relaxed">
-                        <strong className="block mb-1 font-bold text-[15px]">Save these words!</strong>
-                        This is the ONLY way to access your account. If you lose this phrase, your account cannot be recovered.
+                <div className="space-y-3 sm:space-y-6">
+                   <div className="bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-900/50 p-3.5 sm:p-5 rounded-2xl flex items-start gap-3 sm:gap-4 shadow-sm">
+                     <div className="text-orange-500 mt-0.5 text-lg sm:text-xl leading-none">⚠️</div>
+                     <div className="text-xs sm:text-sm text-orange-800 dark:text-orange-200 leading-relaxed text-[13px]">
+                        <strong className="block mb-0.5 sm:mb-1 font-bold text-sm sm:text-[15px]">Save these words!</strong>
+                        This is the ONLY way to access your account. If lost, your account cannot be recovered.
                      </div>
                    </div>
                    
-                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                      {generatedSeed.split(' ').map((word, index) => (
-                       <div key={index} className="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-3.5 rounded-xl flex items-center justify-center gap-2 shadow-sm">
-                         <span className="text-gray-400 text-xs font-mono">{index + 1}.</span>
-                         <span className="font-bold text-gray-900 dark:text-white truncate">{word}</span>
+                       <div key={index} className="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-2.5 sm:p-3.5 rounded-xl flex items-center justify-center gap-2 shadow-sm">
+                         <span className="text-gray-400 text-[10px] sm:text-xs font-mono">{index + 1}.</span>
+                         <span className="font-bold text-gray-900 dark:text-white text-sm sm:text-base truncate">{word}</span>
                        </div>
                      ))}
                    </div>
@@ -344,7 +344,7 @@ function AuthScreen({ onDone }: { onDone?: () => void }) {
                    <button 
                      type="button" 
                      onClick={copyToClipboard}
-                     className="w-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 font-bold py-4 rounded-2xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-all text-[15px] flex items-center justify-center gap-2 shadow-sm active:scale-95"
+                     className="w-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 font-bold py-3 sm:py-4 rounded-2xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-all text-sm sm:text-[15px] flex items-center justify-center gap-2 shadow-sm active:scale-95"
                    >
                      {copied ? '✓ Copied to clipboard' : 'Copy Recovery Phrase'}
                    </button>
@@ -354,17 +354,17 @@ function AuthScreen({ onDone }: { onDone?: () => void }) {
               <button 
                 type="submit" 
                 disabled={isLoading}
-                className="w-full bg-primary text-white font-bold py-4 rounded-[1.25rem] shadow-xl shadow-primary/25 hover:bg-blue-600 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 text-lg"
+                className="w-full bg-primary text-white font-bold py-3.5 sm:py-4 rounded-2xl sm:rounded-[1.25rem] shadow-lg sm:shadow-xl shadow-primary/25 hover:bg-blue-600 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 text-base sm:text-lg"
               >
                 {isLoading ? (
-                  <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
                   isLogin ? 'Access Identity' : 'I have saved my phrase'
                 )}
               </button>
             </form>
 
-            <button onClick={() => setIsLogin(!isLogin)} className="w-full mt-8 text-gray-500 dark:text-gray-400 text-[15px] hover:text-primary dark:hover:text-primary transition-colors font-semibold">
+            <button onClick={() => setIsLogin(!isLogin)} className="w-full mt-5 sm:mt-8 text-gray-500 dark:text-gray-400 text-sm sm:text-[15px] hover:text-primary dark:hover:text-primary transition-colors font-semibold">
               {isLogin ? "Need a new identity? Generate one" : "Already have an identity? Access it here"}
             </button>
           </div>
