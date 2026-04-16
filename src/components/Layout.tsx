@@ -106,14 +106,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                   </div>
                 </div>
               </div>
-            ) : (
-              <button 
-                onClick={() => setAuthModalOpen(true)}
-                className="w-full flex items-center gap-3 p-3 rounded-2xl bg-gray-900 text-white hover:bg-black transition-all"
-              >
-                <User className="w-6 h-6 mx-auto lg:mx-0" />
-                <span className="hidden lg:block font-bold">Login</span>
-              </button>
             )}
           </div>
         </aside>
