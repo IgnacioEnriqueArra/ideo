@@ -75,7 +75,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
           </nav>
 
           <div className="mt-auto px-2">
-            {currentUser ? (
+            {currentUser && (
               <div className="relative group">
                 {/* Desktop Profile Card / Popover trigger */}
                 <div className="flex items-center gap-3 p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all cursor-pointer">
