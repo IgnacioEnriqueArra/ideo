@@ -20,6 +20,33 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = fa
   const isLiked = userLikes.includes(idea.id);
   const [showMenu, setShowMenu] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [translatedText, setTranslatedText] = useState<string | null>(null);
+  const [isTranslating, setIsTranslating] = useState(false);
+
+  const handleTranslate = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (translatedText) {
+      setTranslatedText(null);
+      return;
+    }
+    
+    setIsTranslating(true);
+    try {
+       // Simple heuristic to decide translation direction
+       const isLikelyEnglish = /\b(the|and|is|are|you|my|it|in|on|with)\b/i.test(idea.content);
+       const langPair = isLikelyEnglish ? 'en|es' : 'es|en';
+       
+       const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(idea.content)}&langpair=${langPair}`);
+       const data = await res.json();
+       if (data.responseData.translatedText) {
+         setTranslatedText(data.responseData.translatedText);
+       }
+    } catch (err) {
+       console.error(err);
+    } finally {
+       setIsTranslating(false);
+    }
+  };
 
   return (
     <div 
@@ -95,7 +122,7 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = fa
           </div>
 
           <p className={`mt-1 text-gray-900 leading-snug whitespace-pre-wrap ${isDetail ? 'text-lg' : 'text-[15px]'}`}>
-            {idea.content.split(' ').map((part, i) => {
+            {(translatedText || idea.content).split(' ').map((part, i) => {
               const urlRegex = /(https?:\/\/[^\s]+)/g;
               if (part.match(urlRegex)) {
                 return <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all" onClick={e => e.stopPropagation()}>{part} </a>;
@@ -103,6 +130,22 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = fa
               return part + ' ';
             })}
           </p>
+
+          <button 
+            onClick={handleTranslate}
+            disabled={isTranslating}
+            className="mt-2 text-primary text-xs font-bold hover:underline flex items-center gap-1 transition-all"
+          >
+            {isTranslating ? (
+              <span className="flex items-center gap-1 animate-pulse">
+                Translating...
+              </span>
+            ) : translatedText ? (
+              'Show original'
+            ) : (
+              'Translate post'
+            )}
+          </button>
 
           {idea.mediaUrl && (
             <div className="mt-3 rounded-2xl overflow-hidden bg-gray-100 border border-gray-100 max-h-[400px] flex items-center justify-center">

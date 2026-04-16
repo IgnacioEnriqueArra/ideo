@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { MessageSquare, Heart, GitFork, Share, Bookmark, MoreHorizontal, BadgeCheck } from 'lucide-react';
 import { Branch } from '../types';
@@ -14,6 +14,32 @@ interface BranchCardProps {
 export const BranchCard: React.FC<BranchCardProps> = ({ branch, onClick, onUserClick }) => {
   const { likeBranch, userLikes } = useAppContext();
   const isLiked = userLikes.includes(branch.id);
+  const [translatedText, setTranslatedText] = useState<string | null>(null);
+  const [isTranslating, setIsTranslating] = useState(false);
+
+  const handleTranslate = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (translatedText) {
+      setTranslatedText(null);
+      return;
+    }
+    
+    setIsTranslating(true);
+    try {
+       const isLikelyEnglish = /\b(the|and|is|are|you|my|it|in|on|with)\b/i.test(branch.content);
+       const langPair = isLikelyEnglish ? 'en|es' : 'es|en';
+       
+       const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(branch.content)}&langpair=${langPair}`);
+       const data = await res.json();
+       if (data.responseData.translatedText) {
+         setTranslatedText(data.responseData.translatedText);
+       }
+    } catch (err) {
+       console.error(err);
+    } finally {
+       setIsTranslating(false);
+    }
+  };
 
   return (
     <div 
@@ -66,8 +92,24 @@ export const BranchCard: React.FC<BranchCardProps> = ({ branch, onClick, onUserC
           </div>
 
           <p className="mt-1 text-gray-900 text-[15px] leading-snug whitespace-pre-wrap">
-            {branch.content}
+            {translatedText || branch.content}
           </p>
+
+          <button 
+            onClick={handleTranslate}
+            disabled={isTranslating}
+            className="mt-2 text-primary text-xs font-bold hover:underline flex items-center gap-1 transition-all"
+          >
+            {isTranslating ? (
+              <span className="flex items-center gap-1 animate-pulse">
+                Translating...
+              </span>
+            ) : translatedText ? (
+              'Show original'
+            ) : (
+              'Translate post'
+            )}
+          </button>
 
           <div className="flex items-center justify-between mt-3 text-gray-500 max-w-md pr-4">
             <button className="flex items-center gap-1.5 hover:text-primary transition-colors group">
