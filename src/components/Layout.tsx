@@ -29,7 +29,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
       <div className="w-full max-w-[1300px] flex gap-0 sm:gap-4 lg:gap-8 px-0 sm:px-4">
         
         {/* Desktop Sidebar (Left) */}
-        <aside className="hidden sm:flex flex-col w-[80px] lg:w-[280px] sticky top-0 h-screen py-4 shrink-0 border-r border-gray-100 dark:border-gray-800">
+        <aside className="hidden sm:flex flex-col w-[80px] lg:w-[280px] sticky top-0 h-screen py-4 shrink-0">
           <div className="px-4 mb-8">
             <span className="text-3xl font-black text-primary tracking-tighter">ideo.</span>
           </div>
