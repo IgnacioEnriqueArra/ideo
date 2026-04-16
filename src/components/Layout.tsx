@@ -31,7 +31,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
         {/* Desktop Sidebar (Left) */}
         <aside className="hidden sm:flex flex-col w-[80px] lg:w-[280px] sticky top-0 h-screen py-4 shrink-0">
           <div className="px-4 mb-8">
-            <span className="text-3xl font-black text-primary tracking-tighter">ideo.</span>
+            <span className="text-3xl font-black text-primary tracking-tighter">fork.</span>
           </div>
           
           <nav className="flex-1 space-y-2">
@@ -127,7 +127,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
              <Search className="w-5 h-5 text-gray-400" />
              <input 
                type="text" 
-               placeholder="Search Ideo" 
+               placeholder="Search fork." 
                className="bg-transparent border-none focus:ring-0 text-sm w-full outline-none" 
                value={globalSearchQuery}
                onChange={(e) => setGlobalSearchQuery(e.target.value)}
@@ -251,7 +251,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               
               <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
                 <div className="flex items-center gap-1.5">
-                  <div className="font-bold text-gray-900 dark:text-white text-lg">{currentUser?.name || 'Log in to Ideo'}</div>
+                  <div className="font-bold text-gray-900 dark:text-white text-lg">{currentUser?.name || 'Log in to fork.'}</div>
                   {currentUser?.verified && <BadgeCheck className="w-4 h-4 text-blue-500" />}
                 </div>
                 <div className="text-gray-500 text-[15px]">@{currentUser?.handle || 'visitor'}</div>
@@ -288,7 +288,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 <button 
                   className="w-full flex items-center gap-4 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   onClick={() => {
-                    alert("Para instalar Ideo en tu dispositivo:\n\niOS: Toca el botón de Compartir y elige 'Agregar a inicio'.\n\nAndroid: En el menú del navegador, selecciona 'Instalar aplicación'.");
+                    alert("Para instalar fork. en tu dispositivo:\n\niOS: Toca el botón de Compartir y elige 'Agregar a inicio'.\n\nAndroid: En el menú del navegador, selecciona 'Instalar aplicación'.");
                     setIsMenuOpen(false);
                   }}
                 >

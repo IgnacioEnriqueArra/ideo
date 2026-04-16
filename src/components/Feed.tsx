@@ -44,7 +44,7 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
           <Menu className="w-5 h-5 text-gray-700" />
         </button>
         <div className="flex items-center gap-1">
-          <span className="text-xl font-black text-primary tracking-tight">ideo.</span>
+          <span className="text-xl font-black text-primary tracking-tight">fork.</span>
         </div>
         <button 
           className="p-2 -mr-2 hover:bg-gray-50 rounded-full transition-colors relative"
@@ -99,7 +99,7 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
           <div className="p-6 border-b border-gray-100 flex flex-col items-center justify-center bg-gradient-to-br from-primary/5 to-transparent">
             <h2 className="text-lg font-bold text-gray-900 mb-2">Share your idea, project, or work</h2>
             <p className="text-gray-500 text-[15px] mb-4 text-center max-w-sm">
-              Join the Ideo community. Post what you're working on, branch out, and collaborate with others.
+              Join the fork. community. Post what you're working on, branch out, and collaborate with others.
             </p>
             <button 
               className="bg-primary text-white font-bold py-2.5 px-6 rounded-full hover:bg-blue-600 transition-all shadow-sm active:scale-95"

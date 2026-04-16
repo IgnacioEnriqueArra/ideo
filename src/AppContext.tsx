@@ -496,7 +496,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const formatSeedPhrase = (phrase: string) => phrase.trim().toLowerCase().replace(/\s+/g, '-');
-  const getEmailFromSeed = (phrase: string) => `${formatSeedPhrase(phrase)}@ideo.network`;
+  const getEmailFromSeed = (phrase: string) => `${formatSeedPhrase(phrase)}@fork.network`;
 
   const login = async (seedPhrase: string) => {
     if (seedPhrase) {
@@ -523,7 +523,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           name: 'Anon_' + data.user.id.substring(0, 4),
           handle: tempHandle,
           avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${data.user.id}&backgroundColor=${randomHex}`,
-          bio: 'Just arrived at ideo.',
+          bio: 'Just arrived at fork.',
           followers: [],
           following: []
         };

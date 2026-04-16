@@ -43,7 +43,7 @@ function AppContent() {
     if (!isAuthReady) {
       return (
         <div className="h-screen w-full bg-white flex items-center justify-center">
-          <div className="animate-pulse text-4xl font-black text-primary tracking-tighter">ideo.</div>
+          <div className="animate-pulse text-4xl font-black text-primary tracking-tighter">fork.</div>
         </div>
       );
     }
@@ -85,7 +85,7 @@ function AppContent() {
     return (
       <div className="h-[100dvh] w-full bg-white dark:bg-gray-950 max-w-md mx-auto border-x border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center p-6 transition-colors">
         <div className="mb-6 animate-pulse">
-          <span className="text-4xl font-black text-primary tracking-tighter">ideo.</span>
+          <span className="text-4xl font-black text-primary tracking-tighter">fork.</span>
         </div>
       </div>
     );
@@ -195,7 +195,7 @@ function AppContent() {
       {!currentUser && activeTab === 'home' && !selectedIdeaId && !selectedUserId && (
         <div className="bg-primary/5 border-b border-primary/10 p-4 animate-in slide-in-from-top duration-500">
            <div className="flex items-center justify-between gap-4">
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Explore the best of <span className="font-bold text-primary">ideo.</span> Create an account to join the conversation.</p>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Explore the best of <span className="font-bold text-primary">fork.</span> Create an account to join the conversation.</p>
               <button 
                 onClick={() => setAuthModalOpen(true)}
                 className="shrink-0 bg-primary text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm"
@@ -278,8 +278,8 @@ function AuthScreen({ onDone }: { onDone?: () => void }) {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-black to-blue-900/40 z-0" />
         <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] z-0 mix-blend-overlay" />
         <div className="z-10 text-white max-w-xl w-full">
-          <h1 className="text-7xl font-black mb-8 tracking-tighter shadow-sm text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-primary">ideo.</h1>
-          <p className="text-3xl font-light text-gray-300 mb-10 leading-snug">The decentralized network for thinkers, builders, and creators.</p>
+          <h1 className="text-7xl font-black mb-8 tracking-tighter shadow-sm text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-primary">fork.</h1>
+          <p className="text-3xl font-light text-gray-300 mb-10 leading-snug">Ideas, proyectos, noticias, periodistas anonimos y todo aquel al cual le interese su privacidad.</p>
           <p className="text-xl font-bold text-white mb-8">Own your identity.</p>
           <div className="flex gap-4">
             <div className="w-16 h-1.5 bg-primary rounded-full"></div>
@@ -298,7 +298,7 @@ function AuthScreen({ onDone }: { onDone?: () => void }) {
         <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 overflow-y-auto">
           <div className="w-full max-w-md mx-auto">
             <div className="md:hidden mb-12 flex justify-center">
-              <span className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-primary tracking-tighter">ideo.</span>
+              <span className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-primary tracking-tighter">fork.</span>
             </div>
             
             <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-3 tracking-tight">
