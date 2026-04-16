@@ -71,7 +71,7 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
         </div>
       </div>
 
-      {!searchQuery && (
+      {!globalSearchQuery && (
         <>
           {/* Tabs */}
           <div className="flex border-b border-gray-100">
@@ -116,7 +116,7 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
 
       {/* Feed List */}
       <div className="divide-y divide-gray-100 flex-1">
-        {searchQuery && filteredUsers.length > 0 && (
+        {globalSearchQuery && filteredUsers.length > 0 && (
           <div className="p-4 border-b border-gray-100 bg-gray-50/50">
             <h3 className="text-sm font-bold text-gray-500 mb-3 uppercase tracking-wider">Users</h3>
             <div className="space-y-3">
