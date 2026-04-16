@@ -168,6 +168,10 @@ function AppContent() {
     }
   };
 
+  if (isAuthModalOpen) {
+    return <AuthScreen onDone={() => setAuthModalOpen(false)} />;
+  }
+
   return (
     <Layout 
       activeTab={activeTab} 
@@ -191,7 +195,7 @@ function AppContent() {
       {!currentUser && activeTab === 'home' && !selectedIdeaId && !selectedUserId && (
         <div className="bg-primary/5 border-b border-primary/10 p-4 animate-in slide-in-from-top duration-500">
            <div className="flex items-center justify-between gap-4">
-              <p className="text-sm font-medium text-gray-700">Explore the best of <span className="font-bold text-primary">ideo.</span> Create an account to join the conversation.</p>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Explore the best of <span className="font-bold text-primary">ideo.</span> Create an account to join the conversation.</p>
               <button 
                 onClick={() => setAuthModalOpen(true)}
                 className="shrink-0 bg-primary text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm"
@@ -205,7 +209,6 @@ function AppContent() {
         {renderContent()}
       </AnimatePresence>
       <ComposeModal isOpen={isComposeOpen} onClose={() => setIsComposeOpen(false)} />
-      <AuthModal isOpen={isAuthModalOpen} onClose={() => setAuthModalOpen(false)} />
     </Layout>
   );
 }
@@ -228,7 +231,7 @@ function generateSeedPhrase() {
   return words.join(' ');
 }
 
-function AuthScreen({ inModal, onDone }: { inModal?: boolean, onDone?: () => void }) {
+function AuthScreen({ onDone }: { onDone?: () => void }) {
   const { login, signup } = useAppContext();
   // isLogin true means inputting phrase to login, false means creating new identity
   const [isLogin, setIsLogin] = useState(true);
@@ -269,110 +272,112 @@ function AuthScreen({ inModal, onDone }: { inModal?: boolean, onDone?: () => voi
   };
 
   return (
-      <div className={`${inModal ? '' : 'h-[100dvh]'} w-full bg-white dark:bg-gray-950 max-w-md mx-auto border-x border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center p-6 transition-colors`}>
-        <div className="mb-6">
-          <span className={`${inModal ? 'text-4xl' : 'text-5xl'} font-black text-primary tracking-tighter text-center`}>ideo.</span>
+    <div className="min-h-screen w-full bg-white dark:bg-gray-950 flex flex-col md:flex-row transition-colors">
+      {/* Web3 Desktop Graphic Side */}
+      <div className="hidden md:flex flex-1 bg-gray-900 overflow-hidden relative items-center justify-center p-12">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-black to-blue-900/40 z-0" />
+        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] z-0 mix-blend-overlay" />
+        <div className="z-10 text-white max-w-xl w-full">
+          <h1 className="text-7xl font-black mb-8 tracking-tighter shadow-sm text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-primary">ideo.</h1>
+          <p className="text-3xl font-light text-gray-300 mb-10 leading-snug">The decentralized network for thinkers, builders, and creators.</p>
+          <p className="text-xl font-bold text-white mb-8">Own your identity.</p>
+          <div className="flex gap-4">
+            <div className="w-16 h-1.5 bg-primary rounded-full"></div>
+            <div className="w-6 h-1.5 bg-white/20 rounded-full"></div>
+            <div className="w-6 h-1.5 bg-white/20 rounded-full"></div>
+          </div>
         </div>
-        
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center">
-          {isLogin ? 'Access your account' : 'Generate Identity'}
-        </h1>
-        <p className="text-gray-500 text-center mb-8 px-4 text-sm">
-          {isLogin 
-            ? 'Enter your 5-word secret recovery phrase to authenticate.' 
-            : 'Welcome to the future of social networks. No emails, no passwords. Just a decentralized identity.'}
-        </p>
-        
-        <form onSubmit={handleSubmit} className="w-full space-y-6">
-          {isLogin ? (
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-gray-500 ml-1">Recovery Phrase</label>
-              <textarea 
-                placeholder="e.g. apple banana cherry date elderberry" 
-                value={seedPhrase} 
-                onChange={e=>setSeedPhrase(e.target.value)} 
-                required 
-                className="w-full p-4 rounded-2xl border border-gray-200 outline-none focus:border-primary transition-colors dark:bg-gray-900 dark:text-white resize-none h-32 font-mono text-sm leading-relaxed" 
-              />
-            </div>
-          ) : (
-            <div className="space-y-4">
-               <div className="bg-orange-50 border border-orange-200 p-4 rounded-2xl flex items-start gap-3">
-                 <div className="text-orange-500 mt-0.5">⚠️</div>
-                 <div className="text-sm text-orange-800">
-                    <strong className="block mb-1">Save these words!</strong>
-                    This is the ONLY way to access your account. If you lose this phrase, your account cannot be recovered.
-                 </div>
-               </div>
-               
-               <div className="grid grid-cols-2 gap-2">
-                 {generatedSeed.split(' ').map((word, index) => (
-                   <div key={index} className="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-3 rounded-xl flex items-center justify-center gap-2">
-                     <span className="text-gray-400 text-xs font-mono">{index + 1}.</span>
-                     <span className="font-bold text-gray-900 dark:text-white">{word}</span>
-                   </div>
-                 ))}
-               </div>
-
-               <button 
-                 type="button" 
-                 onClick={copyToClipboard}
-                 className="w-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold py-3 rounded-xl hover:bg-gray-200 transition-colors text-sm flex items-center justify-center gap-2"
-               >
-                 {copied ? '✓ Copied to clipboard' : 'Copy Recovery Phrase'}
-               </button>
-            </div>
-          )}
-          
-          <button 
-            type="submit" 
-            disabled={isLoading}
-            className="w-full bg-primary text-white font-bold py-4 rounded-full shadow-lg shadow-primary/20 hover:bg-blue-600 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {isLoading ? (
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            ) : (
-              isLogin ? 'Access Identity' : 'I have saved my phrase'
-            )}
-          </button>
-        </form>
-
-        <button onClick={() => setIsLogin(!isLogin)} className="w-full mt-8 text-gray-500 text-sm hover:underline font-medium">
-          {isLogin ? "Need a new identity? Generate one" : "Already have an identity? Access it here"}
-        </button>
       </div>
+
+      {/* Form Side */}
+      <div className="flex-1 flex flex-col w-full relative">
+        <button onClick={() => onDone?.()} className="absolute top-6 right-6 p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors z-20">
+          <X className="w-6 h-6 text-gray-400" />
+        </button>
+
+        <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 overflow-y-auto">
+          <div className="w-full max-w-md mx-auto">
+            <div className="md:hidden mb-12 flex justify-center">
+              <span className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-primary tracking-tighter">ideo.</span>
+            </div>
+            
+            <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-3 tracking-tight">
+              {isLogin ? 'Access Identity' : 'Generate Identity'}
+            </h1>
+            <p className="text-gray-500 mb-10 text-sm leading-relaxed">
+              {isLogin 
+                ? 'Enter your 5-word secret recovery phrase to authenticate your session.' 
+                : 'Welcome to the future of social networks. No emails, no passwords. Just a decentralized identity you own.'}
+            </p>
+            
+            <form onSubmit={handleSubmit} className="w-full space-y-8">
+              {isLogin ? (
+                <div className="space-y-3">
+                  <label className="text-xs font-bold uppercase tracking-wider text-gray-500 ml-1">Recovery Phrase</label>
+                  <textarea 
+                    placeholder="e.g. apple banana cherry date elderberry" 
+                    value={seedPhrase} 
+                    onChange={e=>setSeedPhrase(e.target.value)} 
+                    required 
+                    className="w-full p-5 rounded-3xl border border-gray-200 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all dark:bg-gray-900 dark:border-gray-800 dark:focus:border-primary dark:text-white resize-none h-32 font-mono text-[15px] leading-relaxed shadow-sm block" 
+                  />
+                </div>
+              ) : (
+                <div className="space-y-6">
+                   <div className="bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-900/50 p-5 rounded-2xl flex items-start gap-4 shadow-sm">
+                     <div className="text-orange-500 mt-0.5 text-xl leading-none">⚠️</div>
+                     <div className="text-sm text-orange-800 dark:text-orange-200 leading-relaxed">
+                        <strong className="block mb-1 font-bold text-[15px]">Save these words!</strong>
+                        This is the ONLY way to access your account. If you lose this phrase, your account cannot be recovered.
+                     </div>
+                   </div>
+                   
+                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                     {generatedSeed.split(' ').map((word, index) => (
+                       <div key={index} className="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-3.5 rounded-xl flex items-center justify-center gap-2 shadow-sm">
+                         <span className="text-gray-400 text-xs font-mono">{index + 1}.</span>
+                         <span className="font-bold text-gray-900 dark:text-white truncate">{word}</span>
+                       </div>
+                     ))}
+                   </div>
+
+                   <button 
+                     type="button" 
+                     onClick={copyToClipboard}
+                     className="w-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 font-bold py-4 rounded-2xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-all text-[15px] flex items-center justify-center gap-2 shadow-sm active:scale-95"
+                   >
+                     {copied ? '✓ Copied to clipboard' : 'Copy Recovery Phrase'}
+                   </button>
+                </div>
+              )}
+              
+              <button 
+                type="submit" 
+                disabled={isLoading}
+                className="w-full bg-primary text-white font-bold py-4 rounded-[1.25rem] shadow-xl shadow-primary/25 hover:bg-blue-600 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 text-lg"
+              >
+                {isLoading ? (
+                  <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  isLogin ? 'Access Identity' : 'I have saved my phrase'
+                )}
+              </button>
+            </form>
+
+            <button onClick={() => setIsLogin(!isLogin)} className="w-full mt-8 text-gray-500 dark:text-gray-400 text-[15px] hover:text-primary dark:hover:text-primary transition-colors font-semibold">
+              {isLogin ? "Need a new identity? Generate one" : "Already have an identity? Access it here"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
 import { motion } from 'motion/react';
 import { X } from 'lucide-react';
 
-function AuthModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
-  if (!isOpen) return null;
 
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4"
-    >
-      <motion.div 
-        initial={{ scale: 0.95, opacity: 0, y: 20 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        className="bg-white dark:bg-gray-950 w-full max-w-md rounded-[2.5rem] overflow-hidden shadow-2xl relative"
-      >
-        <button 
-          onClick={onClose}
-          className="absolute top-6 right-6 p-2 rounded-full hover:bg-gray-100 transition-colors z-10"
-        >
-          <X className="w-6 h-6 text-gray-400" />
-        </button>
-        <AuthScreen inModal onDone={onClose} />
-      </motion.div>
-    </motion.div>
-  );
-}
 
 
 
