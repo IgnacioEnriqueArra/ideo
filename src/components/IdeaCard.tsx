@@ -15,7 +15,7 @@ interface IdeaCardProps {
 }
 
 export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = false, onUserClick }) => {
-  const { likeIdea, toggleBookmark, bookmarks, userLikes, currentUser, deleteIdea } = useAppContext();
+  const { likeIdea, toggleBookmark, bookmarks, userLikes, currentUser, deleteIdea, setAuthModalOpen } = useAppContext();
   const isBookmarked = bookmarks.includes(idea.id);
   const isLiked = userLikes.includes(idea.id);
   const [showMenu, setShowMenu] = useState(false);
@@ -136,7 +136,11 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = fa
               className={`flex items-center gap-1.5 hover:text-red-500 transition-colors group ${isLiked ? 'text-red-500' : ''}`}
               onClick={(e) => {
                 e.stopPropagation();
-                likeIdea(idea.id);
+                if (!currentUser) {
+                  setAuthModalOpen(true);
+                } else {
+                  likeIdea(idea.id);
+                }
               }}
             >
               <div className="p-1.5 rounded-full group-hover:bg-red-500/10">
@@ -149,7 +153,11 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = fa
               className={`flex items-center gap-1.5 hover:text-primary transition-colors group ${isBookmarked ? 'text-primary' : ''}`}
               onClick={(e) => {
                 e.stopPropagation();
-                toggleBookmark(idea.id);
+                if (!currentUser) {
+                  setAuthModalOpen(true);
+                } else {
+                  toggleBookmark(idea.id);
+                }
               }}
             >
               <div className="p-1.5 rounded-full group-hover:bg-primary/10">

@@ -13,7 +13,7 @@ interface IdeaDetailProps {
 }
 
 export const IdeaDetail: React.FC<IdeaDetailProps> = ({ ideaId, onBack, onUserClick }) => {
-  const { ideas, currentUser, addBranch, addFeedback, likeIdea, bookmarks, toggleBookmark, deleteIdea } = useAppContext();
+  const { ideas, currentUser, addBranch, addFeedback, likeIdea, bookmarks, toggleBookmark, deleteIdea, setAuthModalOpen } = useAppContext();
   const idea = ideas.find(i => i.id === ideaId);
   
   const [newBranch, setNewBranch] = useState('');
@@ -24,12 +24,20 @@ export const IdeaDetail: React.FC<IdeaDetailProps> = ({ ideaId, onBack, onUserCl
   if (!idea) return <div>Idea not found</div>;
 
   const handleAddBranch = () => {
+    if (!currentUser) {
+      setAuthModalOpen(true);
+      return;
+    }
     if (!newBranch.trim()) return;
     addBranch(idea.id, newBranch);
     setNewBranch('');
   };
 
   const handleAddFeedback = (branchId: string) => {
+    if (!currentUser) {
+      setAuthModalOpen(true);
+      return;
+    }
     if (!newFeedback.trim()) return;
     addFeedback(idea.id, branchId, newFeedback);
     setNewFeedback('');
@@ -138,13 +146,25 @@ export const IdeaDetail: React.FC<IdeaDetailProps> = ({ ideaId, onBack, onUserCl
           </button>
           <button 
             className="p-2 hover:text-red-500 hover:bg-red-500/10 rounded-full transition-colors"
-            onClick={() => likeIdea(idea.id)}
+            onClick={() => {
+              if (!currentUser) {
+                setAuthModalOpen(true);
+              } else {
+                likeIdea(idea.id);
+              }
+            }}
           >
             <Heart className={`w-5 h-5 ${idea.likes > 0 ? 'fill-red-500 text-red-500' : ''}`} />
           </button>
           <button 
             className={`p-2 hover:text-primary hover:bg-primary/10 rounded-full transition-colors ${bookmarks.includes(idea.id) ? 'text-primary' : ''}`}
-            onClick={() => toggleBookmark(idea.id)}
+            onClick={() => {
+              if (!currentUser) {
+                setAuthModalOpen(true);
+              } else {
+                toggleBookmark(idea.id);
+              }
+            }}
           >
             <Bookmark className={`w-5 h-5 ${bookmarks.includes(idea.id) ? 'fill-primary' : ''}`} />
           </button>
@@ -156,8 +176,8 @@ export const IdeaDetail: React.FC<IdeaDetailProps> = ({ ideaId, onBack, onUserCl
         {/* Fork Input */}
         <div className="py-4 flex gap-3 items-center">
           <Avatar className="w-10 h-10 rounded-lg">
-            <AvatarImage src={currentUser.avatar} />
-            <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+            <AvatarImage src={currentUser?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=guest`} />
+            <AvatarFallback>{currentUser ? currentUser.name.charAt(0) : 'G'}</AvatarFallback>
           </Avatar>
           <input
             type="text"
@@ -273,7 +293,13 @@ export const IdeaDetail: React.FC<IdeaDetailProps> = ({ ideaId, onBack, onUserCl
                 ) : (
                   <button 
                     className="text-gray-400 hover:text-primary text-[13px] font-medium flex items-center gap-1.5"
-                    onClick={() => setActiveBranchId(branch.id)}
+                    onClick={() => {
+                      if (!currentUser) {
+                        setAuthModalOpen(true);
+                      } else {
+                        setActiveBranchId(branch.id);
+                      }
+                    }}
                   >
                     <MessageSquare className="w-3.5 h-3.5" />
                     Add feedback

@@ -50,6 +50,8 @@ type AppContextType = {
   rawBranches: any[];
   rawFeedbacks: any[];
   allMessages: any[];
+  isAuthModalOpen: boolean;
+  setAuthModalOpen: (open: boolean) => void;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -67,6 +69,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
+  const [isAuthModalOpen, setAuthModalOpen] = useState(false);
 
   useEffect(() => {
     let authSubscription: any;
@@ -544,7 +547,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       updateProfile, markNotificationsRead, deleteIdea, deleteBranch, deleteFeedback, deleteMessage, 
       deleteUser, toggleVerified, deleteAccount, logout, login, signup, loginRedirect, isAuthReady, unreadMessagesCount, 
       playNotificationSound, activeConversationId, setActiveConversationId, clearAllNotifications, deleteNotification, toggleFollow,
-      rawBranches, rawFeedbacks, allMessages
+      rawBranches, rawFeedbacks, allMessages, isAuthModalOpen, setAuthModalOpen
     }}>
       {children}
     </AppContext.Provider>

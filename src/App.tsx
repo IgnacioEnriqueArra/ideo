@@ -14,12 +14,13 @@ import { AdminDashboard } from './components/AdminDashboard';
 import { AnimatePresence } from 'motion/react';
 
 function AppContent() {
-  const { currentUser, isAuthReady } = useAppContext();
+  const { currentUser, isAuthReady, isAuthModalOpen, setAuthModalOpen } = useAppContext();
   const [selectedIdeaId, setSelectedIdeaId] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('home');
   const [isComposeOpen, setIsComposeOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth > 640);
+  const [viewCount, setViewCount] = useState(0);
 
   useEffect(() => {
     const handleResize = () => setIsDesktop(window.innerWidth > 640);
@@ -122,9 +123,10 @@ function AppContent() {
     );
   }
 
-  if (!currentUser) {
-    return <AuthScreen />;
-  }
+  // Guest can see the feed
+  // if (!currentUser) {
+  //   return <AuthScreen />;
+  // }
 
   const renderContent = () => {
     if (selectedUserId) {
@@ -143,7 +145,13 @@ function AppContent() {
           key="detail"
           ideaId={selectedIdeaId} 
           onBack={() => setSelectedIdeaId(null)} 
-          onUserClick={setSelectedUserId}
+          onUserClick={(id) => {
+            if (!currentUser) {
+              setAuthModalOpen(true);
+            } else {
+              setSelectedUserId(id);
+            }
+          }}
         />
       );
     }
@@ -161,9 +169,34 @@ function AppContent() {
         return <Settings key="settings" onBack={() => setActiveTab('home')} />;
       case 'messages':
         return <Messages key="messages" />;
-      case 'home':
       default:
-        return <Feed key="feed" onSelectIdea={setSelectedIdeaId} onUserClick={setSelectedUserId} onNotificationsClick={() => setActiveTab('notifications')} />;
+        return (
+          <Feed 
+            key="feed" 
+            onSelectIdea={(id) => {
+              if (!currentUser && viewCount >= 3) {
+                setAuthModalOpen(true);
+              } else {
+                setSelectedIdeaId(id);
+                if (!currentUser) setViewCount(prev => prev + 1);
+              }
+            }} 
+            onUserClick={(id) => {
+              if (!currentUser) {
+                setAuthModalOpen(true);
+              } else {
+                setSelectedUserId(id);
+              }
+            }}
+            onNotificationsClick={() => {
+              if (!currentUser) {
+                setAuthModalOpen(true);
+              } else {
+                setActiveTab('notifications');
+              }
+            }} 
+          />
+        );
     }
   };
 
@@ -171,16 +204,40 @@ function AppContent() {
     <Layout 
       activeTab={activeTab} 
       setActiveTab={(tab) => {
+        if (!currentUser && ['notifications', 'bookmarks', 'settings', 'messages', 'profile'].includes(tab)) {
+          setAuthModalOpen(true);
+          return;
+        }
         setSelectedIdeaId(null);
         setSelectedUserId(null);
         setActiveTab(tab);
       }} 
-      onCompose={() => setIsComposeOpen(true)}
+      onCompose={() => {
+        if (!currentUser) {
+          setAuthModalOpen(true);
+        } else {
+          setIsComposeOpen(true);
+        }
+      }}
     >
+      {!currentUser && activeTab === 'home' && !selectedIdeaId && !selectedUserId && (
+        <div className="bg-primary/5 border-b border-primary/10 p-4 animate-in slide-in-from-top duration-500">
+           <div className="flex items-center justify-between gap-4">
+              <p className="text-sm font-medium text-gray-700">Explora lo mejor de <span className="font-bold text-primary">ideo.</span> Crea una cuenta para unirte a la conversación.</p>
+              <button 
+                onClick={() => setAuthModalOpen(true)}
+                className="shrink-0 bg-primary text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm"
+              >
+                Unirse ahora
+              </button>
+           </div>
+        </div>
+      )}
       <AnimatePresence mode="wait">
         {renderContent()}
       </AnimatePresence>
       <ComposeModal isOpen={isComposeOpen} onClose={() => setIsComposeOpen(false)} />
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setAuthModalOpen(false)} />
     </Layout>
   );
 }
@@ -193,7 +250,7 @@ export default function App() {
   );
 }
 
-function AuthScreen() {
+function AuthScreen({ inModal, onDone }: { inModal?: boolean, onDone?: () => void }) {
   const { login, signup } = useAppContext();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -211,15 +268,16 @@ function AuthScreen() {
       } else {
         if (signup) await signup(email, password, name, handle);
       }
+      if (onDone) onDone();
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-      <div className="h-[100dvh] w-full bg-white dark:bg-gray-950 max-w-md mx-auto border-x border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center p-6 transition-colors">
+      <div className={`${inModal ? '' : 'h-[100dvh]'} w-full bg-white dark:bg-gray-950 max-w-md mx-auto border-x border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center p-6 transition-colors`}>
         <div className="mb-6">
-          <span className="text-5xl font-black text-primary tracking-tighter text-center">ideo.</span>
+          <span className={`${inModal ? 'text-4xl' : 'text-5xl'} font-black text-primary tracking-tighter text-center`}>ideo.</span>
         </div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center">
           {isLogin ? 'Bienvenido de nuevo' : 'Crea tu cuenta'}
@@ -253,6 +311,36 @@ function AuthScreen() {
           {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
         </button>
       </div>
+  );
+}
+
+import { motion } from 'motion/react';
+import { X } from 'lucide-react';
+
+function AuthModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
+  if (!isOpen) return null;
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+    >
+      <motion.div 
+        initial={{ scale: 0.95, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        className="bg-white dark:bg-gray-950 w-full max-w-md rounded-[2.5rem] overflow-hidden shadow-2xl relative"
+      >
+        <button 
+          onClick={onClose}
+          className="absolute top-6 right-6 p-2 rounded-full hover:bg-gray-100 transition-colors z-10"
+        >
+          <X className="w-6 h-6 text-gray-400" />
+        </button>
+        <AuthScreen inModal onDone={onClose} />
+      </motion.div>
+    </motion.div>
   );
 }
 
