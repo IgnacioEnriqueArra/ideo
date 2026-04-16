@@ -67,6 +67,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [userLikes, setUserLikes] = useState<string[]>([]);
   const [rawNotifications, setRawNotifications] = useState<Notification[]>([]);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isAuthModalOpen, setAuthModalOpen] = useState(false);
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
