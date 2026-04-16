@@ -36,8 +36,8 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
       exit={{ opacity: 0 }}
       className="flex flex-col w-full min-h-full"
     >
-      {/* Top Bar */}
-      <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex items-center justify-between">
+      {/* Top Bar (Mobile Only) */}
+      <div className="sm:hidden sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex items-center justify-between">
         <button 
           className="p-2 -ml-2 hover:bg-gray-50 rounded-full transition-colors"
           onClick={() => window.dispatchEvent(new CustomEvent('open-menu'))}
@@ -58,8 +58,8 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
         </button>
       </div>
 
-      {/* Search Bar */}
-      <div className="px-4 py-2 border-b border-gray-100">
+      {/* Search Bar (Mobile Only) */}
+      <div className="sm:hidden px-4 py-2 border-b border-gray-100">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input 

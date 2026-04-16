@@ -76,20 +76,33 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
 
           <div className="mt-auto px-2">
             {currentUser ? (
-              <button 
-                onClick={() => setIsMenuOpen(true)}
-                className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
-              >
-                <Avatar className="w-10 h-10 rounded-xl">
-                  <AvatarImage src={currentUser.avatar} />
-                  <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div className="hidden lg:block text-left flex-1 min-w-0">
-                  <p className="font-bold text-gray-900 dark:text-white truncate">{currentUser.name}</p>
-                  <p className="text-sm text-gray-500 truncate">@{currentUser.handle}</p>
+              <div className="relative group">
+                {/* Desktop Profile Card / Popover trigger */}
+                <div className="flex items-center gap-3 p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all cursor-pointer">
+                  <Avatar className="w-10 h-10 rounded-xl">
+                    <AvatarImage src={currentUser.avatar} />
+                    <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className="hidden lg:block text-left flex-1 min-w-0">
+                    <p className="font-bold text-gray-900 dark:text-white truncate">{currentUser.name}</p>
+                    <p className="text-sm text-gray-500 truncate">@{currentUser.handle}</p>
+                  </div>
+                  <MoreHorizontal className="hidden lg:block w-5 h-5 text-gray-400" />
                 </div>
-                <MoreHorizontal className="hidden lg:block w-5 h-5 text-gray-400" />
-              </button>
+                
+                {/* Simple Desktop Logout Popover */}
+                <div className="absolute bottom-full left-0 mb-2 w-full hidden group-hover:block animate-in fade-in slide-in-from-bottom-2 duration-200">
+                  <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 p-2 overflow-hidden">
+                    <button 
+                      onClick={logout}
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 text-red-500 transition-colors"
+                    >
+                      <LogOut className="w-5 h-5" />
+                      <span className="font-bold text-sm">Cerrar Sesión</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
             ) : (
               <button 
                 onClick={() => setAuthModalOpen(true)}
@@ -184,7 +197,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
         </motion.button>
       )}
 
-      {/* Hamburger Drawer Menu */}
+      {/* Hamburger Drawer Menu (Mobile Only) */}
       <AnimatePresence>
         {isMenuOpen && (
           <>
