@@ -13,7 +13,7 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, onCompose }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { currentUser, notifications, logout, unreadMessagesCount, setAuthModalOpen } = useAppContext();
+  const { currentUser, ideas, notifications, logout, unreadMessagesCount, setAuthModalOpen, globalSearchQuery, setGlobalSearchQuery } = useAppContext();
   const unreadNotificationsCount = notifications.filter(n => !n.read).length;
 
   useEffect(() => {
@@ -146,25 +146,34 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
         <aside className="hidden xl:flex flex-col w-[350px] sticky top-0 h-screen py-4 gap-6">
           <div className="bg-gray-100 dark:bg-gray-900 rounded-full px-4 py-2.5 flex items-center gap-3">
              <Search className="w-5 h-5 text-gray-400" />
-             <input type="text" placeholder="Buscar en Ideo" className="bg-transparent border-none focus:ring-0 text-sm w-full outline-none" />
+             <input 
+               type="text" 
+               placeholder="Buscar en Ideo" 
+               className="bg-transparent border-none focus:ring-0 text-sm w-full outline-none" 
+               value={globalSearchQuery}
+               onChange={(e) => setGlobalSearchQuery(e.target.value)}
+             />
           </div>
           
           <div className="bg-gray-50 dark:bg-gray-900/50 rounded-3xl p-6 border border-gray-100 dark:border-gray-800">
             <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4">Qué está pasando</h3>
             <div className="space-y-6">
-               {[
-                 { category: 'Tendencia en Argentina', topic: 'Innovación', posts: '1.2K ideas' },
-                 { category: 'Tecnología · Tendencia', topic: 'React 19', posts: '850 ideas' },
-                 { category: 'Diseño', topic: 'Bento Grid', posts: '420 ideas' },
-               ].map((trend, i) => (
-                 <div key={i} className="cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 -mx-4 px-4 py-2 rounded-xl transition-colors">
-                    <p className="text-xs text-gray-500 font-medium">{trend.category}</p>
-                    <p className="font-bold text-gray-900 dark:text-white mt-0.5">{trend.topic}</p>
-                    <p className="text-xs text-gray-400 mt-1">{trend.posts}</p>
+               {ideas.slice(0, 3).map((idea) => (
+                 <div 
+                   key={idea.id} 
+                   onClick={() => window.dispatchEvent(new CustomEvent('open-post', { detail: idea.id }))}
+                   className="cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 -mx-4 px-4 py-2 rounded-xl transition-colors"
+                 >
+                    <p className="text-xs text-gray-500 font-medium">Actualidad · {idea.author.name}</p>
+                    <p className="font-bold text-gray-900 dark:text-white mt-0.5 line-clamp-2">{idea.content}</p>
+                    <p className="text-xs text-gray-400 mt-1">{idea.likes} likes · {idea.branches.length} branches</p>
                  </div>
                ))}
+               {ideas.length === 0 && (
+                 <p className="text-sm text-gray-400 italic">No hay actividad reciente.</p>
+               )}
             </div>
-            <button className="text-primary text-sm font-bold mt-6 hover:underline">Mostrar más</button>
+            <button onClick={() => setActiveTab('news')} className="text-primary text-sm font-bold mt-6 hover:underline text-left">Mostrar más</button>
           </div>
 
           <div className="bg-gray-50 dark:bg-gray-900/50 rounded-3xl p-6 border border-gray-100 dark:border-gray-800">

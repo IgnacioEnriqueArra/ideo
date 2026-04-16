@@ -47,11 +47,11 @@ type AppContextType = {
   activeConversationId: string | null;
   setActiveConversationId: (id: string | null) => void;
   clearAllNotifications: () => void;
-  rawBranches: any[];
-  rawFeedbacks: any[];
   allMessages: any[];
   isAuthModalOpen: boolean;
   setAuthModalOpen: (open: boolean) => void;
+  globalSearchQuery: string;
+  setGlobalSearchQuery: (query: string) => void;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -67,9 +67,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [userLikes, setUserLikes] = useState<string[]>([]);
   const [rawNotifications, setRawNotifications] = useState<Notification[]>([]);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
-  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isAuthModalOpen, setAuthModalOpen] = useState(false);
+  const [globalSearchQuery, setGlobalSearchQuery] = useState('');
 
   useEffect(() => {
     let authSubscription: any;
@@ -547,7 +547,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       updateProfile, markNotificationsRead, deleteIdea, deleteBranch, deleteFeedback, deleteMessage, 
       deleteUser, toggleVerified, deleteAccount, logout, login, signup, loginRedirect, isAuthReady, unreadMessagesCount, 
       playNotificationSound, activeConversationId, setActiveConversationId, clearAllNotifications, deleteNotification, toggleFollow,
-      rawBranches, rawFeedbacks, allMessages, isAuthModalOpen, setAuthModalOpen
+      rawBranches, rawFeedbacks, allMessages, isAuthModalOpen, setAuthModalOpen,
+      globalSearchQuery, setGlobalSearchQuery
     }}>
       {children}
     </AppContext.Provider>

@@ -12,21 +12,20 @@ interface FeedProps {
 }
 
 export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotificationsClick }) => {
-  const { ideas, currentUser, users, notifications } = useAppContext();
+  const { ideas, currentUser, users, notifications, globalSearchQuery, setGlobalSearchQuery } = useAppContext();
   const unreadCount = notifications.filter(n => !n.read).length;
   const [activeTab, setActiveTab] = useState<'foryou' | 'trending'>('foryou');
-  const [searchQuery, setSearchQuery] = useState('');
 
   const filteredIdeas = ideas.filter(idea => 
-    idea.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    idea.author.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    idea.author.handle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    idea.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+    idea.content.toLowerCase().includes(globalSearchQuery.toLowerCase()) ||
+    idea.author.name.toLowerCase().includes(globalSearchQuery.toLowerCase()) ||
+    idea.author.handle.toLowerCase().includes(globalSearchQuery.toLowerCase()) ||
+    idea.tags.some(tag => tag.toLowerCase().includes(globalSearchQuery.toLowerCase()))
   );
 
   const filteredUsers = users.filter(user => 
-    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.handle.toLowerCase().includes(searchQuery.toLowerCase())
+    user.name.toLowerCase().includes(globalSearchQuery.toLowerCase()) ||
+    user.handle.toLowerCase().includes(globalSearchQuery.toLowerCase())
   );
 
   return (
@@ -64,10 +63,10 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input 
             type="text" 
-            placeholder="Search ideas, users, or tags..." 
+            placeholder="Buscar ideas, usuarios o etiquetas..." 
             className="w-full bg-gray-100 border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={globalSearchQuery}
+            onChange={(e) => setGlobalSearchQuery(e.target.value)}
           />
         </div>
       </div>
@@ -141,13 +140,13 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
           </div>
         )}
 
-        {searchQuery && filteredIdeas.length === 0 && filteredUsers.length === 0 ? (
+        {globalSearchQuery && filteredIdeas.length === 0 && filteredUsers.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
-            No results found for "{searchQuery}"
+            No se encontraron resultados para "{globalSearchQuery}"
           </div>
         ) : (
           <AnimatePresence>
-            {(searchQuery ? filteredIdeas : ideas).map(idea => (
+            {(globalSearchQuery ? filteredIdeas : ideas).map(idea => (
               <motion.div
                 key={idea.id}
                 initial={{ opacity: 0, y: 10 }}
