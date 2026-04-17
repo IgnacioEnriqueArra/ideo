@@ -268,7 +268,7 @@ export const IdeaDetail: React.FC<IdeaDetailProps> = ({ ideaId, onBack, onUserCl
                  <GitFork className="w-8 h-8 text-gray-300" />
                </div>
                <p className="font-bold text-gray-900 mb-1">No forks attached yet</p>
-               <p className="text-sm font-mono tracking-tight text-gray-500">Be the first to build on this idea.</p>
+               <p className="text-sm font-mono tracking-tight text-gray-500">Be the first to fork this post.</p>
              </div>
           )}
         </div>

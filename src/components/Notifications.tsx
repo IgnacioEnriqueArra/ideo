@@ -11,9 +11,9 @@ interface NotificationsProps {
 }
 
 const typeConfig = {
-  like:     { icon: Heart,          color: 'bg-red-500',   iconStyle: 'text-white fill-white',  label: 'liked your idea.' },
-  branch:   { icon: GitFork,        color: 'bg-blue-500',  iconStyle: 'text-white',             label: 'made a branch from your idea.' },
-  feedback: { icon: MessageSquare,  color: 'bg-green-500', iconStyle: 'text-white fill-white/20',label: 'commented on your branch.' },
+  like:     { icon: Heart,          color: 'bg-red-500',   iconStyle: 'text-white fill-white',  label: 'liked your post.' },
+  branch:   { icon: GitFork,        color: 'bg-blue-500',  iconStyle: 'text-white',             label: 'forked your post.' },
+  feedback: { icon: MessageSquare,  color: 'bg-green-500', iconStyle: 'text-white fill-white/20',label: 'commented on your fork.' },
   follow:   { icon: UserPlus,       color: 'bg-violet-500',iconStyle: 'text-white',             label: 'started following you.' },
 } as const;
 

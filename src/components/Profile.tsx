@@ -14,7 +14,7 @@ interface ProfileProps {
 
 export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
   const { currentUser, users, ideas, toggleFollow, userLikes } = useAppContext();
-  const [activeTab, setActiveTab] = useState<'ideas' | 'branches' | 'likes'>('ideas');
+  const [activeTab, setActiveTab] = useState<'posts' | 'forks' | 'likes'>('posts');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const profileUser = userId ? users.find(u => u.id === userId) || currentUser : currentUser;
@@ -111,18 +111,18 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
         {/* Tabs */}
         <div className="flex border-b border-gray-100 mt-2">
           <button 
-            className={`flex-1 py-3 text-sm font-medium relative ${activeTab === 'ideas' ? 'text-gray-900 font-bold' : 'text-gray-500'}`}
-            onClick={() => setActiveTab('ideas')}
+            className={`flex-1 py-3 text-sm font-medium relative ${activeTab === 'posts' ? 'text-gray-900 font-bold' : 'text-gray-500'}`}
+            onClick={() => setActiveTab('posts')}
           >
-            Ideas
-            {activeTab === 'ideas' && <motion.div layoutId="profile-tab" className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-primary rounded-t-full" />}
+            Posts
+            {activeTab === 'posts' && <motion.div layoutId="profile-tab" className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-primary rounded-t-full" />}
           </button>
           <button 
-            className={`flex-1 py-3 text-sm font-medium relative ${activeTab === 'branches' ? 'text-gray-900 font-bold' : 'text-gray-500'}`}
-            onClick={() => setActiveTab('branches')}
+            className={`flex-1 py-3 text-sm font-medium relative ${activeTab === 'forks' ? 'text-gray-900 font-bold' : 'text-gray-500'}`}
+            onClick={() => setActiveTab('forks')}
           >
-            Branches
-            {activeTab === 'branches' && <motion.div layoutId="profile-tab" className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-primary rounded-t-full" />}
+            Forks
+            {activeTab === 'forks' && <motion.div layoutId="profile-tab" className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-primary rounded-t-full" />}
           </button>
           <button 
             className={`flex-1 py-3 text-sm font-medium relative ${activeTab === 'likes' ? 'text-gray-900 font-bold' : 'text-gray-500'}`}
@@ -135,10 +135,10 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
 
         {/* Content */}
         <div className="divide-y divide-gray-100">
-          {activeTab === 'ideas' && userIdeas.map(idea => (
+          {activeTab === 'posts' && userIdeas.map(idea => (
             <IdeaCard key={idea.id} idea={idea} />
           ))}
-          {activeTab === 'branches' && userBranches.map(branch => (
+          {activeTab === 'forks' && userBranches.map(branch => (
             <BranchCard key={branch.id} branch={branch} />
           ))}
           {activeTab === 'likes' && (

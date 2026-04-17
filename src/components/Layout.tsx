@@ -77,7 +77,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
             >
               <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 rounded-full" />
               <Plus className="w-6 h-6 relative z-10" />
-              <span className="hidden xl:block text-[17px] relative z-10">Post Idea</span>
+              <span className="hidden xl:block text-[17px] relative z-10">Post</span>
             </button>
           </nav>
 
@@ -134,7 +134,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
              <Search className="w-5 h-5 text-gray-400" />
              <input 
                type="text" 
-               placeholder="Search forks, users, or tags" 
+               placeholder="Search network..." 
                className="bg-transparent border-none focus:ring-0 text-[15px] w-full outline-none placeholder:text-gray-400 font-medium" 
                value={globalSearchQuery}
                onChange={(e) => setGlobalSearchQuery(e.target.value)}
@@ -143,7 +143,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
           
           <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-full blur-2xl -z-10 group-hover:bg-primary/10 transition-colors" />
-            <h3 className="text-[20px] font-black text-gray-900 mb-5 tracking-tight">Trending Ideas</h3>
+            <h3 className="text-[20px] font-black text-gray-900 mb-5 tracking-tight">Trending</h3>
             <div className="space-y-5">
                {ideas.slice(0, 3).map((idea) => (
                  <div 

@@ -102,9 +102,9 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
             <div className="w-12 h-12 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center mb-4 relative z-10">
               <Zap className="w-6 h-6 text-primary fill-primary/20" />
             </div>
-            <h2 className="text-[22px] font-black text-gray-900 mb-2 tracking-tight relative z-10 text-center">Share your idea with the network</h2>
-            <p className="text-gray-500 text-[15px] mb-6 text-center max-w-[340px] font-medium leading-relaxed relative z-10">
-              Post what you're working on, branch out, and collaborate autonomously with other builders.
+            <h2 className="text-[22px] font-black text-gray-900 mb-2 tracking-tight relative z-10 text-center">Join the conversation anonymously</h2>
+            <p className="text-gray-500 text-[15px] mb-6 text-center max-w-[400px] font-medium leading-relaxed relative z-10">
+              Share your thoughts, connect with others, and explore the network with 100% anonymity. No tracks, no limits.
             </p>
             <button 
               className="bg-gradient-to-r from-primary to-blue-500 text-white font-black py-3 px-8 rounded-full shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all active:scale-95 relative z-10"
@@ -113,7 +113,7 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
                 if (composeBtn) composeBtn.click();
               }}
             >
-              Deploy Idea
+              Post Now
             </button>
           </div>
         </>

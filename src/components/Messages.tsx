@@ -185,10 +185,10 @@ const ChatView: React.FC<ChatProps> = ({ conversation, otherUserId, onBack }) =>
                             <img src={sharedIdea.mediaUrl} className="w-full h-full object-cover" alt="" />
                           </div>
                         )}
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-primary">Ver Idea ➔</div>
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-primary">View Post ➔</div>
                       </div>
                     ) : sharedIdeaId ? (
-                      <div className="text-xs italic text-gray-400">Idea not available</div>
+                      <div className="text-xs italic text-gray-400">Post not available</div>
                     ) : (
                       <p className="text-gray-900">{msg.content}</p>
                     )}
