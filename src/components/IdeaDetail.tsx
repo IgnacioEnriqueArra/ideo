@@ -15,41 +15,37 @@ interface IdeaDetailProps {
 }
 
 // Flat list renderer — no indentation on mobile, subtle visual cue via border on desktop
-const RecursiveForkThread = ({ fork, onUserClick, onReplyClick, depth = 0 }: any) => {
+const RecursiveForkThread = ({ fork, onUserClick, onReplyClick, depth = 0, parentAuthorHandle }: any) => {
   const maxDepth = 5;
-  // We cap indentation visually at 2 levels max to avoid overflow
-  const visualDepth = Math.min(depth, 2);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full overflow-hidden"
+      className="w-full"
     >
-      {/* Visual depth indicator: a left accent, not a margin */}
-      <div
-        style={{
-          borderLeft: depth > 0 ? `2px solid rgba(var(--color-primary, 59 130 246) / ${0.15 + visualDepth * 0.05})` : 'none',
-          paddingLeft: depth > 0 ? '12px' : '0',
-        }}
-        className="w-full overflow-hidden"
-      >
-        <BranchCard branch={fork} onUserClick={onUserClick} onReply={() => onReplyClick(fork)} />
+      <BranchCard
+        branch={fork}
+        onUserClick={onUserClick}
+        onReply={() => onReplyClick(fork)}
+        depth={depth}
+        parentAuthorHandle={parentAuthorHandle}
+      />
 
-        {fork.forks && fork.forks.length > 0 && depth < maxDepth && (
-          <div className="w-full overflow-hidden">
-            {fork.forks.map((child: any) => (
-              <RecursiveForkThread
-                key={child.id}
-                fork={child}
-                depth={depth + 1}
-                onUserClick={onUserClick}
-                onReplyClick={onReplyClick}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+      {fork.forks && fork.forks.length > 0 && depth < maxDepth && (
+        <div className="w-full">
+          {fork.forks.map((child: any) => (
+            <RecursiveForkThread
+              key={child.id}
+              fork={child}
+              depth={depth + 1}
+              parentAuthorHandle={fork.author.handle}
+              onUserClick={onUserClick}
+              onReplyClick={onReplyClick}
+            />
+          ))}
+        </div>
+      )}
     </motion.div>
   );
 };
