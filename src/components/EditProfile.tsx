@@ -88,7 +88,7 @@ export const EditProfile: React.FC<EditProfileProps> = ({ isOpen, onClose }) => 
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="fixed inset-x-0 bottom-0 top-12 bg-white rounded-t-2xl shadow-2xl z-50 overflow-hidden flex flex-col max-w-md mx-auto"
+        className="fixed inset-x-0 bottom-0 top-12 sm:top-1/2 sm:-translate-y-1/2 sm:bottom-auto bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl z-50 overflow-hidden flex flex-col max-w-md mx-auto sm:max-h-[85vh]"
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-100">
           <div className="flex items-center gap-4">
@@ -113,43 +113,28 @@ export const EditProfile: React.FC<EditProfileProps> = ({ isOpen, onClose }) => 
                 <AvatarImage src={avatar} className="object-cover" />
                 <AvatarFallback>{name.charAt(0)}</AvatarFallback>
               </Avatar>
-              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleAvatarUpload} />
-              <button 
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className="absolute inset-0 bg-black/30 rounded-full flex items-center justify-center text-white hover:bg-black/40 transition-colors disabled:opacity-50"
-              >
-                {isUploading ? <span className="animate-spin text-xl">⏳</span> : <Camera className="w-6 h-6" />}
-              </button>
             </div>
-            <input 
-              type="text" 
-              placeholder="Or paste an external image URL here..." 
-              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary mt-2"
-              value={avatar}
-              onChange={(e) => setAvatar(e.target.value)}
-            />
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Name</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Generated Name</label>
               <input 
                 type="text" 
-                className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                disabled
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-400 cursor-not-allowed"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Handle</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Generated Handle</label>
               <div className="relative">
-                <span className="absolute left-3 top-2.5 text-gray-500">@</span>
+                <span className="absolute left-3 top-2.5 text-gray-400">@</span>
                 <input 
                   type="text" 
-                  className="w-full bg-white border border-gray-200 rounded-lg pl-8 pr-3 py-2 text-gray-900 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  disabled
+                  className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-8 pr-3 py-2 text-gray-400 cursor-not-allowed"
                   value={handle}
-                  onChange={(e) => setHandle(e.target.value)}
                 />
               </div>
             </div>
