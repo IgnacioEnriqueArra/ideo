@@ -101,6 +101,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     let authSubscription: any;
+    let newsInterval: any;
     
     const initializeData = async () => {
       const [uRes, iRes, bRes, fRes, cRes, oRes, cmRes] = await Promise.all([
@@ -132,31 +133,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
 
       // Fetch external real-time verified news
-      try {
-        const [worldRes, argRes] = await Promise.all([
-          fetch('https://www.reddit.com/r/worldnews/hot.json?limit=15').then(res => res.json()),
-          fetch('https://www.reddit.com/r/argentina/hot.json?limit=15').then(res => res.json())
-        ]);
-        
-        const parseReddit = (json: any, category: string): NewsItem[] => {
-          if (!json?.data?.children) return [];
-          return json.data.children.map((child: any) => ({
-            id: child.data.id,
-            title: child.data.title,
-            url: child.data.url,
-            source: child.data.domain,
-            category,
-            createdAt: new Date(child.data.created_utc * 1000).toISOString(),
-            thumbnail: child.data.thumbnail && child.data.thumbnail.startsWith('http') ? child.data.thumbnail : null,
-            score: child.data.score
-          }));
-        };
+      const fetchNews = async () => {
+        try {
+          const [worldRes, argRes] = await Promise.all([
+            fetch('https://www.reddit.com/r/worldnews/hot.json?limit=15').then(res => res.json()),
+            fetch('https://www.reddit.com/r/argentina/hot.json?limit=15').then(res => res.json())
+          ]);
+          
+          const parseReddit = (json: any, category: string): NewsItem[] => {
+            if (!json?.data?.children) return [];
+            return json.data.children.map((child: any) => ({
+              id: child.data.id,
+              title: child.data.title,
+              url: child.data.url,
+              source: child.data.domain,
+              category,
+              createdAt: new Date(child.data.created_utc * 1000).toISOString(),
+              thumbnail: child.data.thumbnail && child.data.thumbnail.startsWith('http') ? child.data.thumbnail : null,
+              score: child.data.score
+            }));
+          };
 
-        const mergedNews = [...parseReddit(worldRes, 'GlobalIntel'), ...parseReddit(argRes, 'Argentina')].sort((a,b) => b.score - a.score);
-        setGlobalNews(mergedNews);
-      } catch (e) {
-        console.error('Failed to load external news sources', e);
-      }
+          const mergedNews = [...parseReddit(worldRes, 'GlobalIntel'), ...parseReddit(argRes, 'Argentina')].sort((a,b) => b.score - a.score);
+          setGlobalNews(mergedNews);
+        } catch (e) {
+          console.error('Failed to load external news sources', e);
+        }
+      };
+
+      await fetchNews();
+      newsInterval = setInterval(fetchNews, 1000 * 60 * 5); // Refresh every 5 minutes
 
       const { data } = supabase.auth.onAuthStateChange(async (_event, session) => {
         if (session?.user) {
@@ -217,6 +223,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     return () => {
       authSubscription?.unsubscribe();
+      if (newsInterval) clearInterval(newsInterval);
       supabase.removeChannel(channel);
     };
   }, []);
