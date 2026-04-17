@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { X, Camera } from 'lucide-react';
 import { useAppContext } from '../AppContext';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
