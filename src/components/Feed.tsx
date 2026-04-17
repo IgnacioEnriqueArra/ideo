@@ -3,8 +3,7 @@ import { Menu, Bell, Search, BadgeCheck, Zap } from 'lucide-react';
 import { useAppContext } from '../AppContext';
 import { IdeaCard } from './IdeaCard';
 import { motion, AnimatePresence } from 'motion/react';
-import { formatDistanceToNow } from 'date-fns';
-import { ExternalLink } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface FeedProps {
   onSelectIdea: (ideaId: string) => void;
@@ -13,7 +12,7 @@ interface FeedProps {
 }
 
 export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotificationsClick }) => {
-  const { ideas, currentUser, users, notifications, globalSearchQuery, setGlobalSearchQuery, globalNews } = useAppContext();
+  const { ideas, currentUser, users, notifications, globalSearchQuery, setGlobalSearchQuery } = useAppContext();
   const unreadCount = notifications.filter(n => !n.read).length;
   const [activeTab, setActiveTab] = useState<'foryou' | 'trending'>('foryou');
 
@@ -183,50 +182,20 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
         ) : (
           <div className="pb-10">
             <AnimatePresence>
-              {feedItems.map((item, index) => (
+              {(globalSearchQuery ? filteredIdeas : ideas).map((idea, index) => (
                 <motion.div
-                  key={item.id}
+                  key={idea.id}
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                   layout
                   className="bg-white border-b border-gray-100/80 hover:bg-gray-50/50 transition-colors"
                 >
-                  {item.type === 'idea' ? (
-                    <IdeaCard 
-                      idea={item.data} 
-                      onClick={() => onSelectIdea(item.data.id)} 
-                      onUserClick={onUserClick}
-                    />
-                  ) : (
-                    <a 
-                      href={item.data.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group block p-5 sm:p-6 bg-gray-50/50 hover:bg-gray-100/50 transition-colors"
-                    >
-                      <div className="flex gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1.5">
-                            <span className={`text-[9px] uppercase font-black tracking-wider px-1.5 py-0.5 rounded-sm ${item.data.category === 'Argentina' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}`}>
-                              Intel: {item.data.category}
-                            </span>
-                            <span className="text-xs font-mono text-gray-400 capitalize">{item.data.source}</span>
-                            <span className="text-gray-300">·</span>
-                            <span className="text-xs font-mono text-gray-400">{item.data.createdAt ? formatDistanceToNow(new Date(item.data.createdAt), { addSuffix: true }) : ''}</span>
-                          </div>
-                          <h3 className="text-sm sm:text-[15px] font-bold text-gray-900 leading-snug group-hover:text-red-600 transition-colors">
-                            {item.data.title}
-                          </h3>
-                        </div>
-                        {item.data.thumbnail && (
-                          <div className="w-16 h-16 shrink-0 rounded-lg overflow-hidden bg-white border border-gray-100">
-                            <img src={item.data.thumbnail} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                          </div>
-                        )}
-                      </div>
-                    </a>
-                  )}
+                  <IdeaCard 
+                    idea={idea} 
+                    onClick={() => onSelectIdea(idea.id)} 
+                    onUserClick={onUserClick}
+                  />
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -236,4 +205,3 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
     </motion.div>
   );
 };
-

@@ -40,7 +40,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
           <nav className="flex-1 space-y-2.5">
             {[
               { id: 'home', icon: Home, label: 'Home' },
-              { id: 'news', icon: FileText, label: 'News' },
               { id: 'communities', icon: Users, label: 'Communities' },
               { id: 'notifications', icon: Bell, label: 'Notifications', count: unreadNotificationsCount },
               { id: 'messages', icon: MessageSquare, label: 'Messages', count: unreadMessagesCount },
