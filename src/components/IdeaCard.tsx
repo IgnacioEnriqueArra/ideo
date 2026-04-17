@@ -49,12 +49,12 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = fa
 
   return (
     <div 
-      className={`p-4 sm:p-5 transition-colors group relative ${onClick ? 'cursor-pointer' : ''}`}
+      className={`p-3 sm:p-5 transition-colors group relative ${onClick ? 'cursor-pointer' : ''}`}
       onClick={onClick}
     >
-      <div className="flex gap-3 sm:gap-4">
+      <div className="flex gap-2.5 sm:gap-4">
         <Avatar 
-          className="w-11 h-11 rounded-full cursor-pointer hover:opacity-80 transition-opacity border border-gray-100 shadow-sm shrink-0"
+          className="w-10 h-10 sm:w-11 sm:h-11 rounded-full cursor-pointer hover:opacity-80 transition-opacity border border-gray-100 shadow-sm shrink-0"
           onClick={(e) => {
             e.stopPropagation();
             if (onUserClick) onUserClick(idea.author.id);
@@ -67,7 +67,7 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = fa
         <div className="flex-1 min-w-0 pb-1">
           <div className="flex items-start justify-between">
             <div className="flex flex-col">
-              <div className="flex items-center gap-1.5 text-[15px]">
+              <div className="flex items-center gap-1 text-[14px] sm:text-[15px]">
                 <span 
                   className="font-bold text-gray-900 truncate tracking-tight hover:underline cursor-pointer"
                   onClick={(e) => {
@@ -77,13 +77,12 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = fa
                 >
                   {idea.author.name}
                 </span>
-                {idea.author.verified && <BadgeCheck className="w-[15px] h-[15px] text-blue-500 fill-blue-500/10 shrink-0" />}
-                <span className="text-gray-500 font-mono text-[13px] tracking-tighter truncate">@{idea.author.handle}</span>
-                <span className="text-gray-300 mx-0.5">&middot;</span>
-                <span className="text-gray-400 font-mono text-[12px] whitespace-nowrap">
-                  {formatDistanceToNow(new Date(idea.createdAt), { addSuffix: true }).replace('about ', '')}
-                </span>
+                {idea.author.verified && <BadgeCheck className="w-[14px] h-[14px] sm:w-[15px] sm:h-[15px] text-blue-500 fill-blue-500/10 shrink-0" />}
+                <span className="text-gray-500 font-mono text-[12px] sm:text-[13px] tracking-tighter truncate">@{idea.author.handle}</span>
               </div>
+              <span className="text-gray-400 font-mono text-[11px] sm:text-[12px] whitespace-nowrap -mt-0.5">
+                {formatDistanceToNow(new Date(idea.createdAt), { addSuffix: true }).replace('about ', '')}
+              </span>
             </div>
             
             <div className="relative">
@@ -168,11 +167,11 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = fa
           )}
 
           <div className="flex items-center justify-between mt-4 text-gray-500 max-w-[400px] pr-2">
-            <button className="flex items-center gap-1 hover:text-primary transition-colors group outline-none">
-              <div className="w-9 h-9 flex items-center justify-center rounded-full group-hover:bg-primary/10 transition-all duration-300">
-                <GitFork className="w-[18px] h-[18px]" />
+            <button className="flex items-center gap-1 hover:text-primary transition-colors group outline-none" style={{ marginTop: '-4px' }}>
+              <div className="w-8 h-8 flex items-center justify-center rounded-full group-hover:bg-primary/10 transition-all duration-300">
+                <GitFork className="w-[16px] h-[16px]" />
               </div>
-              <span className="text-[13px] font-medium font-mono group-hover:font-bold transition-all">{idea.branches.length > 0 ? idea.branches.length : 'Fork'}</span>
+              <span className="text-[12px] font-medium font-mono group-hover:font-bold transition-all">{idea.branches.length > 0 ? idea.branches.length : 'Fork'}</span>
             </button>
 
             <button 
