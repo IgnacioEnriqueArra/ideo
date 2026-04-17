@@ -101,8 +101,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
         </aside>
 
         {/* Main Content Column */}
-        <main className="flex-1 w-full max-w-none sm:max-w-[620px] bg-white sm:bg-white/70 sm:backdrop-blur-3xl border-x-0 sm:border-x border-gray-100/80 relative flex flex-col h-screen overflow-hidden sm:shadow-[0_0_40px_rgba(0,0,0,0.02)]">
-          <div className="flex-1 overflow-y-auto no-scrollbar relative">
+        <main className="flex-1 w-full max-w-none sm:max-w-[600px] bg-white border-x-0 sm:border-x sm:border-gray-100 relative flex flex-col min-h-screen">
+          <div className="flex-1 relative">
             {children}
           </div>
           
@@ -141,7 +141,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
              />
           </div>
           
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group">
+          <div className="bg-gray-50/50 rounded-2xl p-5 border border-gray-100 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-full blur-2xl -z-10 group-hover:bg-primary/10 transition-colors" />
             <h3 className="text-[20px] font-black text-gray-900 mb-5 tracking-tight">Trending</h3>
             <div className="space-y-5">
@@ -167,7 +167,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
             <button onClick={() => setActiveTab('news')} className="text-primary text-[14px] font-bold mt-5 hover:underline text-left block w-full">View all trends</button>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+          <div className="bg-gray-50/50 rounded-2xl p-5 border border-gray-100">
             <h3 className="text-[20px] font-black text-gray-900 mb-5 tracking-tight">Connect</h3>
             <div className="space-y-5">
               {users
