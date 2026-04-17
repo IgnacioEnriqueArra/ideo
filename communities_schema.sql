@@ -1,9 +1,3 @@
--- Limpiar políticas previas para evitar error 42710
-DROP POLICY IF EXISTS "Enable all for authenticated users" ON communities;
-DROP POLICY IF EXISTS "Enable all for authenticated users" ON community_members;
-DROP POLICY IF EXISTS "Enable all for authenticated users" ON crypto_orders;
-DROP POLICY IF EXISTS "Enable all for authenticated users" ON community_join_requests;
-
 -- Tablas de Comunidades y Ordenes Cripto
 CREATE TABLE IF NOT EXISTS communities (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -49,6 +43,12 @@ ALTER TABLE communities ENABLE ROW LEVEL SECURITY;
 ALTER TABLE community_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE crypto_orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE community_join_requests ENABLE ROW LEVEL SECURITY;
+
+-- Limpiar políticas previas para evitar error 42710
+DROP POLICY IF EXISTS "Enable all for authenticated users" ON communities;
+DROP POLICY IF EXISTS "Enable all for authenticated users" ON community_members;
+DROP POLICY IF EXISTS "Enable all for authenticated users" ON crypto_orders;
+DROP POLICY IF EXISTS "Enable all for authenticated users" ON community_join_requests;
 
 -- Políticas de acceso total (estilo fork.)
 CREATE POLICY "Enable all for authenticated users" ON communities FOR ALL USING (true) WITH CHECK (true);
