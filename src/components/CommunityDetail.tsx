@@ -83,6 +83,31 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({ communityId, o
               )}
             </div>
           </section>
+
+          <section className="pt-8 border-t border-red-50 border-dashed">
+            <h3 className="text-sm font-bold text-red-500 uppercase tracking-widest mb-4">Danger Zone</h3>
+            <div className="p-5 bg-red-50/50 rounded-2xl border border-red-100 flex items-center justify-between">
+               <div>
+                  <p className="font-bold text-red-900">Delete Community</p>
+                  <p className="text-xs text-red-600/70">This action is permanent and will remove all posts.</p>
+               </div>
+               <button 
+                onClick={async () => {
+                   if (window.confirm("ARE YOU SURE? This will permanently delete the community and all its signals.")) {
+                      try {
+                         await deleteCommunity(communityId);
+                         onBack();
+                      } catch (e) {
+                         alert("Error deleting community");
+                      }
+                   }
+                }}
+                className="px-5 py-2.5 bg-red-500 text-white rounded-xl text-sm font-black shadow-sm hover:bg-red-600 transition-colors"
+               >
+                 Destroy Instance
+               </button>
+            </div>
+          </section>
         </div>
       </div>
     );

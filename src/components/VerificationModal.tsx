@@ -113,41 +113,53 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({ isOpen, on
               </div>
             ) : (
               <div className="space-y-6">
-                <div className="bg-gray-900 text-white rounded-[24px] p-6 shadow-xl relative overflow-hidden border border-white/10">
-                  <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider">Blockchain Pending</div>
-                  
-                  <div className="bg-white/5 rounded-2xl p-5 mb-6 text-center border border-white/10">
-                    <div className="text-[10px] text-gray-400 mb-1 font-mono uppercase tracking-widest">Amount to send (TRC20)</div>
-                    <div className="text-4xl font-black font-mono tracking-tighter text-primary">
-                      {activeOrder.amount} <span className="text-lg text-gray-500">USDT</span>
+                <div className="bg-white rounded-[32px] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.08)] border border-gray-100 flex flex-col gap-8 relative overflow-hidden">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-1 block">Network Status</span>
+                      <div className="flex items-center gap-2">
+                         <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                         <span className="text-xs font-bold text-gray-900">Waiting for Signal...</span>
+                      </div>
+                    </div>
+                    <div className="bg-blue-50 text-primary text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest">
+                      TRC20 Network
                     </div>
                   </div>
 
-                  <div className="mb-6">
-                    <div className="text-[11px] text-gray-400 mb-2 font-black font-mono uppercase tracking-widest">Receiving Address:</div>
+                  <div className="text-center py-4">
+                    <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Required Amount</span>
+                    <div className="text-5xl font-black text-gray-900 tracking-tighter flex items-baseline justify-center gap-2">
+                       {activeOrder.amount} <span className="text-xl text-gray-400 font-medium">USDT</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest block pl-1">Wallet Address</span>
                     <div 
-                      className="bg-black/40 rounded-xl p-4 break-all font-mono text-sm border border-white/5 text-center select-all cursor-pointer hover:bg-black/60 transition-colors"
                       onClick={() => {
                         navigator.clipboard.writeText(TRC20_WALLET);
                         alert("Address Copied!");
                       }}
+                      className="group relative bg-gray-50 border border-gray-100 rounded-2xl p-5 break-all font-mono text-sm text-gray-600 cursor-pointer hover:bg-gray-100/50 hover:border-primary/20 transition-all text-center flex flex-col items-center gap-2"
                     >
                       {TRC20_WALLET}
+                      <span className="text-[10px] font-black text-primary opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-widest">Click to Copy Node Address</span>
                     </div>
                   </div>
 
-                  <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex gap-3">
-                    <ShieldAlert className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                    <div className="text-[12px] text-gray-300 leading-tight">
-                      <p className="font-bold text-white mb-1 uppercase tracking-tight">Important Network Notice:</p>
-                      <p>Send precisely <span className="text-red-400 font-bold">{activeOrder.amount} USDT</span> via **TRON (TRC20)** network only. Any other token or network will result in permanent loss of funds.</p>
-                    </div>
+                  <div className="p-5 bg-orange-50/50 rounded-2xl border border-orange-100 flex gap-4">
+                     <ShieldAlert className="w-6 h-6 text-orange-500 shrink-0 mt-0.5" />
+                     <div className="text-[12px] text-orange-900/70 leading-relaxed font-medium">
+                        Send only via <span className="font-black text-orange-900 underline decoration-orange-300">TRON (TRC20)</span>. 
+                        Verification will automatically trigger once the transaction is validated on-chain (usually 2-5 minutes).
+                     </div>
                   </div>
 
-                  <div className="mt-6 flex flex-col items-center gap-4">
-                    <div className="flex justify-center items-center gap-2 text-xs text-gray-400">
-                      {isChecking ? <Loader2 className="w-4 h-4 animate-spin" /> : <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />}
-                      {isChecking ? 'Syncing with TronGrid...' : 'Listening for transaction...'}
+                  <div className="pt-4 flex flex-col items-center gap-5">
+                    <div className="flex justify-center items-center gap-3">
+                       <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                       <span className="text-[11px] font-bold text-gray-400 font-mono tracking-tight">SCANNING BLOCKCHAIN...</span>
                     </div>
 
                     <button 
@@ -155,9 +167,9 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({ isOpen, on
                         const ok = await simulateSuccessOrder(activeOrder.id);
                         if (ok) setPaid(true);
                       }}
-                      className="text-[10px] text-white/20 hover:text-primary transition-colors uppercase tracking-widest font-black"
+                      className="text-[10px] text-gray-200 hover:text-primary transition-colors font-black uppercase tracking-widest hover:underline"
                     >
-                      [ Debug: Simulate Payment ]
+                      [ Dev Bypass: Simulate Node Sync ]
                     </button>
                   </div>
                 </div>

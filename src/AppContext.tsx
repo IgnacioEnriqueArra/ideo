@@ -169,6 +169,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'communities' }, payload => {
         if (payload.eventType === 'INSERT') setCommunities(p => { const x = p.find(c => c.id === payload.new.id); return x ? p : [payload.new as Community, ...p] });
+        if (payload.eventType === 'UPDATE') setCommunities(p => p.map(c => c.id === payload.new.id ? payload.new as Community : c));
+        if (payload.eventType === 'DELETE') setCommunities(p => p.filter(c => c.id !== payload.old.id));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'crypto_orders' }, payload => {
         if (payload.eventType === 'INSERT') setCryptoOrders(p => { const x = p.find(o => o.id === payload.new.id); return x ? p : [payload.new as CryptoOrder, ...p] });
@@ -754,6 +756,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
      await supabase.from('communities').update({ isPrivate }).eq('id', communityId);
   };
 
+  const deleteCommunity = async (communityId: string) => {
+     if (!currentUser) return;
+     const { error } = await supabase.from('communities').delete().eq('id', communityId).eq('ownerId', currentUser.id);
+     if (error) {
+       console.error("Error deleting community:", error);
+       throw error;
+     }
+  };
+
   const deleteAccount = async () => {
     if (!currentUser) return;
     try {
@@ -775,7 +786,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       rawBranches, allMessages, isAuthModalOpen, setAuthModalOpen,
       globalSearchQuery, setGlobalSearchQuery,
       communities, allIdeas, ideas, globalNews,
-      createVerificationOrder, checkOrderStatus, simulateSuccessOrder, createCommunity, addIdeaToCommunity,
+      createVerificationOrder, checkOrderStatus, simulateSuccessOrder, createCommunity, addIdeaToCommunity, deleteCommunity,
       communityMembers, joinRequests, requestToJoinCommunity, handleJoinRequest, updateCommunityPrivacy
     }}>
       {children}
