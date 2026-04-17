@@ -22,19 +22,24 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
     return () => window.removeEventListener('open-menu', handleOpenMenu);
   }, []);
 
-  // removed toggleDarkMode
-
   return (
-    <div className="min-h-screen w-full bg-white dark:bg-gray-950 transition-colors flex justify-center">
-      <div className="w-full max-w-[1300px] flex gap-0 sm:gap-4 lg:gap-8 px-0 sm:px-4">
+    <div className="min-h-screen w-full bg-white transition-colors flex justify-center relative">
+      {/* Background glowing blobs for Web3 effect */}
+      <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
+      <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-400/5 blur-[100px] pointer-events-none" />
+
+      <div className="w-full max-w-[1340px] flex gap-4 lg:gap-8 px-4 sm:px-6 relative z-10">
         
         {/* Desktop Sidebar (Left) */}
-        <aside className="hidden sm:flex flex-col w-[80px] lg:w-[280px] sticky top-0 h-screen py-4 shrink-0">
-          <div className="px-4 mb-8">
-            <span className="text-3xl font-black text-primary tracking-tighter">fork.</span>
+        <aside className="hidden sm:flex flex-col w-[88px] xl:w-[280px] sticky top-0 h-screen py-6 shrink-0 z-20">
+          <div className="px-4 mb-10 flex items-center gap-3 group cursor-pointer">
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/25 group-hover:scale-105 transition-transform duration-300">
+              <Shield className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-3xl font-black text-gray-900 tracking-tighter hidden xl:block group-hover:text-primary transition-colors">fork.</span>
           </div>
           
-          <nav className="flex-1 space-y-2">
+          <nav className="flex-1 space-y-2.5">
             {[
               { id: 'home', icon: Home, label: 'Home' },
               { id: 'news', icon: FileText, label: 'News' },
@@ -48,47 +53,47 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all ${
+                className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 group ${
                   activeTab === item.id 
-                    ? 'text-primary bg-primary/5 font-bold' 
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900'
+                    ? 'text-primary bg-primary/10 font-bold shadow-[inset_4px_0_0_0_rgb(var(--color-primary))]' 
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100/80 font-medium'
                 }`}
               >
-                <div className="relative">
-                  <item.icon className={`w-7 h-7 ${activeTab === item.id ? 'fill-primary/10' : ''}`} />
+                <div className="relative flex justify-center w-8">
+                  <item.icon className={`w-6 h-6 transition-transform duration-300 ${activeTab === item.id ? 'fill-primary/20 scale-110' : 'group-hover:scale-110'}`} />
                   {item.count ? (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold border-2 border-white dark:border-gray-950">
+                    <span className="absolute -top-1.5 -right-2 bg-red-500 text-white text-[10px] w-[18px] h-[18px] rounded-full flex items-center justify-center font-bold border-2 border-white shadow-sm">
                       {item.count}
                     </span>
                   ) : null}
                 </div>
-                <span className="hidden lg:block text-lg">{item.label}</span>
+                <span className="hidden xl:block text-[17px] tracking-tight">{item.label}</span>
               </button>
             ))}
 
             <button
               onClick={onCompose}
-              className="w-full mt-4 bg-primary text-white font-black py-4 rounded-2xl lg:rounded-full shadow-lg shadow-primary/20 hover:bg-blue-600 transition-all flex items-center justify-center gap-3 active:scale-95"
+              className="w-full mt-6 bg-gradient-to-r from-primary to-blue-500 text-white font-black py-4 rounded-full shadow-xl shadow-primary/25 hover:shadow-primary/40 transition-all flex items-center justify-center gap-3 active:scale-95 group relative overflow-hidden"
             >
-              <Plus className="w-7 h-7" />
-              <span className="hidden lg:block text-lg">Post</span>
+              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 rounded-full" />
+              <Plus className="w-6 h-6 relative z-10" />
+              <span className="hidden xl:block text-[17px] relative z-10">Post Idea</span>
             </button>
           </nav>
 
-          <div className="mt-auto px-2">
+          <div className="mt-auto pt-6">
             {currentUser && (
               <div className="relative group">
-                {/* Desktop Profile Card / Popover trigger */}
-                <div className="flex items-center gap-3 p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all cursor-pointer">
-                  <Avatar className="w-10 h-10 rounded-xl">
+                <div className="flex items-center justify-center xl:justify-start gap-3 p-3 rounded-2xl hover:bg-gray-100/80 transition-all cursor-pointer backdrop-blur-sm border border-transparent hover:border-gray-200/50">
+                  <Avatar className="w-11 h-11 rounded-[14px] shadow-sm border border-white">
                     <AvatarImage src={currentUser.avatar} />
-                    <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+                    <AvatarFallback className="bg-primary/10 text-primary">{currentUser.name.charAt(0)}</AvatarFallback>
                   </Avatar>
-                  <div className="hidden lg:block text-left flex-1 min-w-0">
-                    <p className="font-bold text-gray-900 dark:text-white truncate">{currentUser.name}</p>
-                    <p className="text-sm text-gray-500 truncate">@{currentUser.handle}</p>
+                  <div className="hidden xl:block text-left flex-1 min-w-0">
+                    <p className="font-bold text-gray-900 truncate text-[15px] tracking-tight">{currentUser.name}</p>
+                    <p className="text-sm font-mono text-gray-500 truncate tracking-tight pr-2">@{currentUser.handle}</p>
                   </div>
-                  <MoreHorizontal className="hidden lg:block w-5 h-5 text-gray-400" />
+                  <MoreHorizontal className="hidden xl:block w-5 h-5 text-gray-400" />
                 </div>
               </div>
             )}
@@ -96,13 +101,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
         </aside>
 
         {/* Main Content Column */}
-        <main className="flex-1 w-full max-w-md sm:max-w-2xl border-x border-gray-100 dark:border-gray-800 relative bg-white dark:bg-gray-950 transition-colors flex flex-col h-screen overflow-hidden">
+        <main className="flex-1 w-full max-w-md sm:max-w-[620px] bg-white/70 backdrop-blur-3xl border-x border-gray-100/80 relative flex flex-col h-screen overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.02)]">
           <div className="flex-1 overflow-y-auto no-scrollbar relative">
             {children}
           </div>
           
           {/* Bottom Nav (Mobile Only) */}
-          <div className="sm:hidden flex-none bg-white/90 backdrop-blur-md border-t border-gray-100 flex justify-around items-center px-2 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] z-20">
+          <div className="sm:hidden flex-none bg-white/95 backdrop-blur-xl border-t border-gray-100 flex justify-around items-center px-2 pt-3 pb-[calc(14px+env(safe-area-inset-bottom))] z-40 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
             {[
               { id: 'home', icon: Home },
               { id: 'news', icon: FileText },
@@ -112,9 +117,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               { id: 'profile', icon: User },
             ].map(item => (
               <button key={item.id} onClick={() => setActiveTab(item.id)} className="p-2 flex-1 flex justify-center relative">
-                <item.icon className={`w-6 h-6 ${activeTab === item.id ? 'text-primary fill-primary/10' : 'text-gray-400'}`} />
+                <item.icon className={`w-6 h-6 transition-all ${activeTab === item.id ? 'text-primary fill-primary/20 scale-110' : 'text-gray-400'}`} />
                 {item.count ? (
-                  <span className={`absolute top-1.5 right-1/2 -mr-3 rounded-full flex items-center justify-center border-2 border-white ${item.id === 'messages' ? 'bg-red-500 text-white text-[10px] min-w-4 h-4 font-bold px-1' : 'w-2 h-2 bg-red-500'}`}>
+                  <span className={`absolute top-1 right-1/2 -mr-3 rounded-full flex items-center justify-center border-2 border-white shadow-sm ${item.id === 'messages' ? 'bg-red-500 text-white text-[10px] min-w-[16px] h-4 font-bold px-1' : 'w-2.5 h-2.5 bg-red-500'}`}>
                     {item.id === 'messages' ? item.count : ''}
                   </span>
                 ) : null}
@@ -124,87 +129,91 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
         </main>
 
         {/* Widgets Sidebar (Right) - Desktop Only */}
-        <aside className="hidden xl:flex flex-col w-[350px] sticky top-0 h-screen py-4 gap-6">
-          <div className="bg-gray-100 dark:bg-gray-900 rounded-full px-4 py-2.5 flex items-center gap-3">
+        <aside className="hidden lg:flex flex-col w-[350px] sticky top-0 h-screen py-6 gap-6 shrink-0 z-20">
+          <div className="bg-gray-100/80 backdrop-blur-md rounded-2xl px-5 py-3.5 flex items-center gap-3 border border-gray-200/50 shadow-sm focus-within:shadow-md focus-within:ring-2 focus-within:ring-primary/20 focus-within:bg-white transition-all">
              <Search className="w-5 h-5 text-gray-400" />
              <input 
                type="text" 
-               placeholder="Search fork." 
-               className="bg-transparent border-none focus:ring-0 text-sm w-full outline-none" 
+               placeholder="Search forks, users, or tags" 
+               className="bg-transparent border-none focus:ring-0 text-[15px] w-full outline-none placeholder:text-gray-400 font-medium" 
                value={globalSearchQuery}
                onChange={(e) => setGlobalSearchQuery(e.target.value)}
              />
           </div>
           
-          <div className="bg-gray-50 dark:bg-gray-900/50 rounded-3xl p-6 border border-gray-100 dark:border-gray-800">
-            <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4">What's happening</h3>
-            <div className="space-y-6">
+          <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-full blur-2xl -z-10 group-hover:bg-primary/10 transition-colors" />
+            <h3 className="text-[20px] font-black text-gray-900 mb-5 tracking-tight">Trending Ideas</h3>
+            <div className="space-y-5">
                {ideas.slice(0, 3).map((idea) => (
                  <div 
                    key={idea.id} 
                    onClick={() => window.dispatchEvent(new CustomEvent('open-post', { detail: idea.id }))}
-                   className="cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 -mx-4 px-4 py-2 rounded-xl transition-colors"
+                   className="cursor-pointer group flex flex-col gap-1"
                  >
-                    <p className="text-xs text-gray-500 font-medium">Trending · {idea.author.name}</p>
-                    <p className="font-bold text-gray-900 dark:text-white mt-0.5 line-clamp-2">{idea.content}</p>
-                    <p className="text-xs text-gray-400 mt-1">{idea.likes} likes · {idea.branches.length} branches</p>
+                    <div className="flex items-center gap-2">
+                       <span className="text-[12px] text-gray-400 font-mono">Trending</span>
+                       <span className="w-1 h-1 bg-gray-300 rounded-full" />
+                       <span className="text-[12px] font-bold text-gray-600 truncate">{idea.author.name}</span>
+                    </div>
+                    <p className="font-bold text-gray-900 group-hover:text-primary transition-colors line-clamp-2 text-[15px] leading-snug">{idea.content}</p>
+                    <p className="text-[12px] text-gray-500 font-mono mt-0.5">{idea.likes} likes · {idea.branches.length} forks</p>
                  </div>
                ))}
                {ideas.length === 0 && (
-                 <p className="text-sm text-gray-400 italic">No recent activity.</p>
+                 <p className="text-sm text-gray-400 font-mono">No recent activity.</p>
                )}
             </div>
-            <button onClick={() => setActiveTab('news')} className="text-primary text-sm font-bold mt-6 hover:underline text-left">Show more</button>
+            <button onClick={() => setActiveTab('news')} className="text-primary text-[14px] font-bold mt-5 hover:underline text-left block w-full">View all trends</button>
           </div>
 
-          <div className="bg-gray-50 dark:bg-gray-900/50 rounded-3xl p-6 border border-gray-100 dark:border-gray-800">
-            <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4">Who to follow</h3>
-            <div className="space-y-4">
+          <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            <h3 className="text-[20px] font-black text-gray-900 mb-5 tracking-tight">Connect</h3>
+            <div className="space-y-5">
               {users
                 .filter(u => u.id !== currentUser?.id)
                 .slice(0, 4)
                 .map((suggestedUser) => (
-                  <div key={suggestedUser.id} className="flex items-center gap-3">
-                    <Avatar 
-                      className="w-10 h-10 rounded-xl cursor-pointer hover:opacity-80 transition-opacity"
-                      onClick={() => window.dispatchEvent(new CustomEvent('open-user', { detail: suggestedUser.id }))}
-                    >
-                      <AvatarImage src={suggestedUser.avatar} />
-                      <AvatarFallback>{suggestedUser.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div 
-                      className="flex-1 min-w-0 cursor-pointer"
-                      onClick={() => window.dispatchEvent(new CustomEvent('open-user', { detail: suggestedUser.id }))}
-                    >
-                      <div className="flex items-center gap-1">
-                        <p className="font-bold text-sm truncate dark:text-white hover:underline">{suggestedUser.name}</p>
-                        {suggestedUser.verified && <BadgeCheck className="w-3.5 h-3.5 text-blue-500 fill-blue-500/10 shrink-0" />}
+                  <div key={suggestedUser.id} className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 overflow-hidden flex-1">
+                      <Avatar 
+                        className="w-10 h-10 rounded-[12px] cursor-pointer hover:opacity-80 transition-opacity border border-gray-100 shadow-sm shrink-0"
+                        onClick={() => window.dispatchEvent(new CustomEvent('open-user', { detail: suggestedUser.id }))}
+                      >
+                        <AvatarImage src={suggestedUser.avatar} />
+                        <AvatarFallback className="bg-primary/5 text-primary">{suggestedUser.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div 
+                        className="flex-1 min-w-0 cursor-pointer"
+                        onClick={() => window.dispatchEvent(new CustomEvent('open-user', { detail: suggestedUser.id }))}
+                      >
+                        <div className="flex items-center gap-1">
+                          <p className="font-bold text-[14px] truncate text-gray-900 hover:underline tracking-tight">{suggestedUser.name}</p>
+                          {suggestedUser.verified && <BadgeCheck className="w-[14px] h-[14px] text-blue-500 fill-blue-500/10 shrink-0" />}
+                        </div>
+                        <p className="text-[12px] text-gray-500 font-mono truncate">@{suggestedUser.handle}</p>
                       </div>
-                      <p className="text-xs text-gray-500 truncate">@{suggestedUser.handle}</p>
                     </div>
                     <button 
                       onClick={() => {
-                        if (!currentUser) {
-                          setAuthModalOpen(true);
-                        } else {
-                          toggleFollow(suggestedUser.id);
-                        }
+                        if (!currentUser) setAuthModalOpen(true);
+                        else toggleFollow(suggestedUser.id);
                       }}
-                      className={`${
+                      className={`shrink-0 ${
                         currentUser?.following?.includes(suggestedUser.id)
-                          ? 'bg-white text-gray-900 border border-gray-200 hover:bg-red-50 hover:text-red-500 hover:border-red-100'
-                          : 'bg-gray-900 text-white hover:bg-black'
-                      } text-xs font-bold px-4 py-1.5 rounded-full transition-all`}
+                          ? 'bg-white text-gray-900 border border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-100'
+                          : 'bg-gray-900 text-white hover:bg-primary shadow-md hover:shadow-primary/20'
+                      } text-[13px] font-bold px-4 py-1.5 rounded-xl transition-all`}
                     >
                       {currentUser?.following?.includes(suggestedUser.id) ? 'Following' : 'Follow'}
                     </button>
                   </div>
                 ))}
               {users.length <= 1 && (
-                <p className="text-sm text-gray-400 italic">Finding creative minds...</p>
+                <p className="text-sm text-gray-400 font-mono italic">Syncing nodes...</p>
               )}
             </div>
-            <button className="text-primary text-sm font-bold mt-6 hover:underline text-left">Show more</button>
+            <button className="text-primary text-[14px] font-bold mt-5 hover:underline text-left block w-full">Find more peers</button>
           </div>
         </aside>
 
@@ -216,7 +225,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={onCompose}
-          className="sm:hidden absolute right-4 w-14 h-14 bg-primary rounded-full flex items-center justify-center text-white shadow-lg hover:bg-blue-600 transition-colors z-20"
+          className="sm:hidden fixed right-5 w-14 h-14 bg-gradient-to-r from-primary to-blue-500 rounded-full flex items-center justify-center text-white shadow-xl shadow-primary/30 hover:shadow-primary/50 transition-shadow z-30"
           style={{ bottom: 'calc(5rem + env(safe-area-inset-bottom))' }}
         >
           <Plus className="w-6 h-6" />
@@ -231,97 +240,85 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-40"
+              className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50"
               onClick={() => setIsMenuOpen(false)}
             />
             <motion.div 
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 left-0 bottom-0 w-[280px] bg-white dark:bg-gray-900 z-50 shadow-2xl flex flex-col transition-colors"
+              transition={{ type: 'spring', damping: 28, stiffness: 250 }}
+              className="fixed top-0 left-0 bottom-0 w-[280px] bg-white z-50 shadow-2xl flex flex-col"
             >
-              <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-start">
-                <Avatar className="w-12 h-12 rounded-lg">
+              <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <Avatar className="w-12 h-12 rounded-2xl shadow-sm border border-white">
                   <AvatarImage src={currentUser?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=guest`} />
-                  <AvatarFallback>{currentUser ? currentUser.name.charAt(0) : 'G'}</AvatarFallback>
+                  <AvatarFallback className="bg-primary text-white font-bold">{currentUser ? currentUser.name.charAt(0) : 'G'}</AvatarFallback>
                 </Avatar>
-                <button onClick={() => setIsMenuOpen(false)} className="p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-full">
+                <button onClick={() => setIsMenuOpen(false)} className="p-2 bg-white hover:bg-gray-100 rounded-full shadow-sm border border-gray-100 transition-colors">
                   <X className="w-5 h-5 text-gray-500" />
                 </button>
               </div>
               
-              <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
-                <div className="flex items-center gap-1.5">
-                  <div className="font-bold text-gray-900 dark:text-white text-lg">{currentUser?.name || 'Log in to fork.'}</div>
+              <div className="px-5 py-4 border-b border-gray-100">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <div className="font-bold text-gray-900 text-lg tracking-tight">{currentUser?.name || 'Anonymous User'}</div>
                   {currentUser?.verified && <BadgeCheck className="w-4 h-4 text-blue-500" />}
                 </div>
-                <div className="text-gray-500 text-[15px]">@{currentUser?.handle || 'visitor'}</div>
+                <div className="text-gray-500 font-mono text-[14px]">@{currentUser?.handle || 'visitor'}</div>
                 {currentUser && (
-                  <div className="flex gap-4 mt-3 text-[15px]">
-                    <div className="flex gap-1"><span className="font-bold text-gray-900 dark:text-white">{currentUser.following?.length || 0}</span> <span className="text-gray-500">Following</span></div>
-                    <div className="flex gap-1"><span className="font-bold text-gray-900 dark:text-white">{currentUser.followers?.length || 0}</span> <span className="text-gray-500">Followers</span></div>
+                  <div className="flex gap-4 mt-4 mb-2 text-[15px] font-mono">
+                    <div className="flex gap-1.5 items-center"><span className="font-bold text-gray-900 text-[16px]">{currentUser.following?.length || 0}</span> <span className="text-gray-500">Following</span></div>
+                    <div className="flex gap-1.5 items-center"><span className="font-bold text-gray-900 text-[16px]">{currentUser.followers?.length || 0}</span> <span className="text-gray-500">Followers</span></div>
                   </div>
                 )}
               </div>
 
-              <div className="flex-1 py-2 overflow-y-auto">
+              <div className="flex-1 py-3 overflow-y-auto">
+                {[
+                  { icon: User, label: 'Profile', tab: 'profile' },
+                  { icon: Users, label: 'Communities', tab: 'communities' },
+                  { icon: Bookmark, label: 'Bookmarks', tab: 'bookmarks' },
+                  { icon: Settings, label: 'Settings', tab: 'settings' }
+                ].map(item => (
+                  <button 
+                    key={item.tab}
+                    className="w-full flex items-center gap-4 px-5 py-3.5 text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors focus:bg-primary/5"
+                    onClick={() => { setActiveTab(item.tab); setIsMenuOpen(false); }}
+                  >
+                    <item.icon className="w-6 h-6" />
+                    <span className="font-bold text-[17px] tracking-tight">{item.label}</span>
+                  </button>
+                ))}
+                
                 <button 
-                  className="w-full flex items-center gap-4 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                  onClick={() => { setActiveTab('profile'); setIsMenuOpen(false); }}
-                >
-                  <User className="w-6 h-6" />
-                  <span className="font-bold text-[17px]">Profile</span>
-                </button>
-                <button 
-                  className="w-full flex items-center gap-4 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                  onClick={() => { setActiveTab('communities'); setIsMenuOpen(false); }}
-                >
-                  <Users className="w-6 h-6" />
-                  <span className="font-bold text-[17px]">Communities</span>
-                </button>
-                <button 
-                  className="w-full flex items-center gap-4 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                  onClick={() => { setActiveTab('bookmarks'); setIsMenuOpen(false); }}
-                >
-                  <Bookmark className="w-6 h-6" />
-                  <span className="font-bold text-[17px]">Bookmarks</span>
-                </button>
-                <button 
-                  className="w-full flex items-center gap-4 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                  onClick={() => { setActiveTab('settings'); setIsMenuOpen(false); }}
-                >
-                  <Settings className="w-6 h-6" />
-                  <span className="font-bold text-[17px]">Settings</span>
-                </button>
-                <button 
-                  className="w-full flex items-center gap-4 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  className="w-full flex items-center gap-4 px-5 py-3.5 text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors mt-2"
                   onClick={() => {
-                    alert("Para instalar fork. en tu dispositivo:\n\niOS: Toca el botón de Compartir y elige 'Agregar a inicio'.\n\nAndroid: En el menú del navegador, selecciona 'Instalar aplicación'.");
+                    alert("To install fork.:\n\niOS: Tap Share and 'Add to Home Screen'.\n\nAndroid: Tap browser menu and 'Install App'.");
                     setIsMenuOpen(false);
                   }}
                 >
                   <Smartphone className="w-6 h-6" />
-                  <span className="font-bold text-[17px]">Instalar App</span>
+                  <span className="font-bold text-[17px] tracking-tight">Install Web App</span>
                 </button>
               </div>
 
-              <div className="p-4 border-t border-gray-100 dark:border-gray-800">
+              <div className="p-5 border-t border-gray-100 bg-gray-50/50">
                 {currentUser ? (
                   <button 
                     onClick={() => { logout(); setIsMenuOpen(false); }}
-                    className="w-full flex items-center gap-4 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors rounded-lg px-2 -mx-2"
+                    className="w-full flex items-center justify-center gap-2 py-3.5 text-red-500 bg-white hover:bg-red-50 border border-red-100 shadow-sm transition-colors rounded-2xl"
                   >
-                    <LogOut className="w-6 h-6" />
-                    <span className="font-bold text-[17px]">Log out</span>
+                    <LogOut className="w-5 h-5" />
+                    <span className="font-bold text-[16px]">Log out from node</span>
                   </button>
                 ) : (
                   <button 
                     onClick={() => { setAuthModalOpen(true); setIsMenuOpen(false); }}
-                    className="w-full bg-primary text-white font-bold py-3 rounded-2xl hover:bg-blue-600 transition-all flex items-center justify-center gap-2"
+                    className="w-full bg-primary text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all flex items-center justify-center gap-2"
                   >
-                    <Plus className="w-5 h-5" />
-                    <span>Log in</span>
+                    <Shield className="w-5 h-5" />
+                    <span className="text-[16px]">Connect Wallet</span>
                   </button>
                 )}
               </div>
