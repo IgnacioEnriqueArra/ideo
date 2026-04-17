@@ -103,12 +103,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     let authSubscription: any;
     
     const initializeData = async () => {
-      const [uRes, iRes, bRes, fRes, cRes, oRes, cmRes, jrRes] = await Promise.all([
+      const [uRes, iRes, bRes, fRes, cRes, oRes, cmRes] = await Promise.all([
         supabase.from('users').select('*'),
         supabase.from('ideas').select('*').order('createdAt', { ascending: false }),
         supabase.from('branches').select('*').order('createdAt', { ascending: true }),
         supabase.from('communities').select('*'),
         supabase.from('crypto_orders').select('*'),
+        supabase.from('community_members').select('*'),
+        supabase.from('community_join_requests').select('*')
+      ]);
+
       if (uRes.data) setUsers(uRes.data);
       if (iRes.data) setRawIdeas(iRes.data);
       if (bRes.data) setRawBranches(bRes.data);
