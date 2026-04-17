@@ -103,15 +103,15 @@ export const ShareModal: React.FC<ShareModalProps> = ({ idea, isOpen, onClose })
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4"
+          className="fixed inset-0 bg-black/40 backdrop-blur-md z-[9998] flex items-center justify-center p-4"
           onClick={onClose}
         >
           <motion.div
-            initial={{ y: '100%', scale: 1 }}
-            animate={{ y: 0, scale: 1 }}
-            exit={{ y: '100%', scale: 1 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl flex flex-col overflow-hidden max-h-[85vh]"
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 400 }}
+            className="w-full max-w-md bg-white rounded-3xl flex flex-col overflow-hidden max-h-[85vh] z-[9999]"
             onClick={e => e.stopPropagation()}
           >
             <div className="px-4 py-4 border-b border-gray-100 flex items-center justify-between">

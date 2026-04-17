@@ -43,22 +43,17 @@ export const ForkModal: React.FC<ForkModalProps> = ({ isOpen, onClose, targetFor
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-black/40 backdrop-blur-md z-[9998] flex items-center justify-center p-4 sm:p-6"
             onClick={onClose}
-          />
-          <motion.div
-            initial={{ opacity: 0, y: 40, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 40, scale: 0.95 }}
-            transition={{ type: 'spring', damping: 28, stiffness: 350 }}
-            className="fixed z-50 w-full mx-auto px-4"
-            style={{
-              maxWidth: '560px',
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-            }}
           >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 400 }}
+              className="w-full max-w-[560px] z-[9999]"
+              onClick={e => e.stopPropagation()}
+            >
             <div className="w-full bg-white/95 backdrop-blur-xl rounded-3xl overflow-hidden border border-gray-100 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)]">
               <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100/50">
                 <div className="flex items-center gap-2 text-primary">
@@ -118,6 +113,7 @@ export const ForkModal: React.FC<ForkModalProps> = ({ isOpen, onClose, targetFor
                 </div>
               </div>
             </div>
+            </motion.div>
           </motion.div>
         </>
       )}
