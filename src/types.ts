@@ -35,6 +35,15 @@ export type Community = {
   ownerId: string;
   createdAt: string;
   avatarUrl?: string;
+  isPrivate: boolean;
+};
+
+export type CommunityJoinRequest = {
+  id: string;
+  communityId: string;
+  userId: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  createdAt: string;
 };
 
 export type CryptoOrder = {

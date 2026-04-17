@@ -7,12 +7,13 @@ import { useAppContext } from '../AppContext';
 interface ComposeModalProps {
   isOpen: boolean;
   onClose: () => void;
+  communityId?: string;
 }
 
 const MAX_CHARS = 280;
 
-export const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose }) => {
-  const { currentUser, addIdea } = useAppContext();
+export const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose, communityId }) => {
+  const { currentUser, addIdea, addIdeaToCommunity } = useAppContext();
   const [content, setContent] = useState('');
   const [tags, setTags] = useState('');
   const [url, setUrl] = useState('');
@@ -37,7 +38,12 @@ export const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose }) =
     if (!content.trim() || content.length > MAX_CHARS) return;
     const tagsList = tags.split(',').map(t => t.trim()).filter(t => t);
     const finalContent = url.trim() ? `${content} ${url}` : content;
-    addIdea(finalContent, tagsList, mediaFile || undefined);
+    
+    if (communityId) {
+       addIdeaToCommunity(communityId, finalContent, tagsList, mediaFile || undefined);
+    } else {
+       addIdea(finalContent, finalContent.includes('#') ? [...tagsList, ...finalContent.match(/#\w+/g) || []] : tagsList, mediaFile || undefined);
+    }
     onClose();
   };
 

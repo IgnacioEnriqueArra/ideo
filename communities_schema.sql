@@ -5,7 +5,8 @@ CREATE TABLE IF NOT EXISTS communities (
   description TEXT NOT NULL,
   "ownerId" UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  "avatarUrl" TEXT
+  "avatarUrl" TEXT,
+  "isPrivate" BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE IF NOT EXISTS community_members (
@@ -13,6 +14,15 @@ CREATE TABLE IF NOT EXISTS community_members (
   "userId" UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   role TEXT NOT NULL DEFAULT 'member',
   PRIMARY KEY ("communityId", "userId")
+);
+
+CREATE TABLE IF NOT EXISTS community_join_requests (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  "communityId" UUID NOT NULL REFERENCES communities(id) ON DELETE CASCADE,
+  "userId" UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'pending', -- pending, accepted, rejected
+  "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE("communityId", "userId")
 );
 
 CREATE TABLE IF NOT EXISTS crypto_orders (
@@ -29,11 +39,13 @@ CREATE TABLE IF NOT EXISTS crypto_orders (
 ALTER TABLE communities ENABLE ROW LEVEL SECURITY;
 ALTER TABLE community_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE crypto_orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE community_join_requests ENABLE ROW LEVEL SECURITY;
 
 -- Políticas ultra-permisivas para evitar bloqueos como los de posts anteriores:
 CREATE POLICY "Enable all for authenticated users" ON communities FOR ALL USING (auth.role() = 'authenticated' OR true) WITH CHECK (true);
 CREATE POLICY "Enable all for authenticated users" ON community_members FOR ALL USING (auth.role() = 'authenticated' OR true) WITH CHECK (true);
 CREATE POLICY "Enable all for authenticated users" ON crypto_orders FOR ALL USING (auth.role() = 'authenticated' OR true) WITH CHECK (true);
+CREATE POLICY "Enable all for authenticated users" ON community_join_requests FOR ALL USING (auth.role() = 'authenticated' OR true) WITH CHECK (true);
 
 -- Agregar campo 'communityId' a la tabla ideas
 ALTER TABLE ideas ADD COLUMN IF NOT EXISTS "communityId" UUID REFERENCES communities(id) ON DELETE CASCADE;

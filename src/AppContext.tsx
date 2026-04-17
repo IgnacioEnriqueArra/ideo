@@ -59,6 +59,11 @@ type AppContextType = {
   checkOrderStatus: (orderId: string) => Promise<boolean>;
   simulateSuccessOrder: (orderId: string) => Promise<boolean>;
   addIdeaToCommunity: (communityId: string, content: string, tags: string[], mediaFile?: File) => void;
+  communityMembers: any[];
+  joinRequests: CommunityJoinRequest[];
+  requestToJoinCommunity: (communityId: string) => Promise<void>;
+  handleJoinRequest: (requestId: string, status: 'accepted' | 'rejected') => Promise<void>;
+  updateCommunityPrivacy: (communityId: string, isPrivate: boolean) => Promise<void>;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -80,18 +85,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
   const [communities, setCommunities] = useState<Community[]>([]);
   const [cryptoOrders, setCryptoOrders] = useState<CryptoOrder[]>([]);
+  const [communityMembers, setCommunityMembers] = useState<any[]>([]);
+  const [joinRequests, setJoinRequests] = useState<CommunityJoinRequest[]>([]);
 
   useEffect(() => {
     let authSubscription: any;
     
     const initializeData = async () => {
-      const [uRes, iRes, bRes, fRes, cRes, oRes] = await Promise.all([
+      const [uRes, iRes, bRes, fRes, cRes, oRes, cmRes, jrRes] = await Promise.all([
         supabase.from('users').select('*'),
         supabase.from('ideas').select('*').order('createdAt', { ascending: false }),
         supabase.from('branches').select('*').order('createdAt', { ascending: true }),
         supabase.from('feedbacks').select('*').order('createdAt', { ascending: true }),
         supabase.from('communities').select('*'),
-        supabase.from('crypto_orders').select('*')
+        supabase.from('crypto_orders').select('*'),
+        supabase.from('community_members').select('*'),
+        supabase.from('community_join_requests').select('*')
       ]);
       if (uRes.data) setUsers(uRes.data);
       if (iRes.data) setRawIdeas(iRes.data);
@@ -99,6 +108,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (fRes.data) setRawFeedbacks(fRes.data);
       if (cRes.data) setCommunities(cRes.data);
       if (oRes.data) setCryptoOrders(oRes.data);
+      if (cmRes.data) setCommunityMembers(cmRes.data);
+      if (jrRes.data) setJoinRequests(jrRes.data);
       
       const { data: mRes } = await supabase.from('messages').select('*').order('createdAt', { ascending: false });
       if (mRes) setAllMessages(mRes);
@@ -159,6 +170,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       .on('postgres_changes', { event: '*', schema: 'public', table: 'crypto_orders' }, payload => {
         if (payload.eventType === 'INSERT') setCryptoOrders(p => { const x = p.find(o => o.id === payload.new.id); return x ? p : [payload.new as CryptoOrder, ...p] });
         if (payload.eventType === 'UPDATE') setCryptoOrders(p => p.map(o => o.id === payload.new.id ? payload.new as CryptoOrder : o));
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'community_members' }, payload => {
+        if (payload.eventType === 'INSERT') setCommunityMembers(p => [...p, payload.new]);
+        if (payload.eventType === 'DELETE') setCommunityMembers(p => p.filter(m => !(m.communityId === (payload.old as any).communityId && m.userId === (payload.old as any).userId)));
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'community_join_requests' }, payload => {
+        if (payload.eventType === 'INSERT') setJoinRequests(p => [payload.new as CommunityJoinRequest, ...p]);
+        if (payload.eventType === 'UPDATE') setJoinRequests(p => p.map(r => r.id === payload.new.id ? payload.new as CommunityJoinRequest : r));
+        if (payload.eventType === 'DELETE') setJoinRequests(p => p.filter(r => r.id !== (payload.old as any).id));
       })
       .subscribe();
 
@@ -717,6 +737,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Deprecated
   };
 
+  const requestToJoinCommunity = async (communityId: string) => {
+    if (!currentUser) return;
+    await supabase.from('community_join_requests').insert({ communityId, userId: currentUser.id, status: 'pending' });
+  };
+
+  const handleJoinRequest = async (requestId: string, status: 'accepted' | 'rejected') => {
+     const { data: request } = await supabase.from('community_join_requests').update({ status }).eq('id', requestId).select().single();
+     if (status === 'accepted' && request) {
+        await supabase.from('community_members').insert({ communityId: request.communityId, userId: request.userId, role: 'member' });
+     }
+  };
+
+  const updateCommunityPrivacy = async (communityId: string, isPrivate: boolean) => {
+     await supabase.from('communities').update({ isPrivate }).eq('id', communityId);
+  };
+
   const deleteAccount = async () => {
     if (!currentUser) return;
     try {
@@ -737,7 +773,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       playNotificationSound, activeConversationId, setActiveConversationId, clearAllNotifications, deleteNotification, toggleFollow,
       rawBranches, rawFeedbacks, allMessages, isAuthModalOpen, setAuthModalOpen,
       globalSearchQuery, setGlobalSearchQuery,
-      createCommunityOrder, checkOrderStatus, simulateSuccessOrder, addIdeaToCommunity
+      createCommunityOrder, checkOrderStatus, simulateSuccessOrder, addIdeaToCommunity,
+      communityMembers, joinRequests, requestToJoinCommunity, handleJoinRequest, updateCommunityPrivacy
     }}>
       {children}
     </AppContext.Provider>

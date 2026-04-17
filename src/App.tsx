@@ -12,12 +12,14 @@ import { ComposeModal } from './components/ComposeModal';
 import { Settings } from './components/Settings';
 import { AdminDashboard } from './components/AdminDashboard';
 import { Communities } from './components/Communities';
+import { CommunityDetail } from './components/CommunityDetail';
 import { AnimatePresence } from 'motion/react';
 
 function AppContent() {
   const { currentUser, isAuthReady, isAuthModalOpen, setAuthModalOpen } = useAppContext();
   const [selectedIdeaId, setSelectedIdeaId] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('home');
   const [isComposeOpen, setIsComposeOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth > 640);
@@ -28,12 +30,20 @@ function AppContent() {
     const handleOpenPost = (e: any) => {
       setSelectedIdeaId(e.detail);
       setActiveTab('home'); // Ensure we are on home to see the detail
+      setSelectedCommunityId(null);
+    };
+    const handleOpenCommunity = (e: any) => {
+      setSelectedCommunityId(e.detail);
+      setActiveTab('communities');
+      setSelectedIdeaId(null);
     };
     window.addEventListener('resize', handleResize);
     window.addEventListener('open-post', handleOpenPost);
+    window.addEventListener('open-community', handleOpenCommunity);
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('open-post', handleOpenPost);
+      window.removeEventListener('open-community', handleOpenCommunity);
     };
   }, []);
 
@@ -129,7 +139,10 @@ function AppContent() {
       case 'profile':
         return <Profile key="profile" onBack={() => setActiveTab('home')} />;
       case 'communities':
-        return <Communities key="communities" onBack={() => setActiveTab('home')} />;
+        if (selectedCommunityId) {
+           return <CommunityDetail communityId={selectedCommunityId} onBack={() => setSelectedCommunityId(null)} onUserClick={setSelectedUserId} />;
+        }
+        return <Communities key="communities" onBack={() => setActiveTab('home')} onSelectCommunity={setSelectedCommunityId} />;
       case 'news':
         return <NewsFeed key="news" />;
       case 'notifications':
