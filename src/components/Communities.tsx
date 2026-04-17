@@ -9,7 +9,7 @@ interface CommunitiesProps {
 }
 
 export const Communities: React.FC<CommunitiesProps> = ({ onBack, onSelectCommunity }) => {
-  const { communities, createCommunityOrder, checkOrderStatus } = useAppContext();
+  const { communities, createCommunityOrder, checkOrderStatus, simulateSuccessOrder } = useAppContext();
   const [view, setView] = useState<'list' | 'create'>('list');
   
   // Tab states for Create View
@@ -178,9 +178,10 @@ export const Communities: React.FC<CommunitiesProps> = ({ onBack, onSelectCommun
 
                      <button 
                         onClick={async () => {
-                          const { simulateSuccessOrder } = useAppContext() as any;
-                          const ok = await simulateSuccessOrder(activeOrder.id);
-                          if (ok) setPaid(true);
+                          if (activeOrder) {
+                            const ok = await simulateSuccessOrder(activeOrder.id);
+                            if (ok) setPaid(true);
+                          }
                         }}
                         className="text-[10px] text-gray-600 hover:text-primary transition-colors mt-2 uppercase tracking-widest font-bold"
                      >
