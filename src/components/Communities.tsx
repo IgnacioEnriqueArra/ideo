@@ -170,9 +170,22 @@ export const Communities: React.FC<CommunitiesProps> = ({ onBack, onSelectCommun
                       </div>
                    </div>
 
-                   <div className="mt-6 flex justify-center items-center gap-2 text-sm text-gray-400">
-                     {isChecking ? <Loader2 className="w-4 h-4 animate-spin" /> : <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />}
-                     {isChecking ? 'Verifying blockchain...' : 'Waiting for transaction...'}
+                   <div className="mt-6 flex flex-col items-center gap-4">
+                     <div className="flex justify-center items-center gap-2 text-sm text-gray-400">
+                        {isChecking ? <Loader2 className="w-4 h-4 animate-spin" /> : <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />}
+                        {isChecking ? 'Verifying blockchain...' : 'Waiting for transaction...'}
+                     </div>
+
+                     <button 
+                        onClick={async () => {
+                          const { simulateSuccessOrder } = useAppContext() as any;
+                          const ok = await simulateSuccessOrder(activeOrder.id);
+                          if (ok) setPaid(true);
+                        }}
+                        className="text-[10px] text-gray-600 hover:text-primary transition-colors mt-2 uppercase tracking-widest font-bold"
+                     >
+                       [ Simular Pago Exitoso ]
+                     </button>
                    </div>
 
                  </div>

@@ -57,6 +57,7 @@ type AppContextType = {
   ideas: Idea[];
   createCommunityOrder: (name: string, description: string) => Promise<CryptoOrder | null>;
   checkOrderStatus: (orderId: string) => Promise<boolean>;
+  simulateSuccessOrder: (orderId: string) => Promise<boolean>;
   addIdeaToCommunity: (communityId: string, content: string, tags: string[], mediaFile?: File) => void;
 };
 
@@ -359,6 +360,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     } catch (e) {
       console.error(e);
+    }
+    return false;
+  };
+
+  const simulateSuccessOrder = async (orderId: string): Promise<boolean> => {
+    const order = cryptoOrders.find(o => o.id === orderId);
+    if (!order) return false;
+    
+    await supabase.from('crypto_orders').update({ status: 'paid' }).eq('id', orderId);
+    const { data: cData } = await supabase.from('communities').insert({
+       name: order.communityName,
+       description: order.communityDescription,
+       ownerId: order.userId
+    }).select().single();
+    
+    if (cData) {
+       await supabase.from('community_members').insert({
+          communityId: cData.id,
+          userId: order.userId,
+          role: 'admin'
+       });
+       return true;
     }
     return false;
   };
@@ -697,7 +720,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       playNotificationSound, activeConversationId, setActiveConversationId, clearAllNotifications, deleteNotification, toggleFollow,
       rawBranches, rawFeedbacks, allMessages, isAuthModalOpen, setAuthModalOpen,
       globalSearchQuery, setGlobalSearchQuery,
-      createCommunityOrder, checkOrderStatus, addIdeaToCommunity
+      createCommunityOrder, checkOrderStatus, simulateSuccessOrder, addIdeaToCommunity
     }}>
       {children}
     </AppContext.Provider>
