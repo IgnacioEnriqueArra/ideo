@@ -6,6 +6,7 @@ import { IdeaCard } from './IdeaCard';
 import { BranchCard } from './BranchCard';
 import { motion } from 'motion/react';
 import { EditProfile } from './EditProfile';
+import { VerificationModal } from './VerificationModal';
 
 interface ProfileProps {
   userId?: string;
@@ -16,6 +17,7 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
   const { currentUser, users, ideas, toggleFollow, userLikes } = useAppContext();
   const [activeTab, setActiveTab] = useState<'posts' | 'forks' | 'likes'>('posts');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
 
   const profileUser = userId ? users.find(u => u.id === userId) || currentUser : currentUser;
   if (!profileUser || !currentUser) return null;
@@ -69,25 +71,39 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
               <AvatarFallback>{profileUser.name.charAt(0)}</AvatarFallback>
             </Avatar>
             
-            {isOwnProfile ? (
-              <button 
-                onClick={() => setIsEditModalOpen(true)}
-                className="mt-3 px-4 py-1.5 rounded-full border border-gray-300 font-bold text-sm hover:bg-gray-50 transition-colors"
-              >
-                Edit profile
-              </button>
-            ) : (
-              <button 
-                onClick={() => toggleFollow(profileUser.id)}
-                className={`mt-3 px-4 py-1.5 rounded-full font-bold text-sm transition-colors ${
-                  isFollowing 
-                    ? 'border border-gray-300 text-gray-900 hover:bg-red-50 hover:text-red-500 hover:border-red-200' 
-                    : 'bg-gray-900 text-white hover:bg-gray-800'
-                }`}
-              >
-                {isFollowing ? 'Following' : 'Follow'}
-              </button>
-            )}
+            <div className="flex flex-col gap-2 mt-3 items-end">
+              {isOwnProfile && (
+                <div className="flex gap-2">
+                  {!currentUser.verified && (
+                    <button 
+                      onClick={() => setIsVerificationModalOpen(true)}
+                      className="px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 border border-blue-100 font-bold text-sm hover:bg-blue-100 transition-colors flex items-center gap-1.5"
+                    >
+                      <BadgeCheck className="w-4 h-4" /> Get Verified
+                    </button>
+                  )}
+                  <button 
+                    onClick={() => setIsEditModalOpen(true)}
+                    className="px-4 py-1.5 rounded-full border border-gray-300 font-bold text-sm hover:bg-gray-50 transition-colors"
+                  >
+                    Edit profile
+                  </button>
+                </div>
+              )}
+              
+              {!isOwnProfile && (
+                <button 
+                  onClick={() => toggleFollow(profileUser.id)}
+                  className={`px-4 py-1.5 rounded-full font-bold text-sm transition-colors ${
+                    isFollowing 
+                      ? 'border border-gray-300 text-gray-900 hover:bg-red-50 hover:text-red-500 hover:border-red-200' 
+                      : 'bg-gray-900 text-white hover:bg-gray-800'
+                  }`}
+                >
+                  {isFollowing ? 'Following' : 'Follow'}
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="mt-3">
@@ -156,7 +172,10 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
       </div>
       
       {isOwnProfile && (
-        <EditProfile isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} />
+        <>
+          <EditProfile isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} />
+          <VerificationModal isOpen={isVerificationModalOpen} onClose={() => setIsVerificationModalOpen(false)} />
+        </>
       )}
     </motion.div>
   );

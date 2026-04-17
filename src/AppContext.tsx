@@ -55,9 +55,10 @@ type AppContextType = {
   communities: Community[];
   allIdeas: Idea[];
   ideas: Idea[];
-  createCommunityOrder: (name: string, description: string) => Promise<CryptoOrder | null>;
+  createVerificationOrder: () => Promise<CryptoOrder | null>;
   checkOrderStatus: (orderId: string) => Promise<boolean>;
   simulateSuccessOrder: (orderId: string) => Promise<boolean>;
+  createCommunity: (name: string, description: string) => Promise<boolean>;
   addIdeaToCommunity: (communityId: string, content: string, tags: string[], mediaFile?: File) => void;
   communityMembers: any[];
   joinRequests: CommunityJoinRequest[];
@@ -324,12 +325,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await supabase.from('notifications').insert({ recipientId, actorId: currentUser.id, type, targetId, createdAt: new Date().toISOString(), read: false });
   };
 
-  const createCommunityOrder = async (name: string, description: string): Promise<CryptoOrder | null> => {
+  const createVerificationOrder = async (): Promise<CryptoOrder | null> => {
     if (!currentUser) return null;
     const basePrice = 5;
     let attempts = 0;
     while (attempts < 50) {
-      // Generate a fraction between .001 and .999
       const fraction = (Math.floor(Math.random() * 999) + 1) / 1000;
       const uniqueAmount = parseFloat((basePrice + fraction).toFixed(3));
       
@@ -337,8 +337,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (!data || data.length === 0) {
         const newOrder = {
           userId: currentUser.id,
-          communityName: name,
-          communityDescription: description,
+          communityName: 'VERIFICATION',
+          communityDescription: 'User Identity Verification',
           amount: uniqueAmount,
           status: 'pending'
         };
@@ -373,19 +373,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
          if (hasPaid) {
             await supabase.from('crypto_orders').update({ status: 'paid' }).eq('id', orderId);
-            const { data: cData } = await supabase.from('communities').insert({
-               name: order.communityName,
-               description: order.communityDescription,
-               ownerId: order.userId
-            }).select().single();
-            if (cData) {
-               await supabase.from('community_members').insert({
-                  communityId: cData.id,
-                  userId: order.userId,
-                  role: 'admin'
-               });
-               return true;
-            }
+            await supabase.from('users').update({ verified: true }).eq('id', order.userId);
+            if (currentUser?.id === order.userId) setCurrentUser(prev => prev ? { ...prev, verified: true } : null);
+            return true;
          }
       }
     } catch (e) {
@@ -409,16 +399,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     
     await supabase.from('crypto_orders').update({ status: 'paid' }).eq('id', orderId);
-    const { data: cData } = await supabase.from('communities').insert({
-       name: order.communityName,
-       description: order.communityDescription,
-       ownerId: order.userId
+    await supabase.from('users').update({ verified: true }).eq('id', order.userId);
+    if (currentUser?.id === order.userId) setCurrentUser(prev => prev ? { ...prev, verified: true } : null);
+    return true;
+  };
+
+  const createCommunity = async (name: string, description: string): Promise<boolean> => {
+    if (!currentUser || !currentUser.verified) return false;
+    
+    const { data: cData, error } = await supabase.from('communities').insert({
+       name,
+       description,
+       ownerId: currentUser.id
     }).select().single();
     
-    if (cData) {
+    if (cData && !error) {
        await supabase.from('community_members').insert({
           communityId: cData.id,
-          userId: order.userId,
+          userId: currentUser.id,
           role: 'admin'
        });
        return true;
@@ -766,7 +764,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       playNotificationSound, activeConversationId, setActiveConversationId, clearAllNotifications, deleteNotification, toggleFollow,
       rawBranches, allMessages, isAuthModalOpen, setAuthModalOpen,
       globalSearchQuery, setGlobalSearchQuery,
-      createCommunityOrder, checkOrderStatus, simulateSuccessOrder, addIdeaToCommunity,
+      createVerificationOrder, checkOrderStatus, simulateSuccessOrder, createCommunity, addIdeaToCommunity,
       communityMembers, joinRequests, requestToJoinCommunity, handleJoinRequest, updateCommunityPrivacy
     }}>
       {children}

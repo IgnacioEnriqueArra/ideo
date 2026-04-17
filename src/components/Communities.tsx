@@ -9,48 +9,27 @@ interface CommunitiesProps {
 }
 
 export const Communities: React.FC<CommunitiesProps> = ({ onBack, onSelectCommunity }) => {
-  const { communities, createCommunityOrder, checkOrderStatus, simulateSuccessOrder } = useAppContext();
+  const { communities, createCommunity, currentUser } = useAppContext();
   const [view, setView] = useState<'list' | 'create'>('list');
-  
-  // Tab states for Create View
   const [newCommName, setNewCommName] = useState('');
   const [newCommDesc, setNewCommDesc] = useState('');
-  const [isCreatingOrder, setIsCreatingOrder] = useState(false);
-  const [activeOrder, setActiveOrder] = useState<CryptoOrder | null>(null);
-  const [isChecking, setIsChecking] = useState(false);
-  const [paid, setPaid] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
-  // Address exactly as requested
-  const TRC20_WALLET = 'TGvKKNPpoq9gTgUSF2MSDTTf5S9rKFLreP';
-
-  const handleGenerateWallet = async () => {
+  const handleCreate = async () => {
     if (!newCommName.trim() || !newCommDesc.trim()) return alert('Name and Description required');
-    setIsCreatingOrder(true);
-    const order = await createCommunityOrder(newCommName.trim(), newCommDesc.trim());
-    if (order) setActiveOrder(order);
-    else alert('Failed to generate secure payment order.');
-    setIsCreatingOrder(false);
-  };
-
-  useEffect(() => {
-    let interval: any;
-    if (activeOrder && !paid) {
-      interval = setInterval(async () => {
-        setIsChecking(true);
-        const success = await checkOrderStatus(activeOrder.id);
-        if (success) {
-           setPaid(true);
-           clearInterval(interval);
-           setTimeout(() => {
-              setView('list');
-              setActiveOrder(null);
-           }, 3000);
-        }
-        setIsChecking(false);
-      }, 10000); // Check every 10 seconds
+    if (!currentUser?.verified) return alert('Verification required');
+    
+    setIsCreating(true);
+    const success = await createCommunity(newCommName.trim(), newCommDesc.trim());
+    if (success) {
+      setView('list');
+      setNewCommName('');
+      setNewCommDesc('');
+    } else {
+      alert('Failed to create community.');
     }
-    return () => clearInterval(interval);
-  }, [activeOrder, paid]);
+    setIsCreating(false);
+  };
 
   return (
     <div className="flex flex-col h-full bg-white relative">
@@ -91,106 +70,57 @@ export const Communities: React.FC<CommunitiesProps> = ({ onBack, onSelectCommun
            </div>
         ) : (
            <div className="p-6 max-w-xl mx-auto">
-             {!activeOrder ? (
-               <div className="space-y-6">
-                 <div>
-                   <h2 className="text-2xl font-bold mb-2">Build a private branch.</h2>
-                   <p className="text-gray-500 text-sm">Communities are isolated from the main feed. To prevent spam and maintain privacy, creating a community requires a non-refundable one-time decentralized payment.</p>
-                 </div>
-                 
-                 <div className="space-y-4">
-                   <div>
-                     <label className="block text-sm font-bold text-gray-900 mb-1">Community Name</label>
-                     <input 
-                       value={newCommName} onChange={e => setNewCommName(e.target.value)}
-                       type="text" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Cyberpunk Hackers" 
-                     />
-                   </div>
-                   <div>
-                     <label className="block text-sm font-bold text-gray-900 mb-1">Description</label>
-                     <textarea 
-                       value={newCommDesc} onChange={e => setNewCommDesc(e.target.value)}
-                       className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 min-h-[100px] resize-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="A cozy place for shadow runners."
-                     />
-                   </div>
-                 </div>
-
-                 <button 
-                    onClick={handleGenerateWallet}
-                    disabled={isCreatingOrder}
-                    className="w-full bg-primary text-white font-bold py-4 rounded-xl hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
-                 >
-                   {isCreatingOrder ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Pay 5 USDT & Create'}
-                 </button>
-               </div>
+             {!currentUser?.verified ? (
+                <div className="text-center py-12 space-y-6">
+                  <div className="w-20 h-20 bg-blue-50 text-blue-500 rounded-3xl flex items-center justify-center mx-auto">
+                    <CheckCircle2 className="w-10 h-10" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Verification Required</h2>
+                    <p className="text-gray-500">Only verified accounts can host communities. This prevents spam and ensures high-quality network spaces.</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 text-sm text-gray-600">
+                    Go to your **Profile** to obtain your decentralised proof-of-identity badge.
+                  </div>
+                  <button 
+                    onClick={onBack}
+                    className="w-full py-4 rounded-xl border border-gray-200 font-bold hover:bg-gray-50 transition-colors"
+                  >
+                    Go Back
+                  </button>
+                </div>
              ) : (
-               paid ? (
-                 <div className="text-center py-12 space-y-4">
-                   <CheckCircle2 className="w-20 h-20 text-green-500 mx-auto" />
-                   <h2 className="text-2xl font-bold text-gray-900">Payment Received!</h2>
-                   <p className="text-gray-500">Your community has been securely recorded on the database. Redirecting...</p>
-                 </div>
-               ) : (
-                 <div className="bg-gray-900 text-white rounded-3xl p-6 shadow-2xl relative overflow-hidden">
-                   <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider">Awaiting Payment</div>
-                   
-                   <h3 className="text-2xl font-mono mb-6 text-center text-primary-foreground">Send Exact Amount</h3>
-                   
-                   <div className="bg-black/50 rounded-2xl p-6 mb-6 text-center border mt-4 border-white/10">
-                      <div className="text-sm text-gray-400 mb-1 font-mono uppercase tracking-widest">Amount to send</div>
-                      <div className="text-4xl font-bold font-mono tracking-tighter text-blue-400 mb-2">
-                        {activeOrder.amount} <span className="text-lg text-gray-500">USDT</span>
-                      </div>
-                      <div className="text-xs text-red-400 font-bold max-w-[250px] mx-auto mt-4 px-2 py-1 bg-red-400/10 rounded">
-                        ⚠️ Enviar EXACTAMENTE este monto en USDT (TRC20).
-                      </div>
-                   </div>
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Build a new space.</h2>
+                    <p className="text-gray-500 text-sm italic font-mono">Verified users can create unlimited autonomous communities.</p>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-900 mb-1">Community Name</label>
+                      <input 
+                        value={newCommName} onChange={e => setNewCommName(e.target.value)}
+                        type="text" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-bold" placeholder="Cyberpunk Hackers" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-900 mb-1">Description</label>
+                      <textarea 
+                        value={newCommDesc} onChange={e => setNewCommDesc(e.target.value)}
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 min-h-[100px] resize-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Describe the purpose of this community..."
+                      />
+                    </div>
+                  </div>
 
-                   <div className="mb-6">
-                      <div className="text-sm text-gray-400 mb-2 font-bold font-mono">Receiving Address (TRC20):</div>
-                      <div className="bg-black/80 rounded-xl p-4 break-all font-mono text-sm border border-white/10 text-center select-all cursor-pointer hover:bg-black transition-colors"
-                           onClick={() => {
-                             navigator.clipboard.writeText(TRC20_WALLET);
-                             alert("Address Copied!");
-                           }}>
-                        {TRC20_WALLET}
-                      </div>
-                   </div>
-
-                   <div className="space-y-3 bg-red-500/10 border border-red-500/20 p-4 rounded-xl">
-                      <div className="flex gap-3">
-                        <ShieldAlert className="w-6 h-6 text-red-500 shrink-0" />
-                        <div className="text-sm text-gray-300">
-                          <p className="font-bold text-white mb-1">🧨 MUY IMPORTANTE (no te saltees esto)</p>
-                          <p>⚠️ Enviar EXACTAMENTE <span className="text-red-400 font-bold">{activeOrder.amount} USDT (TRC20)</span></p>
-                          <p>No usar redes como Ethereum o BSC, usar wallet compatible con TRON.</p>
-                          <p className="mt-2 text-xs text-gray-400">No usar exchanges (Binance, etc), usar wallet como TronLink, Cake Wallet o Trust Wallet.</p>
-                          <p className="mt-2 text-xs text-red-400 font-bold">❌ Si mandas USDT ERC20 o BEP20, se pierde.</p>
-                        </div>
-                      </div>
-                   </div>
-
-                   <div className="mt-6 flex flex-col items-center gap-4">
-                     <div className="flex justify-center items-center gap-2 text-sm text-gray-400">
-                        {isChecking ? <Loader2 className="w-4 h-4 animate-spin" /> : <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />}
-                        {isChecking ? 'Verifying blockchain...' : 'Waiting for transaction...'}
-                     </div>
-
-                     <button 
-                        onClick={async () => {
-                          if (activeOrder) {
-                            const ok = await simulateSuccessOrder(activeOrder.id);
-                            if (ok) setPaid(true);
-                          }
-                        }}
-                        className="text-[10px] text-gray-600 hover:text-primary transition-colors mt-2 uppercase tracking-widest font-bold"
-                     >
-                       [ Simular Pago Exitoso ]
-                     </button>
-                   </div>
-
-                 </div>
-               )
+                  <button 
+                     onClick={handleCreate}
+                     disabled={isCreating}
+                     className="w-full bg-primary text-white font-black py-4 rounded-xl hover:bg-blue-600 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
+                  >
+                    {isCreating ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Create Community'}
+                  </button>
+                </div>
              )}
            </div>
         )}
