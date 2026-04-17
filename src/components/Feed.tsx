@@ -37,7 +37,7 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col w-full min-h-full pb-20 sm:pb-0"
+      className="flex flex-col w-full min-h-full pb-[calc(100px+env(safe-area-inset-bottom))] sm:pb-0"
     >
       {/* Top Bar (Mobile Only) */}
       <div className="sm:hidden sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-100/50 px-4 py-3 flex items-center justify-between shadow-[0_4px_20px_rgb(0,0,0,0.02)]">

@@ -193,24 +193,19 @@
     --sidebar-ring: oklch(0.556 0 0);
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-    }
-  html {
-    @apply font-sans;
+  html, body, #root {
+    height: 100%;
+    min-height: 100dvh;
     overflow-x: hidden;
-    }
+  }
   body {
     @apply bg-background text-foreground;
     overscroll-behavior-y: none;
-    overflow-x: hidden;
     touch-action: pan-x pan-y;
     background-color: var(--background);
     background-image: radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px);
     background-size: 24px 24px;
+    -webkit-overflow-scrolling: touch;
     }
   input, textarea, select, [contenteditable="true"], .selectable {
     user-select: text !important;

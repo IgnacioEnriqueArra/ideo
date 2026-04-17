@@ -34,7 +34,7 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20 }}
-      className="flex flex-col w-full bg-white min-h-full"
+      className="flex flex-col w-full bg-white min-h-full pb-[calc(100px+env(safe-area-inset-bottom))] sm:pb-0"
     >
       <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-6">
