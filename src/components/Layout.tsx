@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Home, FileText, MessageSquare, User, Plus, X, Settings, Bookmark, LogOut, Smartphone, Bell, BadgeCheck, Shield, MoreHorizontal, Search, Users } from 'lucide-react';
+import { Home, FileText, MessageSquare, User, Plus, X, Settings, Bookmark, LogOut, Smartphone, Bell, BadgeCheck, Shield, MoreHorizontal, Search, Users, PenLine } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAppContext } from '../AppContext';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -73,8 +73,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               onClick={onCompose}
               className="w-full mt-6 bg-black text-white font-black py-4 rounded-full flex items-center justify-center gap-3"
             >
-              <Plus className="w-6 h-6" />
-              <span className="hidden xl:block text-[17px]">Post</span>
+              <span className="text-[17px]">Post</span>
             </button>
           </nav>
 
@@ -225,7 +224,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
           className="sm:hidden fixed right-5 w-14 h-14 bg-black rounded-full flex items-center justify-center text-white shadow-md z-30"
           style={{ bottom: 'calc(5rem + env(safe-area-inset-bottom))' }}
         >
-          <Plus className="w-6 h-6" />
+          <PenLine className="w-5 h-5" />
         </motion.button>
       )}
 
