@@ -12,9 +12,25 @@ export const Communities: React.FC<CommunitiesProps> = ({ onBack, onSelectCommun
   const { communities, createCommunity, currentUser, communityMembers, requestToJoinCommunity, setAuthModalOpen } = useAppContext();
   const [view, setView] = useState<'list' | 'create'>('list');
   const [showVerificationAlert, setShowVerificationAlert] = useState(false);
+  const [showOwnerExpiredAlert, setShowOwnerExpiredAlert] = useState(false);
   const [newCommName, setNewCommName] = useState('');
   const [newCommDesc, setNewCommDesc] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+
+  const isVerified = (user: any) => {
+    if (!user || !user.verified) return false;
+    if (!user.verifiedUntil) return false;
+    return new Date(user.verifiedUntil) > new Date();
+  };
+
+  const handleCommunitySelect = (community: any) => {
+    const isOwner = currentUser && community.ownerId === currentUser.id;
+    if (isOwner && !isVerified(currentUser)) {
+      setShowOwnerExpiredAlert(true);
+      return;
+    }
+    onSelectCommunity?.(community.id);
+  };
 
   const handleCreateClick = () => {
     if (!currentUser) return setAuthModalOpen(true);
@@ -104,6 +120,24 @@ export const Communities: React.FC<CommunitiesProps> = ({ onBack, onSelectCommun
               exit={{ opacity: 0 }}
               className="p-4 sm:p-6"
             >
+              {showOwnerExpiredAlert && (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="mb-8 p-6 bg-red-50 border border-red-100 rounded-[32px] text-center"
+                >
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                    <AlertCircle className="w-8 h-8 text-red-500" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Space Locked</h3>
+                  <p className="text-sm text-gray-600 mb-6">Your identity node subscription has expired. You cannot manage or access your community until you renew your verification.</p>
+                  <div className="flex gap-3">
+                    <button onClick={() => setShowOwnerExpiredAlert(false)} className="flex-1 py-3 text-sm font-bold text-gray-500 hover:bg-white rounded-2xl transition-all">Dismiss</button>
+                    <button onClick={() => { setShowOwnerExpiredAlert(false); setView('create'); }} className="flex-1 py-3 text-sm font-bold bg-black text-white rounded-2xl shadow-lg">Renew Node</button>
+                  </div>
+                </motion.div>
+              )}
+
               {showVerificationAlert && (
                 <motion.div 
                   initial={{ opacity: 0, y: -20 }}
@@ -141,7 +175,7 @@ export const Communities: React.FC<CommunitiesProps> = ({ onBack, onSelectCommun
                     <motion.div 
                       key={c.id} 
                       layout
-                      onClick={() => onSelectCommunity && onSelectCommunity(c.id)}
+                      onClick={() => handleCommunitySelect(c)}
                       className="group relative flex flex-col p-5 bg-white border border-gray-100 rounded-[32px] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all cursor-pointer overflow-hidden"
                     >
                       <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${getCommunityColor(c.name)} opacity-[0.03] group-hover:opacity-[0.08] transition-opacity -mr-16 -mt-16 rounded-full blur-2xl`} />
