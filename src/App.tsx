@@ -29,8 +29,6 @@ function AppContent() {
     const handleResize = () => setIsDesktop(window.innerWidth > 640);
     const handleOpenPost = (e: any) => {
       setSelectedIdeaId(e.detail);
-      setActiveTab('home'); // Ensure we are on home to see the detail
-      setSelectedCommunityId(null);
     };
     const handleOpenCommunity = (e: any) => {
       setSelectedCommunityId(e.detail);

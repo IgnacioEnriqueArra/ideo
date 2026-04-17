@@ -114,9 +114,9 @@ export const BranchCard: React.FC<BranchCardProps> = ({ branch, onClick, onUserC
           <div className="flex items-center justify-between mt-3 text-gray-500 max-w-md pr-4">
             <button className="flex items-center gap-1.5 hover:text-primary transition-colors group">
               <div className="p-1.5 rounded-full group-hover:bg-primary/10">
-                <MessageSquare className="w-[18px] h-[18px]" />
+                <GitFork className="w-[18px] h-[18px]" />
               </div>
-              <span className="text-[13px]">{branch.feedbacks.length}</span>
+              <span className="text-[13px]">{branch.forks?.length || 0}</span>
             </button>
 
             <button 

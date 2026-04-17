@@ -62,4 +62,12 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='ideas' AND column_name='communityId') THEN
     ALTER TABLE ideas ADD COLUMN "communityId" UUID REFERENCES communities(id) ON DELETE CASCADE;
   END IF;
+  
+  -- Añadir sporte para Forks anidados reemplazando Feedbacks
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='branches' AND column_name='parentForkId') THEN
+    ALTER TABLE branches ADD COLUMN "parentForkId" UUID REFERENCES branches(id) ON DELETE CASCADE;
+  END IF;
 END $$;
+
+-- Eliminar tabla feedbacks ya que ahora usamos Forks infinitos
+DROP TABLE IF EXISTS feedbacks CASCADE;

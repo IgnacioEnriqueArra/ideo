@@ -8,6 +8,8 @@ export interface Notification {
   actorId: string;
   recipientId: string;
   targetId: string;
+  recipientId: string;
+  targetId: string;
   createdAt: string;
   read: boolean;
 }
@@ -20,8 +22,7 @@ type AppContextType = {
   userLikes: string[];
   notifications: (Notification & { actor: User })[];
   addIdea: (content: string, tags: string[], mediaFile?: File) => void;
-  addBranch: (ideaId: string, content: string) => void;
-  addFeedback: (ideaId: string, branchId: string, content: string) => void;
+  addBranch: (ideaId: string, content: string, parentForkId?: string) => void;
   likeIdea: (ideaId: string) => void;
   likeBranch: (ideaId: string, branchId: string) => void;
   toggleBookmark: (ideaId: string) => void;
@@ -32,7 +33,6 @@ type AppContextType = {
   toggleFollow: (userId: string) => void;
   deleteIdea: (ideaId: string) => void;
   deleteBranch: (branchId: string) => void;
-  deleteFeedback: (feedbackId: string) => void;
   deleteMessage: (messageId: string) => void;
   deleteUser: (userId: string) => void;
   toggleVerified: (userId: string) => void;
@@ -73,7 +73,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [users, setUsers] = useState<User[]>([]);
   const [rawIdeas, setRawIdeas] = useState<any[]>([]);
   const [rawBranches, setRawBranches] = useState<any[]>([]);
-  const [rawFeedbacks, setRawFeedbacks] = useState<any[]>([]);
   const [allMessages, setAllMessages] = useState<any[]>([]);
   const [bookmarks, setBookmarks] = useState<string[]>([]);
   const [userLikes, setUserLikes] = useState<string[]>([]);
@@ -96,7 +95,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         supabase.from('users').select('*'),
         supabase.from('ideas').select('*').order('createdAt', { ascending: false }),
         supabase.from('branches').select('*').order('createdAt', { ascending: true }),
-        supabase.from('feedbacks').select('*').order('createdAt', { ascending: true }),
         supabase.from('communities').select('*'),
         supabase.from('crypto_orders').select('*'),
         supabase.from('community_members').select('*'),
@@ -105,11 +103,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (uRes.data) setUsers(uRes.data);
       if (iRes.data) setRawIdeas(iRes.data);
       if (bRes.data) setRawBranches(bRes.data);
-      if (fRes.data) setRawFeedbacks(fRes.data);
-      if (cRes.data) setCommunities(cRes.data);
-      if (oRes.data) setCryptoOrders(oRes.data);
-      if (cmRes.data) setCommunityMembers(cmRes.data);
-      if (jrRes.data) setJoinRequests(jrRes.data);
+      if (fRes?.data) setCommunities(fRes.data); // Actually this shift makes cRes -> fRes
+      if (cRes?.data) setCryptoOrders(cRes.data); 
+      if (oRes?.data) setCommunityMembers(oRes.data);
+      if (cmRes?.data) setJoinRequests(cmRes.data);
       
       const { data: mRes } = await supabase.from('messages').select('*').order('createdAt', { ascending: false });
       if (mRes) setAllMessages(mRes);
@@ -154,11 +151,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (payload.eventType === 'UPDATE') setRawBranches(p => p.map(b => b.id === payload.new.id ? payload.new : b));
         if (payload.eventType === 'DELETE') setRawBranches(p => p.filter(b => b.id !== payload.old.id));
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'feedbacks' }, payload => {
-        if (payload.eventType === 'INSERT') setRawFeedbacks(p => { const x = p.find(i => i.id === payload.new.id); return x ? p : [...p, payload.new] });
-        if (payload.eventType === 'UPDATE') setRawFeedbacks(p => p.map(f => f.id === payload.new.id ? payload.new : f));
-        if (payload.eventType === 'DELETE') setRawFeedbacks(p => p.filter(f => f.id !== payload.old.id));
-      })
+
       .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, payload => {
         if (payload.eventType === 'INSERT') setAllMessages(p => [payload.new, ...p]);
         if (payload.eventType === 'UPDATE') setAllMessages(p => p.map(m => m.id === payload.new.id ? payload.new : m));
@@ -262,19 +255,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const allIdeas: Idea[] = rawIdeas.map(rawIdea => {
     const author = users.find(u => u.id === rawIdea.authorId) || { id: rawIdea.authorId, name: 'Cargando...', handle: 'cargando', avatar: '', followers: [], following: [] };
     const community = communities.find(c => c.id === rawIdea.communityId);
-    const ideaBranches: Branch[] = rawBranches
-      .filter(b => b.ideaId === rawIdea.id)
-      .map(rawBranch => {
-        const branchAuthor = users.find(u => u.id === rawBranch.authorId) || { id: rawBranch.authorId, name: 'Cargando...', handle: 'cargando', avatar: '', followers: [], following: [] };
-        const branchFeedbacks: Feedback[] = rawFeedbacks
-          .filter(f => f.branchId === rawBranch.id)
-          .map(rawFeedback => {
-            const feedbackAuthor = users.find(u => u.id === rawFeedback.authorId) || { id: rawFeedback.authorId, name: 'Cargando...', handle: 'cargando', avatar: '', followers: [], following: [] };
-            return { id: rawFeedback.id, branchId: rawFeedback.branchId, author: feedbackAuthor, content: rawFeedback.content, createdAt: rawFeedback.createdAt };
+    const ideaForks = rawBranches.filter(b => b.ideaId === rawIdea.id);
+    
+    const buildForks = (parentId: string | undefined): Branch[] => {
+       return ideaForks
+          .filter(b => b.parentForkId == parentId)
+          .map(rawBranch => {
+              const branchAuthor = users.find(u => u.id === rawBranch.authorId) || { id: rawBranch.authorId, name: 'Cargando...', handle: 'cargando', avatar: '', followers: [], following: [] };
+              const childrenForks = buildForks(rawBranch.id);
+              return { 
+                 id: rawBranch.id, 
+                 ideaId: rawBranch.ideaId, 
+                 parentForkId: rawBranch.parentForkId,
+                 author: branchAuthor, 
+                 content: rawBranch.content, 
+                 createdAt: rawBranch.createdAt, 
+                 likes: rawBranch.likes || 0, 
+                 forks: childrenForks 
+              };
           });
-        return { id: rawBranch.id, ideaId: rawBranch.ideaId, author: branchAuthor, content: rawBranch.content, createdAt: rawBranch.createdAt, likes: rawBranch.likes || 0, feedbacks: branchFeedbacks };
-      });
-    return { id: rawIdea.id, author, content: rawIdea.content, createdAt: rawIdea.createdAt, likes: rawIdea.likes || 0, tags: rawIdea.tags || [], branches: ideaBranches, mediaUrl: rawIdea.mediaUrl, communityId: rawIdea.communityId, community };
+    };
+
+    const rootBranches = buildForks(undefined);
+    return { id: rawIdea.id, author, content: rawIdea.content, createdAt: rawIdea.createdAt, likes: rawIdea.likes || 0, tags: rawIdea.tags || [], branches: rootBranches, mediaUrl: rawIdea.mediaUrl, communityId: rawIdea.communityId, community };
   });
 
   const ideas = allIdeas.filter(idea => !idea.communityId);
@@ -493,11 +496,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await supabase.from('branches').delete().eq('id', id);
   };
 
-  const deleteFeedback = async (id: string) => {
-    setRawFeedbacks(prev => prev.filter(f => f.id !== id));
-    await supabase.from('feedbacks').delete().eq('id', id);
-  };
-
   const deleteMessage = async (id: string) => {
     setAllMessages(prev => prev.filter(m => m.id !== id));
     await supabase.from('messages').delete().eq('id', id);
@@ -517,10 +515,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await supabase.from('users').update({ verified: newVal }).eq('id', userId);
   };
 
-  const addBranch = async (ideaId: string, content: string) => {
+  const addBranch = async (ideaId: string, content: string, parentForkId?: string) => {
     if (!currentUser) return;
     const tempId = crypto.randomUUID();
-    const newBranch = { id: tempId, ideaId, authorId: currentUser.id, content, createdAt: new Date().toISOString(), likes: 0 };
+    const newBranch = { id: tempId, ideaId, authorId: currentUser.id, content, createdAt: new Date().toISOString(), likes: 0, parentForkId: parentForkId || null };
     setRawBranches(prev => [...prev, newBranch]);
     const { error } = await supabase.from('branches').insert(newBranch);
     if (error) {
@@ -529,19 +527,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setRawBranches(prev => prev.filter(b => b.id !== tempId));
     }
     
-    const idea = rawIdeas.find(i => i.id === ideaId);
-    if (idea) createNotification(idea.authorId, 'branch', ideaId);
-  };
-
-  const addFeedback = async (ideaId: string, branchId: string, content: string) => {
-    if (!currentUser) return;
-    const tempId = crypto.randomUUID();
-    const newFeedback = { id: tempId, branchId, authorId: currentUser.id, content, createdAt: new Date().toISOString() };
-    setRawFeedbacks(prev => [...prev, newFeedback]);
-    await supabase.from('feedbacks').insert(newFeedback);
-    
-    const branch = rawBranches.find(b => b.id === branchId);
-    if (branch) createNotification(branch.authorId, 'feedback', branchId);
+    // Notify the author of the post or the parent fork
+    if (parentForkId) {
+      const parentFork = rawBranches.find(b => b.id === parentForkId);
+      if (parentFork) createNotification(parentFork.authorId, 'branch', parentForkId);
+    } else {
+      const idea = rawIdeas.find(i => i.id === ideaId);
+      if (idea) createNotification(idea.authorId, 'branch', ideaId);
+    }
   };
 
   const likeIdea = async (ideaId: string) => {
@@ -767,11 +760,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   return (
     <AppContext.Provider value={{ 
       currentUser, users, ideas, allIdeas, communities, bookmarks, userLikes, notifications, 
-      addIdea, addBranch, addFeedback, likeIdea, likeBranch, toggleBookmark, 
-      updateProfile, markNotificationsRead, deleteIdea, deleteBranch, deleteFeedback, deleteMessage, 
+      addIdea, addBranch, likeIdea, likeBranch, toggleBookmark, 
+      updateProfile, markNotificationsRead, deleteIdea, deleteBranch, deleteMessage, 
       deleteUser, toggleVerified, deleteAccount, logout, login, signup, loginRedirect, isAuthReady, unreadMessagesCount, 
       playNotificationSound, activeConversationId, setActiveConversationId, clearAllNotifications, deleteNotification, toggleFollow,
-      rawBranches, rawFeedbacks, allMessages, isAuthModalOpen, setAuthModalOpen,
+      rawBranches, allMessages, isAuthModalOpen, setAuthModalOpen,
       globalSearchQuery, setGlobalSearchQuery,
       createCommunityOrder, checkOrderStatus, simulateSuccessOrder, addIdeaToCommunity,
       communityMembers, joinRequests, requestToJoinCommunity, handleJoinRequest, updateCommunityPrivacy

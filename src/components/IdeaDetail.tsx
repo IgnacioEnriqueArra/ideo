@@ -13,35 +13,22 @@ interface IdeaDetailProps {
 }
 
 export const IdeaDetail: React.FC<IdeaDetailProps> = ({ ideaId, onBack, onUserClick }) => {
-  const { ideas, currentUser, addBranch, addFeedback, likeIdea, bookmarks, toggleBookmark, deleteIdea, setAuthModalOpen } = useAppContext();
+  const { ideas, currentUser, addBranch, likeIdea, bookmarks, toggleBookmark, deleteIdea, setAuthModalOpen } = useAppContext();
   const idea = ideas.find(i => i.id === ideaId);
   
-  const [newBranch, setNewBranch] = useState('');
-  const [activeBranchId, setActiveBranchId] = useState<string | null>(null);
-  const [newFeedback, setNewFeedback] = useState('');
+  const [newFork, setNewFork] = useState('');
   const [showMenu, setShowMenu] = useState(false);
 
   if (!idea) return <div>Idea not found</div>;
 
-  const handleAddBranch = () => {
+  const handleAddFork = () => {
     if (!currentUser) {
       setAuthModalOpen(true);
       return;
     }
-    if (!newBranch.trim()) return;
-    addBranch(idea.id, newBranch);
-    setNewBranch('');
-  };
-
-  const handleAddFeedback = (branchId: string) => {
-    if (!currentUser) {
-      setAuthModalOpen(true);
-      return;
-    }
-    if (!newFeedback.trim()) return;
-    addFeedback(idea.id, branchId, newFeedback);
-    setNewFeedback('');
-    setActiveBranchId(null);
+    if (!newFork.trim()) return;
+    addBranch(idea.id, newFork);
+    setNewFork('');
   };
 
   return (
@@ -183,15 +170,15 @@ export const IdeaDetail: React.FC<IdeaDetailProps> = ({ ideaId, onBack, onUserCl
             type="text"
             placeholder="Fork this idea..."
             className="flex-1 bg-transparent border-none focus:ring-0 text-[15px] placeholder:text-gray-400 outline-none"
-            value={newBranch}
-            onChange={(e) => setNewBranch(e.target.value)}
+            value={newFork}
+            onChange={(e) => setNewFork(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') handleAddBranch();
+              if (e.key === 'Enter') handleAddFork();
             }}
           />
           <button 
-            onClick={handleAddBranch}
-            disabled={!newBranch.trim()}
+            onClick={handleAddFork}
+            disabled={!newFork.trim()}
             className="bg-primary text-white px-4 py-1.5 rounded-full font-bold text-sm disabled:opacity-50"
           >
             Fork
@@ -199,118 +186,73 @@ export const IdeaDetail: React.FC<IdeaDetailProps> = ({ ideaId, onBack, onUserCl
         </div>
       </div>
 
-      {/* Branches List */}
-      <div className="divide-y divide-gray-100">
+      {/* Forks List */}
+      <div className="divide-y divide-gray-100 pb-20">
         <AnimatePresence>
-          {idea.branches.map(branch => (
-            <motion.div 
-              key={branch.id} 
-              className="relative"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              layout
-            >
-              <BranchCard branch={branch} onUserClick={onUserClick} />
-              
-              {/* Feedbacks for this branch */}
-              {branch.feedbacks.length > 0 && (
-                <div className="pl-14 pr-4 py-2 space-y-4 border-b border-gray-100 bg-gray-50/50">
-                  {branch.feedbacks.map(feedback => (
-                    <motion.div 
-                      key={feedback.id} 
-                      className="flex gap-3"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                    >
-                      <Avatar 
-                        className="w-8 h-8 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                        onClick={() => onUserClick && onUserClick(feedback.author.id)}
-                      >
-                        <AvatarImage src={feedback.author.avatar} />
-                        <AvatarFallback>{feedback.author.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex flex-col">
-                          <div className="flex items-center gap-1.5 text-[15px]">
-                            <span 
-                              className="font-bold text-gray-900 cursor-pointer hover:underline"
-                              onClick={() => onUserClick && onUserClick(feedback.author.id)}
-                            >
-                              {feedback.author.name}
-                            </span>
-                            <span className="text-gray-500">@{feedback.author.handle}</span>
-                          </div>
-                          <span className="text-gray-500 text-[13px] mt-0.5">
-                            {formatDistanceToNow(new Date(feedback.createdAt), { addSuffix: true }).replace('about ', '')}
-                          </span>
-                        </div>
-                        <p className="text-[15px] text-gray-900 mt-1">{feedback.content}</p>
-                        <div className="flex gap-4 mt-2 text-gray-400">
-                          <button className="flex items-center gap-1 hover:text-red-500">
-                            <Heart className="w-3.5 h-3.5" />
-                            <span className="text-xs">0</span>
-                          </button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-
-              {/* Add Feedback inline */}
-              <div className="pl-14 pr-4 py-3 border-b border-gray-100">
-                {activeBranchId === branch.id ? (
-                  <motion.div 
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    className="flex gap-2 items-center"
-                  >
-                    <input
-                      type="text"
-                      placeholder="Add feedback..."
-                      className="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm border-none focus:ring-0 outline-none"
-                      value={newFeedback}
-                      onChange={(e) => setNewFeedback(e.target.value)}
-                      autoFocus
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleAddFeedback(branch.id);
-                      }}
-                    />
-                    <button 
-                      className="text-gray-500 hover:text-gray-900 text-sm font-medium px-2"
-                      onClick={() => setActiveBranchId(null)}
-                    >
-                      Cancel
-                    </button>
-                    <button 
-                      className="text-primary font-bold text-sm px-2 disabled:opacity-50"
-                      onClick={() => handleAddFeedback(branch.id)} 
-                      disabled={!newFeedback.trim()}
-                    >
-                      Reply
-                    </button>
-                  </motion.div>
-                ) : (
-                  <button 
-                    className="text-gray-400 hover:text-primary text-[13px] font-medium flex items-center gap-1.5"
-                    onClick={() => {
-                      if (!currentUser) {
-                        setAuthModalOpen(true);
-                      } else {
-                        setActiveBranchId(branch.id);
-                      }
-                    }}
-                  >
-                    <MessageSquare className="w-3.5 h-3.5" />
-                    Add feedback
-                  </button>
-                )}
-              </div>
-            </motion.div>
+          {idea.branches.map(fork => (
+            <RecursiveForkThread 
+               key={fork.id} 
+               fork={fork} 
+               onUserClick={onUserClick} 
+               onReply={(parentId, content) => {
+                 if (!currentUser) { setAuthModalOpen(true); return; }
+                 addBranch(idea.id, content, parentId);
+               }}
+            />
           ))}
         </AnimatePresence>
       </div>
     </motion.div>
   );
+};
+
+const RecursiveForkThread = ({ fork, onUserClick, onReply }: any) => {
+   const [isReplying, setIsReplying] = useState(false);
+   const [replyContent, setReplyContent] = useState('');
+
+   return (
+       <motion.div 
+         initial={{ opacity: 0, y: 20 }}
+         animate={{ opacity: 1, y: 0 }}
+         layout
+         className="relative pt-2"
+       >
+         <BranchCard branch={fork} onUserClick={onUserClick} />
+         
+         <div className="pl-14 pb-2">
+            {!isReplying ? (
+               <button onClick={() => setIsReplying(true)} className="text-gray-400 text-xs font-bold flex items-center gap-1 hover:text-primary transition-colors">
+                  <MessageSquare className="w-3 h-3" /> Fork this
+               </button>
+            ) : (
+               <div className="flex gap-2 items-center mt-2 pr-4">
+                 <input 
+                    autoFocus
+                    type="text" 
+                    placeholder="Write a fork..." 
+                    value={replyContent} 
+                    onChange={e => setReplyContent(e.target.value)} 
+                    onKeyDown={e => { if (e.key === 'Enter' && replyContent.trim()) { onReply(fork.id, replyContent); setIsReplying(false); setReplyContent(''); } }}
+                    className="flex-1 bg-gray-50 border border-gray-100 rounded-full px-4 py-1.5 text-sm outline-none" 
+                 />
+                 <button onClick={() => setIsReplying(false)} className="text-xs text-gray-500 font-bold px-2">Cancel</button>
+                 <button 
+                   onClick={() => { onReply(fork.id, replyContent); setIsReplying(false); setReplyContent(''); }} 
+                   disabled={!replyContent.trim()}
+                   className="text-xs bg-primary text-white font-bold px-3 py-1.5 rounded-full disabled:opacity-50"
+                 >Post</button>
+               </div>
+            )}
+         </div>
+
+         {fork.forks && fork.forks.length > 0 && (
+             <div className="border-l-2 border-gray-100 ml-8 pl-4 mb-2">
+                {fork.forks.map((child: any) => (
+                   <RecursiveForkThread key={child.id} fork={child} onUserClick={onUserClick} onReply={onReply} />
+                ))}
+             </div>
+         )}
+       </motion.div>
+   );
 };
 

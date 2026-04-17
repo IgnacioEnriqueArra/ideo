@@ -10,14 +10,6 @@ export type User = {
   verified?: boolean;
 };
 
-export type Feedback = {
-  id: string;
-  branchId: string;
-  author: User;
-  content: string;
-  createdAt: string;
-};
-
 export type Branch = {
   id: string;
   ideaId: string;
@@ -25,7 +17,8 @@ export type Branch = {
   content: string;
   createdAt: string;
   likes: number;
-  feedbacks: Feedback[];
+  parentForkId?: string;
+  forks?: Branch[];
 };
 
 export type Community = {
