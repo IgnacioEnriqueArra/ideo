@@ -28,7 +28,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
       <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
       <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-400/5 blur-[100px] pointer-events-none" />
 
-      <div className="w-full max-w-[1340px] flex gap-4 lg:gap-8 px-4 sm:px-6 relative z-10">
+      <div className="w-full max-w-[1340px] flex gap-0 lg:gap-8 px-0 sm:px-6 relative z-10">
         
         {/* Desktop Sidebar (Left) */}
         <aside className="hidden sm:flex flex-col w-[88px] xl:w-[280px] sticky top-0 h-screen py-6 shrink-0 z-20">
@@ -101,7 +101,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
         </aside>
 
         {/* Main Content Column */}
-        <main className="flex-1 w-full max-w-md sm:max-w-[620px] bg-white/70 backdrop-blur-3xl border-x border-gray-100/80 relative flex flex-col h-screen overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.02)]">
+        <main className="flex-1 w-full max-w-none sm:max-w-[620px] bg-white sm:bg-white/70 sm:backdrop-blur-3xl border-x-0 sm:border-x border-gray-100/80 relative flex flex-col h-screen overflow-hidden sm:shadow-[0_0_40px_rgba(0,0,0,0.02)]">
           <div className="flex-1 overflow-y-auto no-scrollbar relative">
             {children}
           </div>
