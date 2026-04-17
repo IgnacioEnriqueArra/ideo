@@ -1,3 +1,9 @@
+-- Limpiar políticas previas para evitar error 42710
+DROP POLICY IF EXISTS "Enable all for authenticated users" ON communities;
+DROP POLICY IF EXISTS "Enable all for authenticated users" ON community_members;
+DROP POLICY IF EXISTS "Enable all for authenticated users" ON crypto_orders;
+DROP POLICY IF EXISTS "Enable all for authenticated users" ON community_join_requests;
+
 -- Tablas de Comunidades y Ordenes Cripto
 CREATE TABLE IF NOT EXISTS communities (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -8,6 +14,9 @@ CREATE TABLE IF NOT EXISTS communities (
   "avatarUrl" TEXT,
   "isPrivate" BOOLEAN DEFAULT FALSE
 );
+
+-- Asegurar que las columnas existan si la tabla ya fue creada
+ALTER TABLE communities ADD COLUMN IF NOT EXISTS "isPrivate" BOOLEAN DEFAULT FALSE;
 
 CREATE TABLE IF NOT EXISTS community_members (
   "communityId" UUID NOT NULL REFERENCES communities(id) ON DELETE CASCADE,
@@ -35,17 +44,22 @@ CREATE TABLE IF NOT EXISTS crypto_orders (
   "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Habilitar RLS estandar (Para permitir inserciones de usuarios en front)
+-- Habilitar RLS estandar
 ALTER TABLE communities ENABLE ROW LEVEL SECURITY;
 ALTER TABLE community_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE crypto_orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE community_join_requests ENABLE ROW LEVEL SECURITY;
 
--- Políticas ultra-permisivas para evitar bloqueos como los de posts anteriores:
-CREATE POLICY "Enable all for authenticated users" ON communities FOR ALL USING (auth.role() = 'authenticated' OR true) WITH CHECK (true);
-CREATE POLICY "Enable all for authenticated users" ON community_members FOR ALL USING (auth.role() = 'authenticated' OR true) WITH CHECK (true);
-CREATE POLICY "Enable all for authenticated users" ON crypto_orders FOR ALL USING (auth.role() = 'authenticated' OR true) WITH CHECK (true);
-CREATE POLICY "Enable all for authenticated users" ON community_join_requests FOR ALL USING (auth.role() = 'authenticated' OR true) WITH CHECK (true);
+-- Políticas de acceso total (estilo fork.)
+CREATE POLICY "Enable all for authenticated users" ON communities FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Enable all for authenticated users" ON community_members FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Enable all for authenticated users" ON crypto_orders FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Enable all for authenticated users" ON community_join_requests FOR ALL USING (true) WITH CHECK (true);
 
--- Agregar campo 'communityId' a la tabla ideas
-ALTER TABLE ideas ADD COLUMN IF NOT EXISTS "communityId" UUID REFERENCES communities(id) ON DELETE CASCADE;
+-- Vincular ideas a comunidades si no existe la columna
+DO $$ 
+BEGIN 
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='ideas' AND column_name='communityId') THEN
+    ALTER TABLE ideas ADD COLUMN "communityId" UUID REFERENCES communities(id) ON DELETE CASCADE;
+  END IF;
+END $$;
