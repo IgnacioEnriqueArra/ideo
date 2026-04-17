@@ -384,9 +384,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
          });
 
          if (hasPaid) {
+            const verifiedUntil = new Date();
+            verifiedUntil.setDate(verifiedUntil.getDate() + 30);
+            const isoDate = verifiedUntil.toISOString();
+
             await supabase.from('crypto_orders').update({ status: 'paid' }).eq('id', orderId);
-            await supabase.from('users').update({ verified: true }).eq('id', order.userId);
-            if (currentUser?.id === order.userId) setCurrentUser(prev => prev ? { ...prev, verified: true } : null);
+            await supabase.from('users').update({ 
+               verified: true, 
+               verifiedUntil: isoDate 
+            }).eq('id', order.userId);
+
+            if (currentUser?.id === order.userId) {
+               setCurrentUser(prev => prev ? { ...prev, verified: true, verifiedUntil: isoDate } : null);
+            }
             return true;
          }
       }
@@ -410,9 +420,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
        return false;
     }
     
+    const verifiedUntil = new Date();
+    verifiedUntil.setDate(verifiedUntil.getDate() + 30);
+    const isoDate = verifiedUntil.toISOString();
+
     await supabase.from('crypto_orders').update({ status: 'paid' }).eq('id', orderId);
-    await supabase.from('users').update({ verified: true }).eq('id', order.userId);
-    if (currentUser?.id === order.userId) setCurrentUser(prev => prev ? { ...prev, verified: true } : null);
+    await supabase.from('users').update({ 
+       verified: true, 
+       verifiedUntil: isoDate 
+    }).eq('id', order.userId);
+
+    if (currentUser?.id === order.userId) {
+       setCurrentUser(prev => prev ? { ...prev, verified: true, verifiedUntil: isoDate } : null);
+    }
     return true;
   };
 

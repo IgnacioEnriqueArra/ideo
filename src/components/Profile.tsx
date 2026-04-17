@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { formatDistanceToNow } from 'date-fns';
 import { ArrowLeft, Search, MoreHorizontal, BadgeCheck } from 'lucide-react';
 import { useAppContext } from '../AppContext';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -113,6 +114,26 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
             </div>
             <div className="text-gray-500 text-[15px]">@{profileUser.handle}</div>
           </div>
+
+          {isOwnProfile && profileUser.verified && profileUser.verifiedUntil && (
+            <div className="mt-4 p-4 bg-blue-50/50 rounded-3xl border border-blue-100/50 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-blue-50">
+                  <BadgeCheck className="w-5 h-5 text-blue-500" />
+                </div>
+                <div>
+                  <p className="text-[13px] font-black text-gray-900 leading-tight uppercase tracking-wide">Identity Node</p>
+                  <p className="text-[11px] text-gray-500 mt-0.5 font-medium">Subscription active</p>
+                </div>
+              </div>
+              <div className="text-right px-1">
+                <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest leading-none">Expires in</p>
+                <p className="text-[14px] font-black text-blue-600 mt-1">
+                  {formatDistanceToNow(new Date(profileUser.verifiedUntil))}
+                </p>
+              </div>
+            </div>
+          )}
 
           <p className="mt-3 text-[15px] text-gray-900">
             {profileUser.bio || "Add a bio to tell the world who you are."}

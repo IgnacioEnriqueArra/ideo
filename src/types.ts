@@ -8,6 +8,7 @@ export type User = {
   followers: string[];
   following: string[];
   verified?: boolean;
+  verifiedUntil?: string;
 };
 
 export type Branch = {
