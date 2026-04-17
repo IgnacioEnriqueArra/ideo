@@ -216,7 +216,7 @@ const ChatView: React.FC<ChatProps> = ({ conversation, otherUserId, onBack }) =>
       </div>
 
       {/* Composer */}
-      <div className="flex items-end gap-2 px-3 py-3 border-t border-gray-100 bg-white pb-[calc(12px+env(safe-area-inset-bottom))]">
+      <div className="flex items-center gap-2 px-3 py-3 border-t border-gray-100 bg-white pb-[calc(12px+env(safe-area-inset-bottom))]">
         <input
           type="text"
           placeholder="Write a message..."
