@@ -80,7 +80,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
             {currentUser && (
               <div className="relative group">
                 <div className="flex items-center justify-center xl:justify-start gap-3 p-3 rounded-2xl hover:bg-gray-100/80 transition-all cursor-pointer backdrop-blur-sm border border-transparent hover:border-gray-200/50">
-                  <Avatar className="w-11 h-11 rounded-[14px] shadow-sm border border-white">
+                  <Avatar className="w-11 h-11 rounded-full shadow-sm border border-white">
                     <AvatarImage src={currentUser.avatar} />
                     <AvatarFallback className="bg-primary/10 text-primary">{currentUser.name.charAt(0)}</AvatarFallback>
                   </Avatar>

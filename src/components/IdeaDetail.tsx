@@ -111,7 +111,7 @@ export const IdeaDetail: React.FC<IdeaDetailProps> = ({ ideaId, onBack, onUserCl
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
               <Avatar
-                className="w-12 h-12 rounded-2xl cursor-pointer hover:opacity-80 transition-opacity border border-gray-100 shadow-sm"
+                className="w-12 h-12 rounded-full cursor-pointer hover:opacity-80 transition-opacity border border-gray-100 shadow-sm"
                 onClick={() => onUserClick && onUserClick(idea.author.id)}
               >
                 <AvatarImage src={idea.author.avatar} />
@@ -231,7 +231,7 @@ export const IdeaDetail: React.FC<IdeaDetailProps> = ({ ideaId, onBack, onUserCl
         {/* Quick Root Fork Input */}
         <div className="px-5 py-4 border-b border-gray-100 bg-white/70 sticky top-[68px] z-10 backdrop-blur-xl shadow-sm">
           <div className="flex items-center gap-3">
-            <Avatar className="w-10 h-10 rounded-2xl shadow-sm border border-gray-100 shrink-0">
+            <Avatar className="w-10 h-10 rounded-full shadow-sm border border-gray-100 shrink-0">
               <AvatarImage src={currentUser?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=guest`} />
               <AvatarFallback className="bg-primary/10 text-primary font-bold">{currentUser ? currentUser.name.charAt(0) : 'G'}</AvatarFallback>
             </Avatar>

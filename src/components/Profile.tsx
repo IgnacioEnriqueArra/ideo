@@ -66,7 +66,7 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
         {/* Profile Info */}
         <div className="px-4 pb-4">
           <div className="flex justify-between items-start">
-            <Avatar className="w-20 h-20 rounded-xl border-4 border-white -mt-10 bg-white">
+            <Avatar className="w-20 h-20 rounded-full border-4 border-white -mt-10 bg-white">
               <AvatarImage src={profileUser.avatar} />
               <AvatarFallback>{profileUser.name.charAt(0)}</AvatarFallback>
             </Avatar>

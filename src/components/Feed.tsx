@@ -137,7 +137,7 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
                   className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2.5 -mx-2.5 rounded-2xl transition-colors border border-transparent hover:border-gray-100"
                   onClick={() => onUserClick && onUserClick(user.id)}
                 >
-                  <Avatar className="w-11 h-11 rounded-xl shadow-sm border border-gray-100">
+                  <Avatar className="w-11 h-11 rounded-full shadow-sm border border-gray-100">
                      <AvatarImage src={user.avatar} />
                      <AvatarFallback className="bg-primary/5 text-primary">{user.name.charAt(0)}</AvatarFallback>
                   </Avatar>

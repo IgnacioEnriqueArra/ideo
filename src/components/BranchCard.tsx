@@ -78,7 +78,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({
       <div className="flex gap-3 sm:gap-4 w-full min-w-0">
         <div className="flex flex-col items-center shrink-0">
           <Avatar
-            className="w-10 h-10 sm:w-11 sm:h-11 rounded-[14px] z-10 bg-white cursor-pointer hover:opacity-80 transition-opacity border border-gray-100 shadow-sm"
+            className="w-10 h-10 sm:w-11 sm:h-11 rounded-full z-10 bg-white cursor-pointer hover:opacity-80 transition-opacity border border-gray-100 shadow-sm"
             onClick={(e) => {
               e.stopPropagation();
               if (onUserClick) onUserClick(branch.author.id);

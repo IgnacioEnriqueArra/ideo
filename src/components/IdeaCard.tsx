@@ -54,7 +54,7 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = fa
     >
       <div className="flex gap-3 sm:gap-4">
         <Avatar 
-          className="w-11 h-11 rounded-[14px] cursor-pointer hover:opacity-80 transition-opacity border border-gray-100 shadow-sm shrink-0"
+          className="w-11 h-11 rounded-full cursor-pointer hover:opacity-80 transition-opacity border border-gray-100 shadow-sm shrink-0"
           onClick={(e) => {
             e.stopPropagation();
             if (onUserClick) onUserClick(idea.author.id);
