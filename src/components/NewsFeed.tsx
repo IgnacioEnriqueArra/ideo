@@ -1,104 +1,48 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'motion/react';
-import { formatDistanceToNow } from 'date-fns';
-import { ExternalLink } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-
-interface Article {
-  id: number;
-  title: string;
-  description: string;
-  url: string;
-  cover_image: string | null;
-  published_at: string;
-  user: {
-    name: string;
-    profile_image: string;
-    username: string;
-  };
-  tag_list: string[];
-}
+import { useAppContext } from '../AppContext';
+import { IdeaCard } from './IdeaCard';
+import { AlertCircle } from 'lucide-react';
 
 export const NewsFeed: React.FC = () => {
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { ideas } = useAppContext();
 
-  useEffect(() => {
-    // Fetching from DEV.to API as a reliable tech news source
-    fetch('https://dev.to/api/articles?tag=programming&top=1&per_page=15')
-      .then(res => res.json())
-      .then(data => {
-        setArticles(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching news:', err);
-        setLoading(false);
-      });
-  }, []);
+  // Filter ideas to only include news, leaks, global and war content
+  const newsIdeas = useMemo(() => {
+    const newsTags = ['news', 'alert', 'war', 'global', 'argentina', 'leak', 'cyberattack', 'scandal', 'urgente'];
+    return ideas.filter(idea => 
+      idea.tags.some(tag => newsTags.includes(tag.toLowerCase()))
+    );
+  }, [ideas]);
 
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col w-full bg-gray-50 min-h-full"
+      className="flex flex-col w-full bg-white min-h-full"
     >
-      <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-3">
-        <h1 className="text-xl font-bold text-gray-900">Tech News</h1>
+      <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex flex-col gap-1">
+        <h1 className="text-xl font-black text-gray-900 flex items-center gap-2 tracking-tight">
+          Global Intel <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
+        </h1>
+        <p className="text-[12px] text-gray-500 font-mono tracking-tight font-bold uppercase">
+          Uncensored & Raw Data Streams
+        </p>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center items-center p-10">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        </div>
-      ) : (
-        <div className="divide-y divide-gray-100">
-          {articles.map((article, i) => (
-            <motion.a
-              href={article.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              key={article.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="block bg-white p-4 hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <Avatar className="w-6 h-6 rounded-md">
-                  <AvatarImage src={article.user.profile_image} />
-                  <AvatarFallback>{article.user.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <span className="text-sm font-medium text-gray-700">{article.user.name}</span>
-                <span className="text-xs text-gray-400">· {formatDistanceToNow(new Date(article.published_at), { addSuffix: true }).replace('about ', '')}</span>
-              </div>
-              
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <h2 className="font-bold text-gray-900 leading-tight mb-1">{article.title}</h2>
-                  <p className="text-sm text-gray-500 line-clamp-2 mb-2">{article.description}</p>
-                  <div className="flex flex-wrap gap-1">
-                    {article.tag_list?.slice(0, 3).map(tag => (
-                      <span key={tag} className="text-[10px] font-mono text-primary bg-primary/10 px-1.5 py-0.5 rounded">
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                {article.cover_image && (
-                  <img 
-                    src={article.cover_image} 
-                    alt={article.title} 
-                    className="w-20 h-20 object-cover rounded-lg border border-gray-100"
-                    referrerPolicy="no-referrer"
-                  />
-                )}
-              </div>
-            </motion.a>
-          ))}
-        </div>
-      )}
+      <div className="divide-y divide-gray-100 pb-20 sm:pb-0">
+        {newsIdeas.length > 0 ? (
+          newsIdeas.map(idea => (
+            <IdeaCard key={idea.id} idea={idea} />
+          ))
+        ) : (
+          <div className="p-10 flex flex-col items-center justify-center text-center text-gray-400 space-y-4">
+            <AlertCircle className="w-12 h-12 text-gray-200" />
+            <p className="font-mono text-sm max-w-[200px]">Signal lost. No secure intel blocks found in the network.</p>
+          </div>
+        )}
+      </div>
     </motion.div>
   );
 };
