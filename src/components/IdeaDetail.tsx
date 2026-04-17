@@ -187,7 +187,7 @@ export const IdeaDetail: React.FC<IdeaDetailProps> = ({ ideaId, onBack, onUserCl
       </div>
 
       {/* Forks List */}
-      <div className="divide-y divide-gray-100 pb-20">
+      <div className="divide-y divide-gray-100 pb-32">
         <AnimatePresence>
           {idea.branches.map(fork => (
             <RecursiveForkThread 
@@ -212,16 +212,15 @@ const RecursiveForkThread = ({ fork, onUserClick, onReply }: any) => {
 
    return (
        <motion.div 
-         initial={{ opacity: 0, y: 20 }}
+         initial={{ opacity: 0, y: 15 }}
          animate={{ opacity: 1, y: 0 }}
-         layout
-         className="relative pt-2"
+         className="relative"
        >
          <BranchCard branch={fork} onUserClick={onUserClick} onReply={() => setIsReplying(true)} />
          
-         <div className="pl-14 pb-2">
-            {isReplying && (
-               <div className="flex gap-2 items-center mt-2 pr-4">
+         {isReplying && (
+            <div className="pl-14 pr-4 py-3 bg-gray-50/50 border-b border-gray-100">
+               <div className="flex gap-2 items-center">
                  <input 
                     autoFocus
                     type="text" 
@@ -229,20 +228,20 @@ const RecursiveForkThread = ({ fork, onUserClick, onReply }: any) => {
                     value={replyContent} 
                     onChange={e => setReplyContent(e.target.value)} 
                     onKeyDown={e => { if (e.key === 'Enter' && replyContent.trim()) { onReply(fork.id, replyContent); setIsReplying(false); setReplyContent(''); } }}
-                    className="flex-1 bg-gray-50 border border-gray-100 rounded-full px-4 py-1.5 text-sm outline-none" 
+                    className="flex-1 bg-white border border-gray-200 rounded-full px-4 py-2 text-sm outline-none shadow-sm focus:border-primary/50" 
                  />
-                 <button onClick={() => setIsReplying(false)} className="text-xs text-gray-500 font-bold px-2">Cancel</button>
+                 <button onClick={() => setIsReplying(false)} className="text-xs text-gray-500 font-bold px-2 hover:text-gray-900">Cancel</button>
                  <button 
                    onClick={() => { onReply(fork.id, replyContent); setIsReplying(false); setReplyContent(''); }} 
                    disabled={!replyContent.trim()}
-                   className="text-xs bg-primary text-white font-bold px-3 py-1.5 rounded-full disabled:opacity-50"
+                   className="text-xs bg-primary text-white font-bold px-4 py-2 rounded-full disabled:opacity-50 hover:bg-primary/90 transition-colors shadow-sm"
                  >Post</button>
                </div>
-            )}
-         </div>
+            </div>
+         )}
 
          {fork.forks && fork.forks.length > 0 && (
-             <div className="border-l-2 border-gray-100 ml-8 pl-4 mb-2">
+             <div className="border-l-2 border-gray-100 ml-6 pl-2 mt-1">
                 {fork.forks.map((child: any) => (
                    <RecursiveForkThread key={child.id} fork={child} onUserClick={onUserClick} onReply={onReply} />
                 ))}
