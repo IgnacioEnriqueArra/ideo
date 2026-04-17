@@ -121,7 +121,7 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = fa
             </div>
           </div>
 
-          <p className={`mt-1.5 text-gray-900 leading-relaxed whitespace-pre-wrap ${isDetail ? 'text-[17px] font-medium' : 'text-[15px]'}`}>
+          <p className={`mt-1.5 text-gray-900 leading-relaxed whitespace-pre-wrap tracking-[-0.01em] ${isDetail ? 'text-[17px] font-semibold' : 'text-[15px] font-medium'}`}>
             {(translatedText || idea.content).split(' ').map((part, i) => {
               const urlRegex = /(https?:\/\/[^\s]+)/g;
               if (part.match(urlRegex)) {

@@ -93,7 +93,7 @@ export const BranchCard: React.FC<BranchCardProps> = ({ branch, onClick, onUserC
             </button>
           </div>
 
-          <p className="mt-1.5 text-gray-900 text-[15px] leading-relaxed whitespace-pre-wrap">
+          <p className="mt-1.5 text-gray-900 text-[15px] font-medium leading-relaxed tracking-[-0.01em] whitespace-pre-wrap">
             {translatedText || branch.content}
           </p>
 
