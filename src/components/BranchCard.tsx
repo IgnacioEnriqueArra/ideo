@@ -131,27 +131,27 @@ export const BranchCard: React.FC<BranchCardProps> = ({
 
           <div className="flex items-center gap-4 mt-4 text-gray-500">
             <button
-              className="flex items-center gap-1.5 hover:text-primary transition-colors group outline-none"
+              className="flex items-center gap-1 hover:text-primary transition-colors group outline-none"
               onClick={(e) => { e.stopPropagation(); if (onReply) onReply(); }}
             >
-              <div className="p-1.5 rounded-full group-hover:bg-primary/10 transition-colors">
+              <div className="w-9 h-9 flex items-center justify-center rounded-full group-hover:bg-primary/10 transition-all duration-300">
                 <GitFork className="w-[18px] h-[18px]" />
               </div>
-              <span className="text-[13px] font-medium font-mono">{branch.forks?.length > 0 ? branch.forks.length : 'Fork'}</span>
+              <span className="text-[13px] font-medium font-mono group-hover:font-bold transition-all">{branch.forks?.length > 0 ? branch.forks.length : 'Fork'}</span>
             </button>
 
             <button
-              className={`flex items-center gap-1.5 hover:text-red-500 transition-colors group outline-none ${isLiked ? 'text-red-500' : ''}`}
+              className={`flex items-center gap-1 hover:text-red-500 transition-colors group outline-none ${isLiked ? 'text-red-500' : ''}`}
               onClick={(e) => { e.stopPropagation(); likeBranch(branch.ideaId, branch.id); }}
             >
-              <div className="p-1.5 rounded-full group-hover:bg-red-500/10 transition-colors">
+              <div className="w-9 h-9 flex items-center justify-center rounded-full group-hover:bg-red-500/10 transition-all duration-300">
                 <Heart className={`w-[18px] h-[18px] transition-transform group-active:scale-90 ${isLiked ? 'fill-red-500' : ''}`} />
               </div>
-              <span className="text-[13px] font-medium font-mono">{branch.likes > 0 ? branch.likes : ''}</span>
+              <span className="text-[13px] font-medium font-mono group-hover:font-bold transition-all">{branch.likes > 0 ? branch.likes : ''}</span>
             </button>
 
             <button className="flex items-center gap-1.5 hover:text-primary transition-colors group outline-none ml-auto">
-              <div className="p-1.5 rounded-full group-hover:bg-primary/10 transition-colors">
+              <div className="w-9 h-9 flex items-center justify-center rounded-full group-hover:bg-primary/10 transition-all duration-300">
                 <Share className="w-[18px] h-[18px]" />
               </div>
             </button>

@@ -168,48 +168,48 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({ idea, onClick, isDetail = fa
           )}
 
           <div className="flex items-center justify-between mt-4 text-gray-500 max-w-[400px] pr-2">
-            <button className="flex items-center gap-1.5 hover:text-primary transition-colors group outline-none">
-              <div className="p-1.5 rounded-full group-hover:bg-primary/10 transition-colors">
+            <button className="flex items-center gap-1 hover:text-primary transition-colors group outline-none">
+              <div className="w-9 h-9 flex items-center justify-center rounded-full group-hover:bg-primary/10 transition-all duration-300">
                 <GitFork className="w-[18px] h-[18px]" />
               </div>
-              <span className="text-[13px] font-medium font-mono">{idea.branches.length > 0 ? idea.branches.length : 'Fork'}</span>
+              <span className="text-[13px] font-medium font-mono group-hover:font-bold transition-all">{idea.branches.length > 0 ? idea.branches.length : 'Fork'}</span>
             </button>
 
             <button 
-              className={`flex items-center gap-1.5 hover:text-red-500 transition-colors group outline-none ${isLiked ? 'text-red-500' : ''}`}
+              className={`flex items-center gap-1 hover:text-red-500 transition-colors group outline-none ${isLiked ? 'text-red-500' : ''}`}
               onClick={(e) => {
                 e.stopPropagation();
                 if (!currentUser) setAuthModalOpen(true);
                 else likeIdea(idea.id);
               }}
             >
-              <div className="p-1.5 rounded-full group-hover:bg-red-500/10 transition-colors">
+              <div className="w-9 h-9 flex items-center justify-center rounded-full group-hover:bg-red-500/10 transition-all duration-300">
                 <Heart className={`w-[18px] h-[18px] transition-transform group-active:scale-90 ${isLiked ? 'fill-red-500' : ''}`} />
               </div>
-              <span className="text-[13px] font-medium font-mono">{idea.likes > 0 ? idea.likes : ''}</span>
+              <span className="text-[13px] font-medium font-mono group-hover:font-bold transition-all">{idea.likes > 0 ? idea.likes : ''}</span>
             </button>
 
             <button 
-              className={`flex items-center gap-1.5 hover:text-blue-500 transition-colors group outline-none ${isBookmarked ? 'text-blue-500' : ''}`}
+              className={`flex items-center gap-1 hover:text-blue-500 transition-colors group outline-none ${isBookmarked ? 'text-blue-500' : ''}`}
               onClick={(e) => {
                 e.stopPropagation();
                 if (!currentUser) setAuthModalOpen(true);
                 else toggleBookmark(idea.id);
               }}
             >
-              <div className="p-1.5 rounded-full group-hover:bg-blue-500/10 transition-colors">
+              <div className="w-9 h-9 flex items-center justify-center rounded-full group-hover:bg-blue-500/10 transition-all duration-300">
                 <Bookmark className={`w-[18px] h-[18px] transition-transform group-active:scale-90 ${isBookmarked ? 'fill-blue-500' : ''}`} />
               </div>
             </button>
 
             <button 
-              className="flex items-center gap-1.5 hover:text-primary transition-colors group outline-none"
+              className="flex items-center gap-1 hover:text-primary transition-colors group outline-none"
               onClick={(e) => {
                 e.stopPropagation();
                 setIsShareOpen(true);
               }}
             >
-              <div className="p-1.5 rounded-full group-hover:bg-primary/10 transition-colors">
+              <div className="w-9 h-9 flex items-center justify-center rounded-full group-hover:bg-primary/10 transition-all duration-300">
                 <Share className="w-[18px] h-[18px]" />
               </div>
             </button>

@@ -189,32 +189,31 @@ export const IdeaDetail: React.FC<IdeaDetailProps> = ({ ideaId, onBack, onUserCl
 
           <div className="border-t border-gray-100/80 pt-4 flex items-center gap-2 sm:gap-6 text-gray-500">
             <button
-              className="flex flex-1 sm:flex-none items-center justify-center gap-2 hover:text-primary transition-colors group"
+              className="flex flex-1 sm:flex-none items-center justify-center gap-2 hover:text-primary transition-colors group outline-none"
               onClick={openRootFork}
             >
-              <div className="p-2 rounded-xl bg-gray-50 group-hover:bg-primary/10 transition-colors border border-transparent group-hover:border-primary/10">
+              <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 group-hover:bg-primary/10 transition-all border border-transparent group-hover:border-primary/10">
                 <GitFork className="w-5 h-5 group-hover:text-primary transition-colors" />
               </div>
-              <span className="font-bold">{idea.branches.length} <span className="font-normal text-sm hidden sm:inline">Forks</span></span>
+              <span className="font-bold text-[15px]">{idea.branches.length} <span className="font-normal text-sm hidden sm:inline text-gray-500">Forks</span></span>
             </button>
 
             <button
-              className={`flex flex-1 sm:flex-none items-center justify-center gap-2 hover:text-red-500 transition-colors group ${isLiked ? 'text-red-500' : ''}`}
+              className={`flex flex-1 sm:flex-none items-center justify-center gap-2 hover:text-red-500 transition-colors group outline-none ${isLiked ? 'text-red-500' : ''}`}
               onClick={() => {
                 if (!currentUser) setAuthModalOpen(true);
                 else likeIdea(idea.id);
               }}
             >
-              <div className={`p-2 rounded-xl transition-colors border border-transparent ${isLiked ? 'bg-red-50 border-red-100' : 'bg-gray-50 group-hover:bg-red-50 group-hover:border-red-100'}`}>
+              <div className={`w-10 h-10 flex items-center justify-center rounded-full transition-all border border-transparent ${isLiked ? 'bg-red-50 border-red-100' : 'bg-gray-50 group-hover:bg-red-50 group-hover:border-red-100'}`}>
                 <Heart className={`w-5 h-5 transition-colors ${isLiked ? 'fill-red-500 text-red-500' : 'group-hover:text-red-500'}`} />
               </div>
-              <span className="font-bold">{idea.likes} <span className="font-normal text-sm hidden sm:inline">Likes</span></span>
+              <span className="font-bold text-[15px]">{idea.likes} <span className="font-normal text-sm hidden sm:inline text-gray-500">Likes</span></span>
             </button>
-
             <div className="hidden sm:block flex-1"></div>
 
             <button
-              className="p-2 rounded-xl flex-1 sm:flex-none flex justify-center hover:bg-gray-50 border border-transparent hover:border-gray-200 hover:text-primary transition-all group"
+              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 border border-transparent hover:border-gray-200 hover:text-primary transition-all group outline-none"
               onClick={() => {
                 if (!currentUser) setAuthModalOpen(true);
                 else toggleBookmark(idea.id);
@@ -222,7 +221,7 @@ export const IdeaDetail: React.FC<IdeaDetailProps> = ({ ideaId, onBack, onUserCl
             >
               <Bookmark className={`w-5 h-5 ${isBookmarked ? 'fill-primary text-primary' : ''}`} />
             </button>
-            <button className="p-2 rounded-xl flex-1 sm:flex-none flex justify-center hover:bg-gray-50 border border-transparent hover:border-gray-200 hover:text-primary transition-all">
+            <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 border border-transparent hover:border-gray-200 hover:text-primary transition-all group outline-none">
               <Share className="w-5 h-5" />
             </button>
           </div>

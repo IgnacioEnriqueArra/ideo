@@ -171,7 +171,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                   <div key={suggestedUser.id} className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 overflow-hidden flex-1">
                       <Avatar 
-                        className="w-10 h-10 rounded-[12px] cursor-pointer hover:opacity-80 transition-opacity border border-gray-100 shadow-sm shrink-0"
+                        className="w-10 h-10 rounded-full cursor-pointer hover:opacity-80 transition-opacity border border-gray-100 shadow-sm shrink-0"
                         onClick={() => window.dispatchEvent(new CustomEvent('open-user', { detail: suggestedUser.id }))}
                       >
                         <AvatarImage src={suggestedUser.avatar} />
@@ -245,7 +245,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               className="fixed top-0 left-0 bottom-0 w-[280px] bg-white z-50 shadow-2xl flex flex-col"
             >
               <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                <Avatar className="w-12 h-12 rounded-2xl shadow-sm border border-white">
+                <Avatar className="w-12 h-12 rounded-full shadow-sm border border-white">
                   <AvatarImage src={currentUser?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=guest`} />
                   <AvatarFallback className="bg-primary text-white font-bold">{currentUser ? currentUser.name.charAt(0) : 'G'}</AvatarFallback>
                 </Avatar>

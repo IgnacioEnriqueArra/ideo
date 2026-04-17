@@ -110,11 +110,15 @@ export const EditProfile: React.FC<EditProfileProps> = ({ isOpen, onClose }) => 
 
         <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-6">
           <div className="flex flex-col items-center gap-4">
-            <div className="relative">
-              <Avatar className="w-24 h-24 rounded-full border-4 border-white shadow-sm overflow-hidden bg-white">
+            <div className="relative group/avatar cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+              <Avatar className="w-24 h-24 rounded-full border-4 border-white shadow-md overflow-hidden bg-white group-hover/avatar:opacity-90 transition-all">
                 <AvatarImage src={avatar} className="object-cover" />
                 <AvatarFallback>{name.charAt(0)}</AvatarFallback>
               </Avatar>
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-full opacity-0 group-hover/avatar:opacity-100 transition-opacity">
+                <Camera className="w-8 h-8 text-white shadow-sm" />
+              </div>
+              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleAvatarUpload} />
             </div>
           </div>
 
