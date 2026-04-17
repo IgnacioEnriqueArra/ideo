@@ -303,8 +303,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const newIdea = { id: tempId, authorId: currentUser.id, content, createdAt: new Date().toISOString(), likes: 0, tags, mediaUrl };
+    // Opt-in UI
     setRawIdeas(prev => [newIdea, ...prev]);
-    await supabase.from('ideas').insert(newIdea);
+    const { error } = await supabase.from('ideas').insert(newIdea);
+    if (error) {
+      console.error("Failed to insert idea:", error);
+      alert("Error saving post to network: " + error.message);
+      // Revert optimistic update
+      setRawIdeas(prev => prev.filter(i => i.id !== tempId));
+    }
   };
 
   const deleteIdea = async (ideaId: string) => {
@@ -346,7 +353,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const tempId = crypto.randomUUID();
     const newBranch = { id: tempId, ideaId, authorId: currentUser.id, content, createdAt: new Date().toISOString(), likes: 0 };
     setRawBranches(prev => [...prev, newBranch]);
-    await supabase.from('branches').insert(newBranch);
+    const { error } = await supabase.from('branches').insert(newBranch);
+    if (error) {
+      console.error("Failed to insert branch:", error);
+      alert("Error saving branch to network: " + error.message);
+      setRawBranches(prev => prev.filter(b => b.id !== tempId));
+    }
     
     const idea = rawIdeas.find(i => i.id === ideaId);
     if (idea) createNotification(idea.authorId, 'branch', ideaId);
