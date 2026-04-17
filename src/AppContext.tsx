@@ -153,6 +153,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (payload.eventType === 'UPDATE') setAllMessages(p => p.map(m => m.id === payload.new.id ? payload.new : m));
         if (payload.eventType === 'DELETE') setAllMessages(p => p.filter(m => m.id !== payload.old.id));
       })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'communities' }, payload => {
+        if (payload.eventType === 'INSERT') setCommunities(p => { const x = p.find(c => c.id === payload.new.id); return x ? p : [payload.new as Community, ...p] });
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'crypto_orders' }, payload => {
+        if (payload.eventType === 'INSERT') setCryptoOrders(p => { const x = p.find(o => o.id === payload.new.id); return x ? p : [payload.new as CryptoOrder, ...p] });
+        if (payload.eventType === 'UPDATE') setCryptoOrders(p => p.map(o => o.id === payload.new.id ? payload.new as CryptoOrder : o));
+      })
       .subscribe();
 
     return () => {
@@ -365,8 +372,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const simulateSuccessOrder = async (orderId: string): Promise<boolean> => {
-    const order = cryptoOrders.find(o => o.id === orderId);
-    if (!order) return false;
+    let order = cryptoOrders.find(o => o.id === orderId);
+    
+    // Fallback: Si no esta en el estado (lag), lo buscamos en el servidor
+    if (!order) {
+      const { data } = await supabase.from('crypto_orders').select('*').eq('id', orderId).single();
+      if (data) order = data as CryptoOrder;
+    }
+
+    if (!order) {
+       alert("Order not found in DB or state. ID: " + orderId);
+       return false;
+    }
     
     await supabase.from('crypto_orders').update({ status: 'paid' }).eq('id', orderId);
     const { data: cData } = await supabase.from('communities').insert({
