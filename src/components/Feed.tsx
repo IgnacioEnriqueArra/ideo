@@ -100,18 +100,18 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
           </div>
 
           {/* CTA post */}
-          <div className="p-6 sm:p-8 border-b border-gray-100 flex flex-col items-center justify-center bg-white relative overflow-hidden group">
+          <div className="p-4 sm:p-5 border-b border-gray-100 flex flex-col items-center justify-center bg-white relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-blue-400/5 opacity-50 block" />
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -z-10 group-hover:bg-primary/20 transition-colors duration-700" />
-            <div className="w-12 h-12 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center mb-4 relative z-10">
-              <Zap className="w-6 h-6 text-primary fill-primary/20" />
+            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-3xl -z-10 group-hover:bg-primary/20 transition-colors duration-700" />
+            <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center mb-3 relative z-10">
+              <Zap className="w-5 h-5 text-primary fill-primary/20" />
             </div>
-            <h2 className="text-[22px] font-black text-gray-900 mb-2 tracking-tight relative z-10 text-center">Join the conversation anonymously</h2>
-            <p className="text-gray-500 text-[15px] mb-6 text-center max-w-[400px] font-medium leading-relaxed relative z-10">
-              Share your thoughts, connect with others, and explore the network with 100% anonymity. No tracks, no limits.
+            <h2 className="text-[18px] sm:text-[22px] font-black text-gray-900 mb-1.5 tracking-tight relative z-10 text-center">Join the network</h2>
+            <p className="text-gray-500 text-[13px] sm:text-[15px] mb-4 text-center max-w-[320px] font-medium leading-tight relative z-10">
+              Explore the decentralized web with 100% anonymity.
             </p>
             <button 
-              className="bg-black text-white font-black py-3 px-8 rounded-full relative z-10"
+              className="bg-black text-white font-black py-2.5 px-6 rounded-full relative z-10 text-sm"
               onClick={() => {
                 const composeBtn = document.querySelector('svg.lucide-pen-line')?.closest('button') as HTMLButtonElement | null;
                 const desktopBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent?.includes('Post'));

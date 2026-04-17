@@ -96,13 +96,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
         </aside>
 
         {/* Main Content Column */}
-        <main className="flex flex-col w-full min-h-screen pb-[calc(100px+env(safe-area-inset-bottom))] sm:pb-0 max-w-[600px] bg-white border-x-0 sm:border-x sm:border-gray-100 relative">
+        <main className="flex flex-col w-full min-h-screen pb-[calc(70px+env(safe-area-inset-bottom))] sm:pb-0 max-w-[600px] bg-white border-x-0 sm:border-x sm:border-gray-100 relative">
           <div className="flex-1 relative">
             {children}
           </div>
           
           {/* Bottom Nav (Mobile Only) */}
-          <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-100 flex justify-around items-center px-2 pt-3 pb-[calc(24px+env(safe-area-inset-bottom))] z-40 shadow-[0_-10px_40px_rgba(0,0,0,0.08)]">
+          <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-100 flex justify-around items-center px-2 pt-2.5 pb-[calc(12px+env(safe-area-inset-bottom))] z-40 shadow-[0_-10px_40px_rgba(0,0,0,0.08)]">
             {[
               { id: 'home', icon: Home },
               { id: 'communities', icon: Users },
@@ -219,8 +219,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={onCompose}
-          className="sm:hidden fixed right-5 w-14 h-14 bg-black rounded-full flex items-center justify-center text-white shadow-md z-30"
-          style={{ bottom: 'calc(5rem + env(safe-area-inset-bottom))' }}
+          className="sm:hidden fixed right-5 w-14 h-14 bg-black rounded-full flex items-center justify-center text-white shadow-xl z-30"
+          style={{ bottom: 'calc(4.5rem + env(safe-area-inset-bottom))' }}
         >
           <PenLine className="w-5 h-5" />
         </motion.button>

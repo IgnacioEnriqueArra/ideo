@@ -40,19 +40,22 @@ export const Communities: React.FC<CommunitiesProps> = ({ onBack, onSelectCommun
         <h1 className="text-xl font-bold font-mono tracking-tight text-gray-900 flex items-center gap-2">
           {view === 'create' ? 'Create Community' : 'Communities'} <Users className="w-5 h-5 text-primary" />
         </h1>
-        {view === 'list' && (
-          <button 
-            onClick={() => setView('create')} 
-            className="ml-auto flex items-center gap-1 bg-black text-white px-3 py-1.5 rounded-full text-sm font-bold shadow-sm"
-          >
-            <Plus className="w-4 h-4" /> New
-          </button>
-        )}
       </div>
 
       <div className="flex-1 overflow-y-auto">
         {view === 'list' ? (
            <div className="p-6 space-y-4">
+             {currentUser?.verified && (
+               <button 
+                 onClick={() => setView('create')}
+                 className="w-full p-6 border-2 border-dashed border-gray-200 rounded-3xl flex flex-col items-center justify-center gap-3 text-gray-400 hover:border-primary hover:text-primary transition-all group mb-8"
+               >
+                 <div className="w-14 h-14 bg-gray-50 group-hover:bg-primary/5 rounded-full flex items-center justify-center transition-colors">
+                   <Plus className="w-7 h-7" />
+                 </div>
+                 <span className="font-bold text-base">Create New Community</span>
+               </button>
+             )}
              {communities.length === 0 ? (
                <div className="text-center text-gray-400 py-12">No communities yet. Be the first to build a protected space.</div>
              ) : (
