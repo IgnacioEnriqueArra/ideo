@@ -75,11 +75,11 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({ isOpen, on
 
           {!activeOrder ? (
             <div className="space-y-6">
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-[24px] border border-blue-100 dark:border-blue-800">
-                <CheckCircle2 className="w-12 h-12 text-primary mb-4" />
-                <h3 className="text-xl font-bold mb-2">Proof of Human Identity</h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-                  Verified accounts represent authentic contributors in the network. Verification grants you:
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-8 rounded-[32px] border border-blue-100 dark:border-blue-800 flex flex-col items-center text-center">
+                <CheckCircle2 className="w-16 h-16 text-primary mb-4 animate-pulse" />
+                <h3 className="text-2xl font-black mb-2 tracking-tight">Proof of Human Identity</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed max-w-[280px]">
+                  Verified accounts represent authentic contributors in the network.
                 </p>
                 <ul className="mt-4 space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <li className="flex items-center gap-2">✅ Create unlimited autonomous communities</li>
@@ -135,7 +135,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({ isOpen, on
                   </div>
 
                   <div className="space-y-3">
-                    <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest block pl-1">Wallet Address</span>
+                    <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest block pl-1">Target Node Address</span>
                     <div 
                       onClick={() => {
                         navigator.clipboard.writeText(TRC20_WALLET);
@@ -144,22 +144,31 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({ isOpen, on
                       className="group relative bg-gray-50 border border-gray-100 rounded-2xl p-5 break-all font-mono text-sm text-gray-600 cursor-pointer hover:bg-gray-100/50 hover:border-primary/20 transition-all text-center flex flex-col items-center gap-2"
                     >
                       {TRC20_WALLET}
-                      <span className="text-[10px] font-black text-primary opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-widest">Click to Copy Node Address</span>
+                      <span className="text-[10px] font-black text-primary uppercase tracking-widest">Click to Copy Node Address</span>
                     </div>
                   </div>
 
-                  <div className="p-5 bg-orange-50/50 rounded-2xl border border-orange-100 flex gap-4">
-                     <ShieldAlert className="w-6 h-6 text-orange-500 shrink-0 mt-0.5" />
-                     <div className="text-[12px] text-orange-900/70 leading-relaxed font-medium">
-                        Send only via <span className="font-black text-orange-900 underline decoration-orange-300">TRON (TRC20)</span>. 
-                        Verification will automatically trigger once the transaction is validated on-chain (usually 2-5 minutes).
-                     </div>
+                  <div className="space-y-3 pt-2">
+                    <div className="p-4 bg-orange-50/70 rounded-2xl border border-orange-100 flex gap-4">
+                       <ShieldAlert className="w-6 h-6 text-orange-500 shrink-0 mt-0.5" />
+                       <div className="text-[11px] text-orange-900/80 leading-relaxed font-semibold">
+                          <p className="font-black uppercase mb-1">Critical Network Warning</p>
+                          Send ONLY via <span className="font-extrabold text-orange-600 underline">TRC20 (TRON)</span>. Sending via ERC20, BEP20 or any other network will result in <span className="text-red-600 uppercase font-black">immediate and permanent loss</span> of funds.
+                       </div>
+                    </div>
+
+                    <div className="p-4 bg-red-50/50 rounded-2xl border border-red-50 flex gap-4">
+                       <div className="w-6 h-6 flex items-center justify-center bg-red-100 rounded-full text-red-500 shrink-0 font-bold text-[10px]">!</div>
+                       <div className="text-[11px] text-red-900/60 leading-relaxed">
+                          Do not send from exchanges (CEX) that deduct fees from the withdrawal amount. The node must receive exactly <span className="font-bold">{activeOrder.amount} USDT</span>.
+                       </div>
+                    </div>
                   </div>
 
-                  <div className="pt-4 flex flex-col items-center gap-5">
+                  <div className="pt-2 flex flex-col items-center gap-5">
                     <div className="flex justify-center items-center gap-3">
                        <Loader2 className="w-4 h-4 text-primary animate-spin" />
-                       <span className="text-[11px] font-bold text-gray-400 font-mono tracking-tight">SCANNING BLOCKCHAIN...</span>
+                       <span className="text-[11px] font-bold text-gray-400 font-mono tracking-tight uppercase">Scanning Nodes for Confirmation...</span>
                     </div>
 
                     <button 
@@ -167,7 +176,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({ isOpen, on
                         const ok = await simulateSuccessOrder(activeOrder.id);
                         if (ok) setPaid(true);
                       }}
-                      className="text-[10px] text-gray-200 hover:text-primary transition-colors font-black uppercase tracking-widest hover:underline"
+                      className="text-[9px] text-gray-200 hover:text-primary transition-colors font-black uppercase tracking-widest hover:underline"
                     >
                       [ Dev Bypass: Simulate Node Sync ]
                     </button>
