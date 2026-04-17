@@ -11,7 +11,7 @@ interface FeedProps {
 }
 
 export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotificationsClick }) => {
-  const { ideas, currentUser, users, notifications, globalSearchQuery, setGlobalSearchQuery } = useAppContext();
+  const { ideas, currentUser, users, notifications, globalSearchQuery, setGlobalSearchQuery, globalNews } = useAppContext();
   const unreadCount = notifications.filter(n => !n.read).length;
   const [activeTab, setActiveTab] = useState<'foryou' | 'trending'>('foryou');
 
@@ -181,20 +181,39 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
         ) : (
           <div className="pb-10">
             <AnimatePresence>
-              {(globalSearchQuery ? filteredIdeas : ideas).map((idea, index) => (
+              {feedItems.map((item, index) => (
                 <motion.div
-                  key={idea.id}
+                  key={item.id}
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                   layout
                   className="bg-white border-b border-gray-100/80 hover:bg-gray-50/50 transition-colors"
                 >
-                  <IdeaCard 
-                    idea={idea} 
-                    onClick={() => onSelectIdea(idea.id)} 
-                    onUserClick={onUserClick}
-                  />
+                  {item.type === 'idea' ? (
+                    <IdeaCard 
+                      idea={item.data} 
+                      onClick={() => onSelectIdea(item.data.id)} 
+                      onUserClick={onUserClick}
+                    />
+                  ) : (
+                    <div className="p-5 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-3">
+                         <BadgeCheck className="w-5 h-5 text-blue-500 fill-blue-500/10" />
+                      </div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-bold rounded-full uppercase tracking-wider">{item.data.category || 'GLOBAL'}</span>
+                        <span className="text-[11px] text-gray-400 font-medium">{item.data.time}</span>
+                      </div>
+                      <h4 className="text-[17px] font-black text-gray-900 leading-tight mb-2 group-hover:text-primary transition-colors cursor-pointer" onClick={() => onSelectIdea(item.id)}>
+                        {item.data.title}
+                      </h4>
+                      <div className="flex items-center justify-between mt-4">
+                        <span className="text-xs font-mono text-gray-400">SOURCE: {item.data.source}</span>
+                        <button className="text-xs font-bold text-gray-400 hover:text-primary">Read Intel →</button>
+                      </div>
+                    </div>
+                  )}
                 </motion.div>
               ))}
             </AnimatePresence>

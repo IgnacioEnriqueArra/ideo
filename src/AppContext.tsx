@@ -53,6 +53,7 @@ type AppContextType = {
   communities: Community[];
   allIdeas: Idea[];
   ideas: Idea[];
+  globalNews: any[];
   createVerificationOrder: () => Promise<CryptoOrder | null>;
   checkOrderStatus: (orderId: string) => Promise<boolean>;
   simulateSuccessOrder: (orderId: string) => Promise<boolean>;
@@ -85,6 +86,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [cryptoOrders, setCryptoOrders] = useState<CryptoOrder[]>([]);
   const [communityMembers, setCommunityMembers] = useState<any[]>([]);
   const [joinRequests, setJoinRequests] = useState<CommunityJoinRequest[]>([]);
+  const [globalNews, setGlobalNews] = useState<any[]>([]);
 
   useEffect(() => {
     let authSubscription: any;
@@ -141,72 +143,89 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       const fetchRedditSyndication = async () => {
         try {
-          const proxy = (url: string) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+          // Use a few fallback proxies to ensure stability
+          const proxies = [
+            (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+            (url: string) => `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(url)}`,
+            (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`
+          ];
           
-          const [worldData, argData] = await Promise.all([
-            fetch(proxy('https://www.reddit.com/r/worldnews/hot.json?limit=10')).then(res => res.json()),
-            fetch(proxy('https://www.reddit.com/r/argentina/hot.json?limit=10')).then(res => res.json())
-          ]);
+          let success = false;
+          let redditPosts: any[] = [];
+          
+          // Subreddits requested: General, a bit of everything
+          const subreddits = ['popular', 'interestingasfuck', 'technology', 'dataisbeautiful', 'argentina'];
 
-          const worldRes = JSON.parse(worldData.contents);
-          const argRes = JSON.parse(argData.contents);
+          for (const proxyFn of proxies) {
+            try {
+              const fetchOptions = { signal: AbortSignal.timeout(8000) }; // 8s timeout
+              const responses = await Promise.all(
+                subreddits.map(sub => 
+                  fetch(proxyFn(`https://www.reddit.com/r/${sub}/hot.json?limit=5`), fetchOptions)
+                    .then(res => res.json())
+                    .catch(() => null)
+                )
+              );
 
-          const redditPosts = [...(worldRes.data?.children || []), ...(argRes.data?.children || [])];
+              redditPosts = responses
+                .filter(r => r && r.data && r.data.children)
+                .flatMap(r => r.data.children);
+
+              if (redditPosts.length > 0) {
+                success = true;
+                break;
+              }
+            } catch (e) {
+              continue;
+            }
+          }
+
+          if (!success) throw new Error("All proxies failed or timed out");
+
           const newIdeas: any[] = [];
           const newBranches: any[] = [];
+          const newsItems: any[] = [];
 
           for (const post of redditPosts) {
             const botIdx = Math.floor(Math.random() * 20);
             const bot = SYNTHETIC_BOTS[botIdx];
             const ideaId = `reddit-idea-${post.data.id}`;
 
-            newIdeas.push({
+            const idea = {
               id: ideaId,
               authorId: bot.id,
               content: post.data.title + (post.data.selftext ? "\n\n" + post.data.selftext : ""),
               createdAt: new Date(post.data.created_utc * 1000).toISOString(),
               likes: Math.floor(Math.random() * 500) + post.data.score,
-              tags: ['intel', 'global', 'verified'],
+              tags: ['intel', post.data.subreddit, 'verified'],
               mediaUrl: (post.data.thumbnail && post.data.thumbnail.startsWith('http')) ? post.data.thumbnail : null
-            });
+            };
 
-            try {
-              const commentUrl = proxy(`https://www.reddit.com${post.data.permalink}.json?limit=5`);
-              const commentData = await fetch(commentUrl).then(res => res.json());
-              const commentRes = JSON.parse(commentData.contents);
-              const comments = commentRes[1]?.data?.children || [];
-              
-              comments.forEach((comment: any, idx: number) => {
-                if (comment.kind === 't1') {
-                  const bBotIdx = (botIdx + idx + 1) % 20;
-                  const bBot = SYNTHETIC_BOTS[bBotIdx];
-                  newBranches.push({
-                    id: `reddit-branch-${comment.data.id}`,
-                    ideaId: ideaId,
-                    authorId: bBot.id,
-                    content: comment.data.body,
-                    createdAt: new Date(comment.data.created_utc * 1000).toISOString(),
-                    likes: Math.floor(Math.random() * 100) + comment.data.score
-                  });
-                }
-              });
-            } catch (e) {
-              console.error("Failed comments for", post.data.id);
+            newIdeas.push(idea);
+            
+            // Populate globalNews with high-score items for injection
+            if (post.data.score > 1000 || newsItems.length < 5) {
+                newsItems.push({
+                    id: ideaId,
+                    title: post.data.title,
+                    content: post.data.content || post.data.title,
+                    source: `r/${post.data.subreddit}`,
+                    time: new Date(post.data.created_utc * 1000).toLocaleTimeString(),
+                    verified: true,
+                    category: post.data.subreddit
+                });
             }
           }
+
+          setGlobalNews(newsItems);
 
           setRawIdeas(prev => {
             const filtered = prev.filter(i => !i.id.startsWith('reddit-idea-'));
             return [...newIdeas, ...filtered].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
           });
 
-          setRawBranches(prev => {
-            const filtered = prev.filter(b => !b.id.startsWith('reddit-branch-'));
-            return [...newBranches, ...filtered];
-          });
-
         } catch (e) {
-          console.error("Synidcation failed", e);
+          console.error("Syndication failed:", e);
         }
       };
 
@@ -863,6 +882,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       playNotificationSound, activeConversationId, setActiveConversationId, clearAllNotifications, deleteNotification, toggleFollow,
       rawBranches, allMessages, isAuthModalOpen, setAuthModalOpen,
       globalSearchQuery, setGlobalSearchQuery,
+      communities, allIdeas, ideas, globalNews,
       createVerificationOrder, checkOrderStatus, simulateSuccessOrder, createCommunity, addIdeaToCommunity,
       communityMembers, joinRequests, requestToJoinCommunity, handleJoinRequest, updateCommunityPrivacy
     }}>
