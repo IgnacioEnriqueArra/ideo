@@ -8,10 +8,19 @@ export interface Notification {
   actorId: string;
   recipientId: string;
   targetId: string;
-  recipientId: string;
-  targetId: string;
   createdAt: string;
   read: boolean;
+}
+
+export interface NewsItem {
+  id: string;
+  title: string;
+  url: string;
+  source: string;
+  category: string;
+  createdAt: string;
+  thumbnail: string | null;
+  score: number;
 }
 
 type AppContextType = {
@@ -65,6 +74,7 @@ type AppContextType = {
   requestToJoinCommunity: (communityId: string) => Promise<void>;
   handleJoinRequest: (requestId: string, status: 'accepted' | 'rejected') => Promise<void>;
   updateCommunityPrivacy: (communityId: string, isPrivate: boolean) => Promise<void>;
+  globalNews: NewsItem[];
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -87,6 +97,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [cryptoOrders, setCryptoOrders] = useState<CryptoOrder[]>([]);
   const [communityMembers, setCommunityMembers] = useState<any[]>([]);
   const [joinRequests, setJoinRequests] = useState<CommunityJoinRequest[]>([]);
+  const [globalNews, setGlobalNews] = useState<NewsItem[]>([]);
 
   useEffect(() => {
     let authSubscription: any;
@@ -98,59 +109,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         supabase.from('branches').select('*').order('createdAt', { ascending: true }),
         supabase.from('communities').select('*'),
         supabase.from('crypto_orders').select('*'),
-        supabase.from('community_members').select('*'),
-        supabase.from('community_join_requests').select('*')
-      ]);
-      const SYNTHETIC_USERS: User[] = [
-        {
-          id: 'anon-001', name: 'PhantomX', handle: 'phantom_x',
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=phantom',
-          bio: 'Independent OSINT researcher. Uncensored data drops.',
-          verified: true, followers: [], following: [], created_at: new Date().toISOString()
-        },
-        {
-          id: 'anon-002', name: 'Sombra', handle: 'sombra_arg',
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sombra',
-          bio: 'Cobertura cruda de la realidad Argentina. Sin filtros.',
-          verified: true, followers: [], following: [], created_at: new Date().toISOString()
-        },
-        {
-          id: 'anon-003', name: 'WarMonitor_Null', handle: 'warmonitor0',
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=war',
-          bio: 'Frontline footage. Global conflicts. Truth hurts.',
-          verified: true, followers: [], following: [], created_at: new Date().toISOString()
-        }
-      ];
-
-      const SYNTHETIC_IDEAS: any[] = [
-        {
-          id: 'mock-101', authorId: 'anon-002',
-          content: 'ALERTA: Fuga masiva de documentos financieros desde el interior del ministerio. Tenemos los registros de transacciones off-shore de los últimos 10 días. Millones transferidos mientras el país arde. #argentina #leak #scandal #news',
-          tags: ['argentina', 'leak', 'scandal', 'news'],
-          likes: 452, createdAt: new Date(Date.now() - 1200000).toISOString()
-        },
-        {
-          id: 'mock-102', authorId: 'anon-003',
-          content: 'BREAKING: Footage from the border confirms illegal use of chemical weapons by unbadged mercenaries. Villages wiped out. Mainstream media completely ignoring it under federal orders. We have the raw videos in our secure nodes. #war #global #alert #news',
-          tags: ['war', 'global', 'alert', 'news'],
-          likes: 1204, createdAt: new Date(Date.now() - 3600000).toISOString()
-        },
-        {
-          id: 'mock-103', authorId: 'anon-001',
-          content: 'Massive zero-day exploit leaked affecting 80% of global government infrastructure. Darknet auctions already moving millions in XMR. If your central bank goes offline tomorrow, you know why. #cyberattack #leak #news',
-          tags: ['cyberattack', 'leak', 'news'],
-          likes: 890, createdAt: new Date(Date.now() - 7200000).toISOString()
-        },
-        {
-          id: 'mock-104', authorId: 'anon-002',
-          content: 'Urgente: Represión brutal en el sur censurada en todos los canales oficiales. Periodistas independientes atacados. Argentina entrando en un apagón informativo silencioso. Difundan esto antes de que tumben este nodo. #argentina #urgente #news',
-          tags: ['argentina', 'urgente', 'news'],
-          likes: 673, createdAt: new Date(Date.now() - 86400000).toISOString()
-        }
-      ];
-
-      if (uRes.data) setUsers([...SYNTHETIC_USERS, ...uRes.data]);
-      if (iRes.data) setRawIdeas([...SYNTHETIC_IDEAS, ...iRes.data]);
+      if (uRes.data) setUsers(uRes.data);
+      if (iRes.data) setRawIdeas(iRes.data);
       if (bRes.data) setRawBranches(bRes.data);
       if (fRes?.data) setCommunities(fRes.data);
       if (cRes?.data) setCryptoOrders(cRes.data); 
@@ -165,6 +125,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         await fetchCurrentUser(session.user.id, session.user.email);
       } else {
         setIsAuthReady(true);
+      }
+
+      // Fetch external real-time verified news
+      try {
+        const [worldRes, argRes] = await Promise.all([
+          fetch('https://www.reddit.com/r/worldnews/hot.json?limit=15').then(res => res.json()),
+          fetch('https://www.reddit.com/r/argentina/hot.json?limit=15').then(res => res.json())
+        ]);
+        
+        const parseReddit = (json: any, category: string): NewsItem[] => {
+          if (!json?.data?.children) return [];
+          return json.data.children.map((child: any) => ({
+            id: child.data.id,
+            title: child.data.title,
+            url: child.data.url,
+            source: child.data.domain,
+            category,
+            createdAt: new Date(child.data.created_utc * 1000).toISOString(),
+            thumbnail: child.data.thumbnail && child.data.thumbnail.startsWith('http') ? child.data.thumbnail : null,
+            score: child.data.score
+          }));
+        };
+
+        const mergedNews = [...parseReddit(worldRes, 'GlobalIntel'), ...parseReddit(argRes, 'Argentina')].sort((a,b) => b.score - a.score);
+        setGlobalNews(mergedNews);
+      } catch (e) {
+        console.error('Failed to load external news sources', e);
       }
 
       const { data } = supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -813,7 +800,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       rawBranches, allMessages, isAuthModalOpen, setAuthModalOpen,
       globalSearchQuery, setGlobalSearchQuery,
       createVerificationOrder, checkOrderStatus, simulateSuccessOrder, createCommunity, addIdeaToCommunity,
-      communityMembers, joinRequests, requestToJoinCommunity, handleJoinRequest, updateCommunityPrivacy
+      communityMembers, joinRequests, requestToJoinCommunity, handleJoinRequest, updateCommunityPrivacy, globalNews
     }}>
       {children}
     </AppContext.Provider>
