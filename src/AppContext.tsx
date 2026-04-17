@@ -12,17 +12,6 @@ export interface Notification {
   read: boolean;
 }
 
-export interface NewsItem {
-  id: string;
-  title: string;
-  url: string;
-  source: string;
-  category: string;
-  createdAt: string;
-  thumbnail: string | null;
-  score: number;
-}
-
 type AppContextType = {
   currentUser: User | null;
   users: User[];
@@ -74,7 +63,6 @@ type AppContextType = {
   requestToJoinCommunity: (communityId: string) => Promise<void>;
   handleJoinRequest: (requestId: string, status: 'accepted' | 'rejected') => Promise<void>;
   updateCommunityPrivacy: (communityId: string, isPrivate: boolean) => Promise<void>;
-  globalNews: NewsItem[];
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -97,7 +85,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [cryptoOrders, setCryptoOrders] = useState<CryptoOrder[]>([]);
   const [communityMembers, setCommunityMembers] = useState<any[]>([]);
   const [joinRequests, setJoinRequests] = useState<CommunityJoinRequest[]>([]);
-  const [globalNews, setGlobalNews] = useState<NewsItem[]>([]);
 
   useEffect(() => {
     let authSubscription: any;
@@ -154,10 +141,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       const fetchRedditSyndication = async () => {
         try {
-          const [worldRes, argRes] = await Promise.all([
-            fetch('https://www.reddit.com/r/worldnews/hot.json?limit=10').then(res => res.json()),
-            fetch('https://www.reddit.com/r/argentina/hot.json?limit=10').then(res => res.json())
+          const proxy = (url: string) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+          
+          const [worldData, argData] = await Promise.all([
+            fetch(proxy('https://www.reddit.com/r/worldnews/hot.json?limit=10')).then(res => res.json()),
+            fetch(proxy('https://www.reddit.com/r/argentina/hot.json?limit=10')).then(res => res.json())
           ]);
+
+          const worldRes = JSON.parse(worldData.contents);
+          const argRes = JSON.parse(argData.contents);
 
           const redditPosts = [...(worldRes.data?.children || []), ...(argRes.data?.children || [])];
           const newIdeas: any[] = [];
@@ -179,7 +171,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             });
 
             try {
-              const commentRes = await fetch(`https://www.reddit.com${post.data.permalink}.json?limit=5`).then(res => res.json());
+              const commentUrl = proxy(`https://www.reddit.com${post.data.permalink}.json?limit=5`);
+              const commentData = await fetch(commentUrl).then(res => res.json());
+              const commentRes = JSON.parse(commentData.contents);
               const comments = commentRes[1]?.data?.children || [];
               
               comments.forEach((comment: any, idx: number) => {
@@ -870,7 +864,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       rawBranches, allMessages, isAuthModalOpen, setAuthModalOpen,
       globalSearchQuery, setGlobalSearchQuery,
       createVerificationOrder, checkOrderStatus, simulateSuccessOrder, createCommunity, addIdeaToCommunity,
-      communityMembers, joinRequests, requestToJoinCommunity, handleJoinRequest, updateCommunityPrivacy, globalNews
+      communityMembers, joinRequests, requestToJoinCommunity, handleJoinRequest, updateCommunityPrivacy
     }}>
       {children}
     </AppContext.Provider>

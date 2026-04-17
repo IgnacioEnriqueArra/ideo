@@ -3,7 +3,6 @@ import { Menu, Bell, Search, BadgeCheck, Zap } from 'lucide-react';
 import { useAppContext } from '../AppContext';
 import { IdeaCard } from './IdeaCard';
 import { motion, AnimatePresence } from 'motion/react';
-import { motion, AnimatePresence } from 'motion/react';
 
 interface FeedProps {
   onSelectIdea: (ideaId: string) => void;
