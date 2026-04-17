@@ -243,7 +243,7 @@ export const IdeaDetail: React.FC<IdeaDetailProps> = ({ ideaId, onBack, onUserCl
             </button>
             <button
               onClick={openRootFork}
-              className="shrink-0 bg-primary text-white font-black px-5 py-3 rounded-2xl shadow-lg shadow-primary/20 hover:shadow-primary/40 active:scale-95 transition-all text-sm"
+              className="shrink-0 bg-black text-white font-black px-5 py-3 rounded-2xl text-sm"
             >
               Fork
             </button>

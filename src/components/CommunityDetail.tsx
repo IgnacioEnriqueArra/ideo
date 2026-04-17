@@ -124,7 +124,7 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({ communityId, o
                   ) : (
                      <button 
                         onClick={() => requestToJoinCommunity(communityId)}
-                        className="bg-primary text-white px-6 py-2 rounded-full font-bold shadow-sm active:scale-95 transition-transform"
+                        className="bg-black text-white px-6 py-2 rounded-full font-bold shadow-sm"
                      >
                         Request to Join
                      </button>
@@ -156,7 +156,7 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({ communityId, o
       {isMember && (
          <button 
             onClick={() => setIsComposeOpen(true)}
-            className="fixed bottom-20 right-6 sm:bottom-8 sm:relative sm:right-auto sm:self-end sm:mr-6 bg-primary text-white p-4 rounded-full shadow-2xl z-40 hover:bg-blue-600 transition-colors"
+            className="fixed bottom-20 right-6 sm:bottom-8 sm:relative sm:right-auto sm:self-end sm:mr-6 bg-black text-white p-4 rounded-full shadow-lg z-40"
          >
             <Plus className="w-6 h-6" />
          </button>

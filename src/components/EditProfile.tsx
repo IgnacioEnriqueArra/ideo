@@ -102,7 +102,7 @@ export const EditProfile: React.FC<EditProfileProps> = ({ isOpen, onClose }) => 
           <button 
             onClick={handleSave}
             disabled={isUploading}
-            className="bg-gray-900 text-white px-4 py-1.5 rounded-full font-bold text-sm disabled:opacity-50"
+            className="bg-black text-white px-4 py-1.5 rounded-full font-bold text-sm disabled:opacity-50"
           >
             Save
           </button>

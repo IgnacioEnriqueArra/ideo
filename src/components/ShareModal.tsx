@@ -172,7 +172,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ idea, isOpen, onClose })
                         className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
                           isSent 
                             ? 'bg-green-100 text-green-600' 
-                            : 'bg-primary text-white hover:bg-blue-600 active:scale-95 disabled:opacity-50'
+                            : 'bg-black text-white disabled:opacity-50'
                         }`}
                       >
                         {isPending ? 'Sending...' : isSent ? 'Sent' : 'Send'}

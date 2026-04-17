@@ -95,7 +95,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({ isOpen, on
               <button 
                 onClick={handleStartVerification}
                 disabled={isCreating}
-                className="w-full bg-primary text-white font-black py-5 rounded-[20px] hover:bg-blue-600 transition-all active:scale-[0.98] shadow-lg shadow-primary/25 flex items-center justify-center gap-2"
+                className="w-full bg-black text-white font-black py-5 rounded-[20px] flex items-center justify-center gap-2"
               >
                 {isCreating ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Get Verified Badge'}
               </button>

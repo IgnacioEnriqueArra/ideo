@@ -212,7 +212,7 @@ function AppContent() {
               <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Explore the best of <span className="font-bold text-primary">fork.</span> Create an account to join the conversation.</p>
               <button 
                 onClick={() => setAuthModalOpen(true)}
-                className="shrink-0 bg-primary text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm"
+                className="shrink-0 bg-black text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm"
               >
                 Join now
               </button>
@@ -373,7 +373,7 @@ function AuthScreen({ onDone }: { onDone?: () => void }) {
               <button 
                 type="submit" 
                 disabled={isLoading}
-                className="w-full bg-primary text-white font-bold py-3.5 sm:py-4 rounded-2xl sm:rounded-[1.25rem] shadow-lg sm:shadow-xl shadow-primary/25 hover:bg-blue-600 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 text-base sm:text-lg"
+                className="w-full bg-black text-white font-bold py-3.5 sm:py-4 rounded-2xl sm:rounded-[1.25rem] disabled:opacity-50 flex items-center justify-center gap-3 text-base sm:text-lg"
               >
                 {isLoading ? (
                   <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />

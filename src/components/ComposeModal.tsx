@@ -83,7 +83,7 @@ export const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose, com
               <button
                 onClick={handleSubmit}
                 disabled={!content.trim() || isOverLimit}
-                className="bg-gray-900 text-white text-sm font-bold px-5 py-2 rounded-full hover:bg-gray-700 transition-all active:scale-95 disabled:opacity-40 shadow-md"
+                className="bg-black text-white text-sm font-bold px-5 py-2 rounded-full disabled:opacity-40"
               >
                 Post
               </button>

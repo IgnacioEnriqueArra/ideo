@@ -43,7 +43,7 @@ export const Communities: React.FC<CommunitiesProps> = ({ onBack, onSelectCommun
         {view === 'list' && (
           <button 
             onClick={() => setView('create')} 
-            className="ml-auto flex items-center gap-1 bg-gray-900 text-white px-3 py-1.5 rounded-full text-sm font-bold shadow-sm"
+            className="ml-auto flex items-center gap-1 bg-black text-white px-3 py-1.5 rounded-full text-sm font-bold shadow-sm"
           >
             <Plus className="w-4 h-4" /> New
           </button>
@@ -116,7 +116,7 @@ export const Communities: React.FC<CommunitiesProps> = ({ onBack, onSelectCommun
                   <button 
                      onClick={handleCreate}
                      disabled={isCreating}
-                     className="w-full bg-primary text-white font-black py-4 rounded-xl hover:bg-blue-600 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
+                     className="w-full bg-black text-white font-black py-4 rounded-xl flex items-center justify-center gap-2"
                   >
                     {isCreating ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Create Community'}
                   </button>

@@ -228,7 +228,7 @@ const ChatView: React.FC<ChatProps> = ({ conversation, otherUserId, onBack }) =>
         <button
           onClick={sendMessage}
           disabled={!input.trim() || isSending}
-          className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white disabled:opacity-40 hover:bg-blue-600 transition-all active:scale-90 shrink-0"
+          className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white disabled:opacity-40 shrink-0"
         >
           <Send className="w-4 h-4" />
         </button>
@@ -455,7 +455,7 @@ export const Messages: React.FC = () => {
               <p className="text-gray-400 text-sm">Start a conversation with someone.</p>
               <button
                 onClick={() => setShowNewMessage(true)}
-                className="bg-primary text-white font-bold px-6 py-2.5 rounded-full text-sm hover:bg-blue-600 transition-all active:scale-95 mt-1"
+                className="bg-black text-white font-bold px-6 py-2.5 rounded-full text-sm mt-1"
               >
                 New message
               </button>

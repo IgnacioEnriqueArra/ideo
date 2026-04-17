@@ -32,11 +32,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
         
         {/* Desktop Sidebar (Left) */}
         <aside className="hidden sm:flex flex-col w-[88px] xl:w-[280px] sticky top-0 h-screen py-6 shrink-0 z-20">
-          <div className="px-4 mb-10 flex items-center gap-3 group cursor-pointer">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/25 group-hover:scale-105 transition-transform duration-300">
-              <Shield className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-3xl font-black text-gray-900 tracking-tighter hidden xl:block group-hover:text-primary transition-colors">fork.</span>
+          <div className="px-4 xl:px-5 mb-10 mt-2 cursor-pointer flex justify-center xl:justify-start">
+            <span className="text-3xl font-black text-gray-900 tracking-tighter hidden xl:block">fork.</span>
+            <span className="text-3xl font-black text-gray-900 tracking-tighter block xl:hidden">f.</span>
           </div>
           
           <nav className="flex-1 space-y-2.5">
@@ -73,11 +71,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
 
             <button
               onClick={onCompose}
-              className="w-full mt-6 bg-gradient-to-r from-primary to-blue-500 text-white font-black py-4 rounded-full shadow-xl shadow-primary/25 hover:shadow-primary/40 transition-all flex items-center justify-center gap-3 active:scale-95 group relative overflow-hidden"
+              className="w-full mt-6 bg-black text-white font-black py-4 rounded-full flex items-center justify-center gap-3"
             >
-              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 rounded-full" />
-              <Plus className="w-6 h-6 relative z-10" />
-              <span className="hidden xl:block text-[17px] relative z-10">Post</span>
+              <Plus className="w-6 h-6" />
+              <span className="hidden xl:block text-[17px]">Post</span>
             </button>
           </nav>
 
@@ -202,7 +199,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                       className={`shrink-0 ${
                         currentUser?.following?.includes(suggestedUser.id)
                           ? 'bg-white text-gray-900 border border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-100'
-                          : 'bg-gray-900 text-white hover:bg-primary shadow-md hover:shadow-primary/20'
+                          : 'bg-black text-white shadow-md'
                       } text-[13px] font-bold px-4 py-1.5 rounded-xl transition-all`}
                     >
                       {currentUser?.following?.includes(suggestedUser.id) ? 'Following' : 'Follow'}
@@ -225,7 +222,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={onCompose}
-          className="sm:hidden fixed right-5 w-14 h-14 bg-gradient-to-r from-primary to-blue-500 rounded-full flex items-center justify-center text-white shadow-xl shadow-primary/30 hover:shadow-primary/50 transition-shadow z-30"
+          className="sm:hidden fixed right-5 w-14 h-14 bg-black rounded-full flex items-center justify-center text-white shadow-md z-30"
           style={{ bottom: 'calc(5rem + env(safe-area-inset-bottom))' }}
         >
           <Plus className="w-6 h-6" />
@@ -315,7 +312,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 ) : (
                   <button 
                     onClick={() => { setAuthModalOpen(true); setIsMenuOpen(false); }}
-                    className="w-full bg-primary text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all flex items-center justify-center gap-2"
+                    className="w-full bg-black text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2"
                   >
                     <Shield className="w-5 h-5" />
                     <span className="text-[16px]">Connect Wallet</span>

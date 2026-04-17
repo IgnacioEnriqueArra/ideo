@@ -84,7 +84,7 @@ export const Settings: React.FC<SettingsProps> = ({ onBack }) => {
                 logout();
               }
             }}
-            className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white font-bold py-3 px-4 rounded-xl hover:bg-black transition-colors"
+            className="w-full flex items-center justify-center gap-2 bg-black text-white font-bold py-3 px-4 rounded-xl"
           >
             <LogOut className="w-5 h-5" />
             Log Out

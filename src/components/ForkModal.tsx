@@ -105,7 +105,7 @@ export const ForkModal: React.FC<ForkModalProps> = ({ isOpen, onClose, targetFor
                     <button 
                       onClick={handleSubmit}
                       disabled={!content.trim()}
-                      className="px-6 py-2.5 rounded-2xl text-sm font-black transition-all disabled:opacity-50 disabled:scale-100 bg-primary text-white shadow-lg shadow-primary/25 hover:shadow-primary/40 active:scale-95"
+                      className="px-6 py-2.5 rounded-2xl text-sm font-black transition-all disabled:opacity-50 disabled:scale-100 bg-black text-white"
                     >
                       Fork
                     </button>

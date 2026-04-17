@@ -97,7 +97,7 @@ export const Profile: React.FC<ProfileProps> = ({ userId, onBack }) => {
                   className={`px-4 py-1.5 rounded-full font-bold text-sm transition-colors ${
                     isFollowing 
                       ? 'border border-gray-300 text-gray-900 hover:bg-red-50 hover:text-red-500 hover:border-red-200' 
-                      : 'bg-gray-900 text-white hover:bg-gray-800'
+                      : 'bg-black text-white'
                   }`}
                 >
                   {isFollowing ? 'Following' : 'Follow'}
