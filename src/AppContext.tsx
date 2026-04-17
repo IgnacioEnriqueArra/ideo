@@ -103,27 +103,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         supabase.from('community_join_requests').select('*')
       ]);
 
-      const SYNTHETIC_BOTS: User[] = Array.from({ length: 20 }).map((_, i) => ({
-        id: `bot-user-${i}`,
-        email: `bot${i}@fork.net`,
-        name: [
-          "Phantom", "Ghost", "Void", "Cipher", "Node", "Kernel", "Root", "Echo", "Flux", "Nexus",
-          "Shadow", "Vector", "Logic", "Data", "Matrix", "Zero", "One", "Trace", "Pulse", "Link"
-        ][i] + `_${i} (bot)`,
-        handle: `bot_node_${i}`,
-        avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=bot${i}&backgroundColor=000000`,
-        bio: "Autonomous Network Intelligence Node.",
-        followers: [],
-        following: [],
-        verified: true
-      }));
+      const processUsers = (data: any[]) => data;
 
-      const processUsers = (data: any[]) => data.map(u => ({
-        ...u,
-        name: u.name.includes(' (bot)') || u.name.includes(' (real)') ? u.name : `${u.name} (real)`
-      }));
-
-      if (uRes.data) setUsers([...SYNTHETIC_BOTS, ...processUsers(uRes.data)]);
+      if (uRes.data) setUsers(uRes.data);
       if (iRes.data) setRawIdeas(iRes.data);
       if (bRes.data) setRawBranches(bRes.data);
       if (fRes?.data) setCommunities(fRes.data);
@@ -141,96 +123,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsAuthReady(true);
       }
 
-      const fetchRedditSyndication = async () => {
-        try {
-          // Use a few fallback proxies to ensure stability
-          const proxies = [
-            (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-            (url: string) => `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(url)}`,
-            (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`
-          ];
-          
-          let success = false;
-          let redditPosts: any[] = [];
-          
-          // Subreddits requested: General, a bit of everything
-          const subreddits = ['popular', 'interestingasfuck', 'technology', 'dataisbeautiful', 'argentina'];
+      // Reddit Syndication removed per user request
 
-          for (const proxyFn of proxies) {
-            try {
-              const fetchOptions = { signal: AbortSignal.timeout(8000) }; // 8s timeout
-              const responses = await Promise.all(
-                subreddits.map(sub => 
-                  fetch(proxyFn(`https://www.reddit.com/r/${sub}/hot.json?limit=5`), fetchOptions)
-                    .then(res => res.json())
-                    .catch(() => null)
-                )
-              );
-
-              redditPosts = responses
-                .filter(r => r && r.data && r.data.children)
-                .flatMap(r => r.data.children);
-
-              if (redditPosts.length > 0) {
-                success = true;
-                break;
-              }
-            } catch (e) {
-              continue;
-            }
-          }
-
-          if (!success) throw new Error("All proxies failed or timed out");
-
-          const newIdeas: any[] = [];
-          const newBranches: any[] = [];
-          const newsItems: any[] = [];
-
-          for (const post of redditPosts) {
-            const botIdx = Math.floor(Math.random() * 20);
-            const bot = SYNTHETIC_BOTS[botIdx];
-            const ideaId = `reddit-idea-${post.data.id}`;
-
-            const idea = {
-              id: ideaId,
-              authorId: bot.id,
-              content: post.data.title + (post.data.selftext ? "\n\n" + post.data.selftext : ""),
-              createdAt: new Date(post.data.created_utc * 1000).toISOString(),
-              likes: Math.floor(Math.random() * 500) + post.data.score,
-              tags: ['intel', post.data.subreddit, 'verified'],
-              mediaUrl: (post.data.thumbnail && post.data.thumbnail.startsWith('http')) ? post.data.thumbnail : null
-            };
-
-            newIdeas.push(idea);
-            
-            // Populate globalNews with high-score items for injection
-            if (post.data.score > 1000 || newsItems.length < 5) {
-                newsItems.push({
-                    id: ideaId,
-                    title: post.data.title,
-                    content: post.data.content || post.data.title,
-                    source: `r/${post.data.subreddit}`,
-                    time: new Date(post.data.created_utc * 1000).toLocaleTimeString(),
-                    verified: true,
-                    category: post.data.subreddit
-                });
-            }
-          }
-
-          setGlobalNews(newsItems);
-
-          setRawIdeas(prev => {
-            const filtered = prev.filter(i => !i.id.startsWith('reddit-idea-'));
-            return [...newIdeas, ...filtered].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-          });
-
-        } catch (e) {
-          console.error("Syndication failed:", e);
-        }
-      };
-
-      await fetchRedditSyndication();
-      newsInterval = setInterval(fetchRedditSyndication, 1000 * 60 * 10); // Refresh every 10 min
+      // await fetchRedditSyndication();
 
       const { data } = supabase.auth.onAuthStateChange(async (_event, session) => {
         if (session?.user) {
@@ -250,10 +145,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (payload.eventType === 'INSERT') setUsers(p => { const x = p.find(u => u.id === payload.new.id); return x ? p : [...p, payload.new as User] });
         if (payload.eventType === 'UPDATE') {
            const updated = payload.new as User;
-           const fixedName = updated.name.includes(' (bot)') || updated.name.includes(' (real)') ? updated.name : `${updated.name} (real)`;
-           const fixedUser = { ...updated, name: fixedName };
-           setUsers(p => p.map(u => u.id === updated.id ? fixedUser : u));
-           if (currentUser?.id === updated.id) setCurrentUser(fixedUser);
+            const fixedUser = updated;
+            setUsers(p => p.map(u => u.id === updated.id ? fixedUser : u));
+            if (currentUser?.id === updated.id) setCurrentUser(fixedUser);
         }
         if (payload.eventType === 'DELETE') setUsers(p => p.filter(u => u.id !== payload.old.id));
       })
@@ -301,8 +195,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const fetchCurrentUser = async (id: string, email?: string) => {
     const { data } = await supabase.from('users').select('*').eq('id', id).maybeSingle();
     if (data) {
-      const fixedName = data.name.includes(' (bot)') || data.name.includes(' (real)') ? data.name : `${data.name} (real)`;
-      setCurrentUser({ ...data, name: fixedName, email: email || '' } as User);
+      setCurrentUser({ ...data, email: email || '' } as User);
     } else {
       await supabase.auth.signOut();
       setCurrentUser(null);
@@ -724,10 +617,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateProfile = async (name: string, handle: string, bio: string, avatar: string) => {
     if (!currentUser) return;
-    const fixedName = name.includes(' (bot)') || name.includes(' (real)') ? name : `${name} (real)`;
-    setCurrentUser(prev => prev ? { ...prev, name: fixedName, handle, bio, avatar } : null);
-    setUsers(prev => prev.map(u => u.id === currentUser.id ? { ...u, name: fixedName, handle, bio, avatar } : u));
-    await supabase.from('users').update({ name: fixedName, handle, bio, avatar }).eq('id', currentUser.id);
+    setCurrentUser(prev => prev ? { ...prev, name, handle, bio, avatar } : null);
+    setUsers(prev => prev.map(u => u.id === currentUser.id ? { ...u, name, handle, bio, avatar } : u));
+    await supabase.from('users').update({ name, handle, bio, avatar }).eq('id', currentUser.id);
   };
 
   const markNotificationsRead = async () => {

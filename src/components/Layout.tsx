@@ -105,7 +105,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
           <div className="sm:hidden flex-none bg-white/95 backdrop-blur-xl border-t border-gray-100 flex justify-around items-center px-2 pt-3 pb-[calc(14px+env(safe-area-inset-bottom))] z-40 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
             {[
               { id: 'home', icon: Home },
-              { id: 'news', icon: FileText },
               { id: 'communities', icon: Users },
               { id: 'notifications', icon: Bell, count: unreadNotificationsCount },
               { id: 'messages', icon: MessageSquare, count: unreadMessagesCount },

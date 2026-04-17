@@ -141,8 +141,6 @@ function AppContent() {
            return <CommunityDetail communityId={selectedCommunityId} onBack={() => setSelectedCommunityId(null)} onUserClick={setSelectedUserId} />;
         }
         return <Communities key="communities" onBack={() => setActiveTab('home')} onSelectCommunity={setSelectedCommunityId} />;
-      case 'news':
-        return <NewsFeed key="news" />;
       case 'notifications':
         return <Notifications key="notifications" onUserClick={setSelectedUserId} />;
       case 'bookmarks':

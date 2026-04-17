@@ -11,7 +11,7 @@ interface FeedProps {
 }
 
 export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotificationsClick }) => {
-  const { ideas, currentUser, users, notifications, globalSearchQuery, setGlobalSearchQuery, globalNews } = useAppContext();
+  const { ideas, currentUser, users, notifications, globalSearchQuery, setGlobalSearchQuery } = useAppContext();
   const unreadCount = notifications.filter(n => !n.read).length;
   const [activeTab, setActiveTab] = useState<'foryou' | 'trending'>('foryou');
 
@@ -28,27 +28,8 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
   );
 
   const feedItems = React.useMemo(() => {
-    const baseIdeas = globalSearchQuery ? filteredIdeas : ideas;
-    const merged: any[] = [];
-    let newsIndex = 0;
-    
-    baseIdeas.forEach((idea, idx) => {
-       merged.push({ type: 'idea', data: idea, id: `idea-${idea.id}` });
-       
-       // Every 4 posts, inject 1 verified news item (if available)
-       if (idx > 0 && idx % 4 === 0 && globalNews && newsIndex < globalNews.length) {
-           merged.push({ type: 'news', data: globalNews[newsIndex], id: `news-${globalNews[newsIndex].id}` });
-           newsIndex++;
-       }
-    });
-
-    // If feed is totally empty but we have news, show some news
-    if (merged.length === 0 && globalNews && globalNews.length > 0 && !globalSearchQuery) {
-       globalNews.slice(0, 3).forEach(news => merged.push({ type: 'news', data: news, id: `news-${news.id}` }));
-    }
-
-    return merged;
-  }, [ideas, filteredIdeas, globalSearchQuery, globalNews]);
+    return globalSearchQuery ? filteredIdeas : ideas;
+  }, [ideas, filteredIdeas, globalSearchQuery]);
 
   return (
     <motion.div 
@@ -181,39 +162,20 @@ export const Feed: React.FC<FeedProps> = ({ onSelectIdea, onUserClick, onNotific
         ) : (
           <div className="pb-10">
             <AnimatePresence>
-              {feedItems.map((item, index) => (
+              {feedItems.map((idea, index) => (
                 <motion.div
-                  key={item.id}
+                  key={idea.id}
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                   layout
                   className="bg-white border-b border-gray-100/80 hover:bg-gray-50/50 transition-colors"
                 >
-                  {item.type === 'idea' ? (
-                    <IdeaCard 
-                      idea={item.data} 
-                      onClick={() => onSelectIdea(item.data.id)} 
-                      onUserClick={onUserClick}
-                    />
-                  ) : (
-                    <div className="p-5 relative overflow-hidden group">
-                      <div className="absolute top-0 right-0 p-3">
-                         <BadgeCheck className="w-5 h-5 text-blue-500 fill-blue-500/10" />
-                      </div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-bold rounded-full uppercase tracking-wider">{item.data.category || 'GLOBAL'}</span>
-                        <span className="text-[11px] text-gray-400 font-medium">{item.data.time}</span>
-                      </div>
-                      <h4 className="text-[17px] font-black text-gray-900 leading-tight mb-2 group-hover:text-primary transition-colors cursor-pointer" onClick={() => onSelectIdea(item.id)}>
-                        {item.data.title}
-                      </h4>
-                      <div className="flex items-center justify-between mt-4">
-                        <span className="text-xs font-mono text-gray-400">SOURCE: {item.data.source}</span>
-                        <button className="text-xs font-bold text-gray-400 hover:text-primary">Read Intel →</button>
-                      </div>
-                    </div>
-                  )}
+                  <IdeaCard 
+                    idea={idea} 
+                    onClick={() => onSelectIdea(idea.id)} 
+                    onUserClick={onUserClick}
+                  />
                 </motion.div>
               ))}
             </AnimatePresence>
