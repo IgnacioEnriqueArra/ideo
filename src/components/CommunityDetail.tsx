@@ -143,6 +143,9 @@ export const CommunityDetail: React.FC<CommunityDetailProps> = ({ communityId, o
                        key={post.id} 
                        idea={post} 
                        onUserClick={onUserClick}
+                       onClick={() => {
+                          window.dispatchEvent(new CustomEvent('open-post', { detail: post.id }));
+                       }}
                     />
                   ))
                )}

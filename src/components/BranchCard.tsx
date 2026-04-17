@@ -9,9 +9,10 @@ interface BranchCardProps {
   branch: Branch;
   onClick?: () => void;
   onUserClick?: (userId: string) => void;
+  onReply?: () => void;
 }
 
-export const BranchCard: React.FC<BranchCardProps> = ({ branch, onClick, onUserClick }) => {
+export const BranchCard: React.FC<BranchCardProps> = ({ branch, onClick, onUserClick, onReply }) => {
   const { likeBranch, userLikes } = useAppContext();
   const isLiked = userLikes.includes(branch.id);
   const [translatedText, setTranslatedText] = useState<string | null>(null);
@@ -112,7 +113,13 @@ export const BranchCard: React.FC<BranchCardProps> = ({ branch, onClick, onUserC
           </button>
 
           <div className="flex items-center justify-between mt-3 text-gray-500 max-w-md pr-4">
-            <button className="flex items-center gap-1.5 hover:text-primary transition-colors group">
+            <button 
+              className="flex items-center gap-1.5 hover:text-primary transition-colors group"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onReply) onReply();
+              }}
+            >
               <div className="p-1.5 rounded-full group-hover:bg-primary/10">
                 <GitFork className="w-[18px] h-[18px]" />
               </div>

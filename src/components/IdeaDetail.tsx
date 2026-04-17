@@ -217,14 +217,10 @@ const RecursiveForkThread = ({ fork, onUserClick, onReply }: any) => {
          layout
          className="relative pt-2"
        >
-         <BranchCard branch={fork} onUserClick={onUserClick} />
+         <BranchCard branch={fork} onUserClick={onUserClick} onReply={() => setIsReplying(true)} />
          
          <div className="pl-14 pb-2">
-            {!isReplying ? (
-               <button onClick={() => setIsReplying(true)} className="text-gray-400 text-xs font-bold flex items-center gap-1 hover:text-primary transition-colors">
-                  <MessageSquare className="w-3 h-3" /> Fork this
-               </button>
-            ) : (
+            {isReplying && (
                <div className="flex gap-2 items-center mt-2 pr-4">
                  <input 
                     autoFocus
