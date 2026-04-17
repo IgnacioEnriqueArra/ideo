@@ -250,16 +250,17 @@ function AuthScreen({ onDone }: { onDone?: () => void }) {
     e.preventDefault();
     setIsLoading(true);
     try {
+      let success = false;
       if (isLogin) {
         if (!seedPhrase.trim()) {
            alert("Please enter a recovery phrase.");
            return;
         }
-        if (login) await login(seedPhrase);
+        if (login) success = await login(seedPhrase);
       } else {
-        if (signup) await signup(generatedSeed);
+        if (signup) success = await signup(generatedSeed);
       }
-      if (onDone) onDone();
+      if (success && onDone) onDone();
     } finally {
       setIsLoading(false);
     }

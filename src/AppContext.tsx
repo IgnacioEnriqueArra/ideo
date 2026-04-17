@@ -38,8 +38,8 @@ type AppContextType = {
   toggleVerified: (userId: string) => void;
   deleteAccount: () => Promise<void>;
   logout: () => void;
-  login: (seedPhrase: string) => Promise<void>;
-  signup?: (seedPhrase: string) => Promise<void>;
+  login: (seedPhrase: string) => Promise<boolean>;
+  signup?: (seedPhrase: string) => Promise<boolean>;
   loginRedirect: () => void;
   isAuthReady: boolean;
   unreadMessagesCount: number;
@@ -503,16 +503,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const formatSeedPhrase = (phrase: string) => phrase.trim().toLowerCase().replace(/\s+/g, '-');
   const getEmailFromSeed = (phrase: string) => `${formatSeedPhrase(phrase)}@fork.network`;
 
-  const login = async (seedPhrase: string) => {
+  const login = async (seedPhrase: string): Promise<boolean> => {
     if (seedPhrase) {
       const email = getEmailFromSeed(seedPhrase);
       const password = formatSeedPhrase(seedPhrase);
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) alert("Recovery key is invalid or the account doesn't exist.");
+      if (error) {
+        alert("Recovery key is invalid or the account doesn't exist.");
+        return false;
+      }
+      return true;
     }
+    return false;
   };
 
-  const signup = async (seedPhrase: string) => {
+  const signup = async (seedPhrase: string): Promise<boolean> => {
     try {
       const email = getEmailFromSeed(seedPhrase);
       const password = formatSeedPhrase(seedPhrase);
@@ -538,9 +543,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (data.session) {
            await fetchCurrentUser(data.user.id, data.user.email);
         }
+        return true;
       }
+      return false;
     } catch (error: any) {
       alert(error.message || "An error occurred during account creation");
+      return false;
     }
   };
 
