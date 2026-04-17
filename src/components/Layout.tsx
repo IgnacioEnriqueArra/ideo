@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Home, FileText, MessageSquare, User, Plus, X, Settings, Bookmark, LogOut, Smartphone, Bell, BadgeCheck, Shield, MoreHorizontal, Search } from 'lucide-react';
+import { Home, FileText, MessageSquare, User, Plus, X, Settings, Bookmark, LogOut, Smartphone, Bell, BadgeCheck, Shield, MoreHorizontal, Search, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAppContext } from '../AppContext';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -38,6 +38,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
             {[
               { id: 'home', icon: Home, label: 'Home' },
               { id: 'news', icon: FileText, label: 'News' },
+              { id: 'communities', icon: Users, label: 'Communities' },
               { id: 'notifications', icon: Bell, label: 'Notifications', count: unreadNotificationsCount },
               { id: 'messages', icon: MessageSquare, label: 'Messages', count: unreadMessagesCount },
               { id: 'profile', icon: User, label: 'Profile' },
@@ -105,6 +106,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
             {[
               { id: 'home', icon: Home },
               { id: 'news', icon: FileText },
+              { id: 'communities', icon: Users },
               { id: 'notifications', icon: Bell, count: unreadNotificationsCount },
               { id: 'messages', icon: MessageSquare, count: unreadMessagesCount },
               { id: 'profile', icon: User },
@@ -270,6 +272,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 >
                   <User className="w-6 h-6" />
                   <span className="font-bold text-[17px]">Profile</span>
+                </button>
+                <button 
+                  className="w-full flex items-center gap-4 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  onClick={() => { setActiveTab('communities'); setIsMenuOpen(false); }}
+                >
+                  <Users className="w-6 h-6" />
+                  <span className="font-bold text-[17px]">Communities</span>
                 </button>
                 <button 
                   className="w-full flex items-center gap-4 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"

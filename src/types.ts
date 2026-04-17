@@ -28,6 +28,25 @@ export type Branch = {
   feedbacks: Feedback[];
 };
 
+export type Community = {
+  id: string;
+  name: string;
+  description: string;
+  ownerId: string;
+  createdAt: string;
+  avatarUrl?: string;
+};
+
+export type CryptoOrder = {
+  id: string;
+  userId: string;
+  communityName: string;
+  communityDescription: string;
+  amount: number;
+  status: 'pending' | 'paid' | 'expired';
+  createdAt: string;
+};
+
 export type Idea = {
   id: string;
   author: User;
@@ -37,4 +56,6 @@ export type Idea = {
   tags: string[];
   branches: Branch[];
   mediaUrl?: string;
+  communityId?: string;
+  community?: Community;
 };

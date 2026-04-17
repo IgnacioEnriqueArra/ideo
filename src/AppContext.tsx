@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Idea, User, Branch, Feedback } from './types';
+import { Idea, User, Branch, Feedback, Community, CryptoOrder } from './types';
 import { supabase } from './supabase';
 
 export interface Notification {
@@ -52,6 +52,12 @@ type AppContextType = {
   setAuthModalOpen: (open: boolean) => void;
   globalSearchQuery: string;
   setGlobalSearchQuery: (query: string) => void;
+  communities: Community[];
+  allIdeas: Idea[];
+  ideas: Idea[];
+  createCommunityOrder: (name: string, description: string) => Promise<CryptoOrder | null>;
+  checkOrderStatus: (orderId: string) => Promise<boolean>;
+  addIdeaToCommunity: (communityId: string, content: string, tags: string[], mediaFile?: File) => void;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -71,21 +77,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isAuthModalOpen, setAuthModalOpen] = useState(false);
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
+  const [communities, setCommunities] = useState<Community[]>([]);
+  const [cryptoOrders, setCryptoOrders] = useState<CryptoOrder[]>([]);
 
   useEffect(() => {
     let authSubscription: any;
     
     const initializeData = async () => {
-      const [uRes, iRes, bRes, fRes] = await Promise.all([
+      const [uRes, iRes, bRes, fRes, cRes, oRes] = await Promise.all([
         supabase.from('users').select('*'),
         supabase.from('ideas').select('*').order('createdAt', { ascending: false }),
         supabase.from('branches').select('*').order('createdAt', { ascending: true }),
-        supabase.from('feedbacks').select('*').order('createdAt', { ascending: true })
+        supabase.from('feedbacks').select('*').order('createdAt', { ascending: true }),
+        supabase.from('communities').select('*'),
+        supabase.from('crypto_orders').select('*')
       ]);
       if (uRes.data) setUsers(uRes.data);
       if (iRes.data) setRawIdeas(iRes.data);
       if (bRes.data) setRawBranches(bRes.data);
       if (fRes.data) setRawFeedbacks(fRes.data);
+      if (cRes.data) setCommunities(cRes.data);
+      if (oRes.data) setCryptoOrders(oRes.data);
       
       const { data: mRes } = await supabase.from('messages').select('*').order('createdAt', { ascending: false });
       if (mRes) setAllMessages(mRes);
@@ -219,8 +231,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => { supabase.removeChannel(channel); };
   }, [currentUser?.id]);
 
-  const ideas: Idea[] = rawIdeas.map(rawIdea => {
+  const allIdeas: Idea[] = rawIdeas.map(rawIdea => {
     const author = users.find(u => u.id === rawIdea.authorId) || { id: rawIdea.authorId, name: 'Cargando...', handle: 'cargando', avatar: '', followers: [], following: [] };
+    const community = communities.find(c => c.id === rawIdea.communityId);
     const ideaBranches: Branch[] = rawBranches
       .filter(b => b.ideaId === rawIdea.id)
       .map(rawBranch => {
@@ -233,8 +246,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           });
         return { id: rawBranch.id, ideaId: rawBranch.ideaId, author: branchAuthor, content: rawBranch.content, createdAt: rawBranch.createdAt, likes: rawBranch.likes || 0, feedbacks: branchFeedbacks };
       });
-    return { id: rawIdea.id, author, content: rawIdea.content, createdAt: rawIdea.createdAt, likes: rawIdea.likes || 0, tags: rawIdea.tags || [], branches: ideaBranches, mediaUrl: rawIdea.mediaUrl };
+    return { id: rawIdea.id, author, content: rawIdea.content, createdAt: rawIdea.createdAt, likes: rawIdea.likes || 0, tags: rawIdea.tags || [], branches: ideaBranches, mediaUrl: rawIdea.mediaUrl, communityId: rawIdea.communityId, community };
   });
+
+  const ideas = allIdeas.filter(idea => !idea.communityId);
 
   const playNotificationSound = () => {
     // Sonido más limpio y premium (Digital Pop)
@@ -276,6 +291,100 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const createNotification = async (recipientId: string, type: Notification['type'], targetId: string) => {
     if (!currentUser || currentUser.id === recipientId) return;
     await supabase.from('notifications').insert({ recipientId, actorId: currentUser.id, type, targetId, createdAt: new Date().toISOString(), read: false });
+  };
+
+  const createCommunityOrder = async (name: string, description: string): Promise<CryptoOrder | null> => {
+    if (!currentUser) return null;
+    const basePrice = 5;
+    let attempts = 0;
+    while (attempts < 50) {
+      // Generate a fraction between .001 and .999
+      const fraction = (Math.floor(Math.random() * 999) + 1) / 1000;
+      const uniqueAmount = parseFloat((basePrice + fraction).toFixed(3));
+      
+      const { data } = await supabase.from('crypto_orders').select('id').eq('amount', uniqueAmount).eq('status', 'pending');
+      if (!data || data.length === 0) {
+        const newOrder = {
+          userId: currentUser.id,
+          communityName: name,
+          communityDescription: description,
+          amount: uniqueAmount,
+          status: 'pending'
+        };
+        const { data: inserted, error } = await supabase.from('crypto_orders').insert(newOrder).select().single();
+        if (inserted && !error) return inserted as CryptoOrder;
+      }
+      attempts++;
+    }
+    return null;
+  };
+
+  const checkOrderStatus = async (orderId: string): Promise<boolean> => {
+    const order = cryptoOrders.find(o => o.id === orderId);
+    if (!order) return false;
+    
+    try {
+      // TRON USDT TRC20 Contract: TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t
+      // Receiver Wallet: TGvKKNPpoq9gTgUSF2MSDTTf5S9rKFLreP
+      const url = "https://api.trongrid.io/v1/accounts/TGvKKNPpoq9gTgUSF2MSDTTf5S9rKFLreP/transactions/trc20?contract_address=TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t&limit=20";
+      const res = await fetch(url);
+      const data = await res.json();
+      
+      if (data && data.data) {
+         const expectedValue = (order.amount * 1000000).toString(); // 6 decimals
+         const orderTimeMs = new Date(order.createdAt).getTime();
+         
+         const hasPaid = data.data.some((tx: any) => {
+            return tx.to === 'TGvKKNPpoq9gTgUSF2MSDTTf5S9rKFLreP' 
+                && tx.value === expectedValue 
+                && tx.block_timestamp > orderTimeMs;
+         });
+
+         if (hasPaid) {
+            await supabase.from('crypto_orders').update({ status: 'paid' }).eq('id', orderId);
+            const { data: cData } = await supabase.from('communities').insert({
+               name: order.communityName,
+               description: order.communityDescription,
+               ownerId: order.userId
+            }).select().single();
+            if (cData) {
+               await supabase.from('community_members').insert({
+                  communityId: cData.id,
+                  userId: order.userId,
+                  role: 'admin'
+               });
+               return true;
+            }
+         }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return false;
+  };
+
+  const addIdeaToCommunity = async (communityId: string, content: string, tags: string[], mediaFile?: File) => {
+    if (!currentUser) return;
+    const tempId = crypto.randomUUID();
+    let mediaUrl = undefined;
+    
+    // ... file logic ...
+    if (mediaFile) {
+       const fileToUpload = await compressImage(mediaFile);
+       const fileName = `${tempId}-${Math.random()}.${mediaFile.name.split('.').pop()}`;
+       const { data, error } = await supabase.storage.from('media').upload(`public/${fileName}`, fileToUpload);
+       if (!error && data) {
+         mediaUrl = supabase.storage.from('media').getPublicUrl(data.path).data.publicUrl;
+       }
+    }
+    
+    const newIdea = { id: tempId, authorId: currentUser.id, content, createdAt: new Date().toISOString(), likes: 0, tags, mediaUrl, communityId };
+    setRawIdeas(prev => [newIdea, ...prev]);
+    const { error } = await supabase.from('ideas').insert(newIdea);
+    if (error) {
+      alert("Error saving community post.");
+      setRawIdeas(prev => prev.filter(i => i.id !== tempId));
+    }
   };
 
   const addIdea = async (content: string, tags: string[], mediaFile?: File) => {

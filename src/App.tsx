@@ -11,6 +11,7 @@ import { Layout } from './components/Layout';
 import { ComposeModal } from './components/ComposeModal';
 import { Settings } from './components/Settings';
 import { AdminDashboard } from './components/AdminDashboard';
+import { Communities } from './components/Communities';
 import { AnimatePresence } from 'motion/react';
 
 function AppContent() {
@@ -127,6 +128,8 @@ function AppContent() {
     switch (activeTab) {
       case 'profile':
         return <Profile key="profile" onBack={() => setActiveTab('home')} />;
+      case 'communities':
+        return <Communities key="communities" onBack={() => setActiveTab('home')} />;
       case 'news':
         return <NewsFeed key="news" />;
       case 'notifications':
