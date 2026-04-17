@@ -13,8 +13,8 @@ interface IdeaDetailProps {
 }
 
 export const IdeaDetail: React.FC<IdeaDetailProps> = ({ ideaId, onBack, onUserClick }) => {
-  const { ideas, currentUser, addBranch, likeIdea, bookmarks, toggleBookmark, deleteIdea, setAuthModalOpen } = useAppContext();
-  const idea = ideas.find(i => i.id === ideaId);
+  const { allIdeas, currentUser, addBranch, likeIdea, bookmarks, toggleBookmark, deleteIdea, setAuthModalOpen } = useAppContext();
+  const idea = allIdeas.find(i => i.id === ideaId);
   
   const [newFork, setNewFork] = useState('');
   const [showMenu, setShowMenu] = useState(false);
@@ -193,6 +193,7 @@ export const IdeaDetail: React.FC<IdeaDetailProps> = ({ ideaId, onBack, onUserCl
             <RecursiveForkThread 
                key={fork.id} 
                fork={fork} 
+               depth={0}
                onUserClick={onUserClick} 
                onReply={(parentId, content) => {
                  if (!currentUser) { setAuthModalOpen(true); return; }
@@ -206,9 +207,13 @@ export const IdeaDetail: React.FC<IdeaDetailProps> = ({ ideaId, onBack, onUserCl
   );
 };
 
-const RecursiveForkThread = ({ fork, onUserClick, onReply }: any) => {
+const RecursiveForkThread = ({ fork, onUserClick, onReply, depth = 0 }: any) => {
    const [isReplying, setIsReplying] = useState(false);
    const [replyContent, setReplyContent] = useState('');
+
+   // Cap indentation to avoid "squeezing" the content too much
+   const maxIndentationDepth = 5;
+   const shouldIndent = depth < maxIndentationDepth;
 
    return (
        <motion.div 
@@ -219,7 +224,7 @@ const RecursiveForkThread = ({ fork, onUserClick, onReply }: any) => {
          <BranchCard branch={fork} onUserClick={onUserClick} onReply={() => setIsReplying(true)} />
          
          {isReplying && (
-            <div className="pl-14 pr-4 py-3 bg-gray-50/50 border-b border-gray-100">
+            <div className={`${shouldIndent ? 'pl-14' : 'pl-4'} pr-4 py-3 bg-gray-50/50 border-b border-gray-100`}>
                <div className="flex gap-2 items-center">
                  <input 
                     autoFocus
@@ -241,9 +246,9 @@ const RecursiveForkThread = ({ fork, onUserClick, onReply }: any) => {
          )}
 
          {fork.forks && fork.forks.length > 0 && (
-             <div className="border-l-2 border-gray-100 ml-6 pl-2 mt-1">
+             <div className={`${shouldIndent ? 'border-l-2 border-gray-100 ml-6 pl-2' : 'ml-0 pl-0'} mt-1`}>
                 {fork.forks.map((child: any) => (
-                   <RecursiveForkThread key={child.id} fork={child} onUserClick={onUserClick} onReply={onReply} />
+                   <RecursiveForkThread key={child.id} fork={child} depth={depth + 1} onUserClick={onUserClick} onReply={onReply} />
                 ))}
              </div>
          )}
