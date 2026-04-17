@@ -690,13 +690,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   return (
     <AppContext.Provider value={{ 
-      currentUser, users, ideas, bookmarks, userLikes, notifications, 
+      currentUser, users, ideas, allIdeas, communities, bookmarks, userLikes, notifications, 
       addIdea, addBranch, addFeedback, likeIdea, likeBranch, toggleBookmark, 
       updateProfile, markNotificationsRead, deleteIdea, deleteBranch, deleteFeedback, deleteMessage, 
       deleteUser, toggleVerified, deleteAccount, logout, login, signup, loginRedirect, isAuthReady, unreadMessagesCount, 
       playNotificationSound, activeConversationId, setActiveConversationId, clearAllNotifications, deleteNotification, toggleFollow,
       rawBranches, rawFeedbacks, allMessages, isAuthModalOpen, setAuthModalOpen,
-      globalSearchQuery, setGlobalSearchQuery
+      globalSearchQuery, setGlobalSearchQuery,
+      createCommunityOrder, checkOrderStatus, addIdeaToCommunity
     }}>
       {children}
     </AppContext.Provider>
